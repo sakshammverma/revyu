@@ -1,0 +1,36 @@
+# Backend (Python)
+backend/.venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.env
+backend/*.egg-info/
+backend/.pytest_cache/
+backend/.ruff_cache/
+
+# Frontend (Next.js)
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env*.local
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+backend/uploads/
+
+# Agent / Scratch / Temporary
+.agents/
+.claude/
+brag-output/
+brag-output*/
+skills-lock.json
+files_manifest.txt
+*.tsbuildinfo
+create_commits.py
+commit_plan.json
+generate_commit_plan.py
+execute_commit_plan.py
+
+
