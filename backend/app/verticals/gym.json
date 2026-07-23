@@ -1,0 +1,77 @@
+{
+  "label": "Gym",
+  "tags": [
+    {
+      "label": "clean",
+      "phrases": [
+        "the gym was clean",
+        "well-maintained space",
+        "hygienic facility",
+        "kept tidy throughout"
+      ]
+    },
+    {
+      "label": "good equipment",
+      "phrases": [
+        "good range of equipment",
+        "well-maintained machines",
+        "modern equipment available",
+        "enough equipment for everyone"
+      ]
+    },
+    {
+      "label": "helpful trainers",
+      "phrases": [
+        "the trainers were helpful",
+        "attentive training staff",
+        "trainers who actually help you",
+        "supportive coaching"
+      ]
+    },
+    {
+      "label": "not crowded",
+      "phrases": [
+        "never felt too crowded",
+        "enough space to work out",
+        "manageable crowd levels",
+        "rarely had to wait for equipment"
+      ]
+    },
+    {
+      "label": "good hours",
+      "phrases": [
+        "convenient operating hours",
+        "open when I need it",
+        "good hours for my schedule",
+        "flexible timings"
+      ]
+    },
+    {
+      "label": "fair pricing",
+      "phrases": [
+        "fair membership pricing",
+        "reasonable cost for what's offered",
+        "good value membership",
+        "transparent pricing"
+      ]
+    },
+    {
+      "label": "good atmosphere",
+      "phrases": [
+        "a great atmosphere",
+        "motivating environment",
+        "good energy in the gym",
+        "an enjoyable place to train"
+      ]
+    },
+    {
+      "label": "changing rooms",
+      "phrases": [
+        "clean changing rooms",
+        "well-kept changing facilities",
+        "decent locker rooms",
+        "good changing room facilities"
+      ]
+    }
+  ]
+}

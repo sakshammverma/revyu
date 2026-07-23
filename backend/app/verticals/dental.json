@@ -1,0 +1,77 @@
+{
+  "label": "Dental",
+  "tags": [
+    {
+      "label": "clean clinic",
+      "phrases": [
+        "the clinic was spotless",
+        "very clean space",
+        "the place was well maintained",
+        "hygienic environment"
+      ]
+    },
+    {
+      "label": "painless treatment",
+      "phrases": [
+        "the treatment was painless",
+        "barely felt a thing",
+        "much less painful than expected",
+        "a comfortable procedure"
+      ]
+    },
+    {
+      "label": "explained clearly",
+      "phrases": [
+        "everything was explained clearly",
+        "the doctor explained each step",
+        "clear communication throughout",
+        "walked me through the procedure"
+      ]
+    },
+    {
+      "label": "on time",
+      "phrases": [
+        "seen right on time",
+        "no long wait",
+        "the appointment started on schedule",
+        "minimal waiting"
+      ]
+    },
+    {
+      "label": "friendly staff",
+      "phrases": [
+        "the staff were friendly",
+        "everyone was welcoming",
+        "warm and courteous team",
+        "felt taken care of by the staff"
+      ]
+    },
+    {
+      "label": "fair pricing",
+      "phrases": [
+        "pricing was fair",
+        "reasonable cost for the treatment",
+        "transparent about charges",
+        "good value for the treatment"
+      ]
+    },
+    {
+      "label": "modern equipment",
+      "phrases": [
+        "modern equipment used",
+        "up-to-date technology",
+        "well-equipped clinic",
+        "advanced tools for the treatment"
+      ]
+    },
+    {
+      "label": "good follow-up",
+      "phrases": [
+        "good follow-up after the visit",
+        "checked in afterward",
+        "attentive aftercare",
+        "followed up to see how I was doing"
+      ]
+    }
+  ]
+}

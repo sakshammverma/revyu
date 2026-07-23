@@ -1,0 +1,77 @@
+{
+  "label": "Coaching",
+  "tags": [
+    {
+      "label": "clear teaching",
+      "phrases": [
+        "clear teaching throughout",
+        "concepts explained well",
+        "easy to follow lessons",
+        "explained clearly at every step"
+      ]
+    },
+    {
+      "label": "helpful faculty",
+      "phrases": [
+        "the faculty were helpful",
+        "supportive teaching staff",
+        "faculty who genuinely help",
+        "attentive teachers"
+      ]
+    },
+    {
+      "label": "good material",
+      "phrases": [
+        "good quality study material",
+        "well-prepared material",
+        "useful reference material",
+        "comprehensive study material"
+      ]
+    },
+    {
+      "label": "small batches",
+      "phrases": [
+        "small batch sizes",
+        "manageable class sizes",
+        "enough individual attention",
+        "not overcrowded batches"
+      ]
+    },
+    {
+      "label": "regular tests",
+      "phrases": [
+        "regular tests to track progress",
+        "frequent practice tests",
+        "consistent assessments",
+        "good testing routine"
+      ]
+    },
+    {
+      "label": "fair fees",
+      "phrases": [
+        "fair fees for what's offered",
+        "reasonable cost",
+        "good value for the course",
+        "transparent about fees"
+      ]
+    },
+    {
+      "label": "doubt solving",
+      "phrases": [
+        "doubts were resolved quickly",
+        "happy to answer questions",
+        "good doubt-clearing sessions",
+        "always available to clarify doubts"
+      ]
+    },
+    {
+      "label": "good results",
+      "phrases": [
+        "good results from the course",
+        "noticeable improvement",
+        "results that speak for themselves",
+        "delivered real results"
+      ]
+    }
+  ]
+}
