@@ -238,6 +238,7 @@ Sorted by how often you'll need them.
 | [21-CONVERSION-DESIGN.md](21-CONVERSION-DESIGN.md) | 250 | Designing the marketing site |
 | [22-HUB-AND-MODULES.md](22-HUB-AND-MODULES.md) | ~430 | Anything after the scan: hub, menu, connects, loyalty, Growth Services |
 | [24-HUB-BUILD-PLAN.md](24-HUB-BUILD-PLAN.md) | ~330 | Building the hub, loyalty, Growth Services: tables, endpoints, screens, phases |
+| [25-SUPABASE-MIGRATION-PLAN.md](25-SUPABASE-MIGRATION-PLAN.md) | ~190 | Moving off FastAPI to Supabase + Next.js route handlers (proposed) |
 | [00-README.md](00-README.md) | 81 | Doc conventions |
 
 ---
