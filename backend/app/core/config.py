@@ -17,9 +17,21 @@ class Settings(BaseSettings):
     def _normalize_database_url(cls, v: str) -> str:
         if isinstance(v, str):
             if v.startswith("postgres://"):
-                return "postgresql+psycopg://" + v[len("postgres://"):]
-            if v.startswith("postgresql://") and not v.startswith("postgresql+"):
-                return "postgresql+psycopg://" + v[len("postgresql://"):]
+                v = "postgresql+psycopg://" + v[len("postgres://"):]
+            elif v.startswith("postgresql://"):
+                v = "postgresql+psycopg://" + v[len("postgresql://"):]
+            host = v.split("@", 1)[-1].split("/", 1)[0]
+            if "supabase." in host or "pooler.supabase" in host:
+                # Supabase's transaction pooler hands each statement to a
+                # different backend: session advisory locks (jobs/scheduler.py)
+                # and psycopg prepared statements break. Use the session pooler.
+                if host.endswith(":6543"):
+                    raise ValueError(
+                        "DATABASE_URL uses Supabase's transaction pooler (port 6543); "
+                        "use the Session pooler string (port 5432) instead"
+                    )
+                if "sslmode=" not in v:
+                    v += ("&" if "?" in v else "?") + "sslmode=require"
         return v
 
     google_places_api_key: str = ""
