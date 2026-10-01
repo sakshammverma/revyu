@@ -35,7 +35,12 @@ npm run dev          # :3000, proxies /api/* to the backend (next.config.ts)
 npx tsc --noEmit
 npx eslint src
 npm run test:e2e     # Playwright; starts/reuses both servers, needs the seeded demo-dental outlet
+npm test             # Vitest for src/server/** against DATABASE_URL in .env.local (rolled-back transactions)
 ```
+
+- **Migration in progress** (`documents/25-SUPABASE-MIGRATION-PLAN.md`, phases 0-2 done): the API is moving from FastAPI to Next route handlers (`src/app/api/**`, logic in `src/server/`), one endpoint at a time. Ported: customer flow config/session/feedback, events, hub/connect/menu/rewards reads. Everything else still proxies to FastAPI through the `fallback` rewrite in `next.config.ts` (must stay `fallback`: a plain array runs before dynamic routes and swallows the new handlers). When you change a ported endpoint, change the TypeScript one; the Python copy is dead code until phase 8.
+- Server code reads `frontend/.env.local` (gitignored; copy `DATABASE_URL` from `backend/.env`; set `DISABLE_RATE_LIMITS=true` locally, since limits now persist in the DB). Schema types in `src/server/db/schema.ts` come from `drizzle-kit pull`; **Alembic is still the only migration tool**, so re-pull after a migration. The DB has no defaults for ids/booleans (Python supplied them), so TS inserts must set them.
+- `E2E_NO_BACKEND=1 npm run test:e2e -- e2e/compliance.spec.ts` runs without FastAPI; it must stay green.
 
 - `e2e/compliance.spec.ts` is the CR-3 boundary (SRS-17.1a-g, ratings 1-5, 360x640). It must stay green. It targets `/r/demo-dental/review`, which works in both hub modes. The e2e run sets `DISABLE_RATE_LIMITS` (honoured only when `ENVIRONMENT=local`) and writes scans/sessions to the dev DB, so dev metrics are not real numbers.
 

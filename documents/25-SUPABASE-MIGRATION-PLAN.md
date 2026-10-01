@@ -1,6 +1,7 @@
 # 25 — Supabase Migration Plan
 
-**Status:** proposed, 2026-10-02. Nothing here is built yet.
+**Status:** phases 0, 1 and 2 done (2026-10-02); phases 3-8 not started. See
+section 6 for what was built and where it differs from the plan below.
 **Goal:** run Revyu with no Python server. Supabase provides Postgres, Auth,
 Storage and cron. Next.js on Vercel provides the API and the UI.
 
@@ -164,3 +165,71 @@ risk sits in Phases 2, 5 and 6, where correctness matters most.
 - Rate limiting: Postgres table vs Upstash (recommend Postgres to start).
 - Whether to do Phase 0 now and pause there. That alone gets the DB on
   Supabase with no rewrite.
+
+---
+
+## 6. Progress log
+
+### Phases 0-2 (done 2026-10-02)
+
+**Built**
+- Backend runs on Supabase Postgres (`revyu-dev`); all 10 Alembic migrations applied.
+- `frontend/src/server/` is the new server layer: `env.ts`, `db/` (Drizzle schema
+  introspected from the live DB), `http.ts` (error shape, zod body parsing,
+  shared rate limiter), `auth/` (admin bearer + owner session cookie, same
+  mechanisms as Python), `notifications/` (all 15 templates, Resend, WhatsApp
+  click-to-chat queue), `services/` (flow, events, trial metering, hub read
+  models), `verticals/` (copy of the six JSON configs).
+- Ported endpoints (Next route handlers under `src/app/api/`):
+  `GET /api/flow/{slug}/{config,hub,connect,menu,rewards}`,
+  `POST /api/flow/{slug}/{session,feedback}`, `POST /api/events`.
+  The server-rendered `/r/[slug]/*` pages call the services directly instead of
+  looping back over HTTP; the scan event runs in `after()`.
+- Still on FastAPI (reached through the `fallback` rewrite): everything else,
+  notably `rewards/join|recover|wallet|code` (phase 6), all `/api/app/*`, `/api/admin/*`.
+- Migration `a7e3c91d4b05`: RLS (deny-all) on every table, plus
+  `rate_limit_hits` / `hit_rate_limit()`.
+
+**Verified**
+- Vitest: 77 tests (`npm test`, runs in rolled-back transactions on the dev DB).
+- pytest: 60 pass. Playwright: `compliance.spec.ts` 22/22 with `E2E_NO_BACKEND=1`
+  (FastAPI not running at all); full suite also green with the backend up.
+- Parity: the five GET endpoints return byte-identical JSON from FastAPI and
+  Next on both the demo outlet and a fully populated temporary outlet (hub mode,
+  links, menu, rewards, hours, tag locale fallback); the write endpoints return
+  identical status codes and bodies and leave identical rows behind.
+
+**Deviations from the plan above**
+1. **Alembic stays the migration authority until phase 8**, not
+   `supabase/migrations`. Two tools writing one database is worse than one.
+   After a migration, re-run `drizzle-kit pull` (see header of `server/db/schema.ts`).
+2. **Two connection strings.** Python and migrations need the *session* pooler
+   (port 5432; advisory locks, config.py refuses 6543). Vercel/serverless should
+   set `DATABASE_POOL_URL` to the *transaction* pooler (6543); the Next server
+   prefers it and always runs with `prepare: false`.
+3. **Rewrites must be `fallback`.** A plain rewrites array is `afterFiles`, which
+   runs *before* dynamic routes, so `/api/:path*` swallowed
+   `/api/flow/[slug]/config`. Delete the `fallback` block when phase 8 lands.
+4. **Rate limiting is fixed-window** (one atomic upsert) rather than the old
+   sliding window; a client can briefly burst up to 2x the limit at a window
+   boundary. Counters persist, so local dev sets `DISABLE_RATE_LIMITS=true`
+   in `frontend/.env.local` (honoured only when `ENVIRONMENT=local`).
+5. **Trial metering is stricter than the Python:** the credit counter is an
+   atomic SQL increment and a session's completion is claimed atomically, so
+   concurrent taps cannot double-count. Same rules otherwise (OD-11, OD-21).
+6. **Local proxy target is `127.0.0.1:8000`**, not `localhost`: Node resolves
+   localhost to `::1` while uvicorn listens on IPv4 only.
+7. **SSR scan events skip the per-IP limiter.** They used to go over HTTP from
+   the Next server, so every visitor shared one bucket; now each page view
+   records its own scan.
+
+**Python code now superseded (delete in phase 8, keep until then):**
+`api/flow.py` (except `build_flow_config`, still used by the admin preview),
+`api/events.py`, the read endpoints of `api/hub_public.py`.
+
+**Known gap:** `build_flow_config` is duplicated in TS and Python until the
+admin approval preview moves (phase 7).
+
+### Next: phase 3 (Auth)
+Needs a decision on the email provider for Supabase Auth (built-in SMTP is
+rate-limited; production needs custom SMTP, e.g. the existing Resend account).
