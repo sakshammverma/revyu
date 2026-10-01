@@ -129,20 +129,6 @@ export interface Wallet {
   rewards: Grant[];
 }
 
-/* ------------------------------------------------------------ public reads */
-
-async function publicGet<T>(slug: string, part: string): Promise<T | null> {
-  const res = await fetch(`${API_BASE}/api/flow/${slug}/${part}`, { cache: "no-store" });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`${part} failed: ${res.status}`);
-  return res.json();
-}
-
-export const fetchHub = (slug: string) => publicGet<HubPayload>(slug, "hub");
-export const fetchConnect = (slug: string) => publicGet<ConnectPayload>(slug, "connect");
-export const fetchMenu = (slug: string) => publicGet<MenuPayload>(slug, "menu");
-export const fetchRewardsInfo = (slug: string) => publicGet<RewardsInfo>(slug, "rewards");
-
 /* ---------------------------------------------------------------- errors */
 
 export class HubApiError extends Error {

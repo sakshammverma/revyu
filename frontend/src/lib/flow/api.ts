@@ -23,13 +23,6 @@ export interface FlowConfig {
   tags: TagConfig[];
 }
 
-export async function fetchFlowConfig(slug: string): Promise<FlowConfig | null> {
-  const res = await fetch(`${API_BASE}/api/flow/${slug}/config`, { cache: "no-store" });
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error(`flow config failed: ${res.status}`);
-  return res.json();
-}
-
 export async function createSession(slug: string, sessionId: string, deviceHash: string) {
   return fetch(`${API_BASE}/api/flow/${slug}/session`, {
     method: "POST",

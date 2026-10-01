@@ -11,6 +11,12 @@ const python =
 // Compliance + UX tests. They run against the real API with the seeded demo
 // outlet (`python -m app.seeds.dev_outlet`, slug demo-dental).
 //   npm run test:e2e
+//   E2E_NO_BACKEND=1 npm run test:e2e -- e2e/compliance.spec.ts
+// The second form never starts FastAPI. It is the proof that a spec only needs
+// endpoints already ported to Next route handlers (Supabase migration plan,
+// phase 2: the customer flow). Rate limits are disabled for the Next server
+// too, because the ported endpoints are limited there now.
+const withBackend = !process.env.E2E_NO_BACKEND;
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
@@ -27,17 +33,22 @@ export default defineConfig({
   webServer: [
     {
       command: "npm run dev",
+      env: { DISABLE_RATE_LIMITS: "true" },
       url: "http://localhost:3000",
       reuseExistingServer: true,
       timeout: 120_000,
     },
-    {
-      command: `${python} -m uvicorn app.main:app --port 8000`,
-      cwd: "../backend",
-      env: { DISABLE_RATE_LIMITS: "true" },
-      url: "http://localhost:8000/health",
-      reuseExistingServer: true,
-      timeout: 60_000,
-    },
+    ...(withBackend
+      ? [
+          {
+            command: `${python} -m uvicorn app.main:app --port 8000`,
+            cwd: "../backend",
+            env: { DISABLE_RATE_LIMITS: "true" },
+            url: "http://127.0.0.1:8000/health",
+            reuseExistingServer: true,
+            timeout: 60_000,
+          },
+        ]
+      : []),
   ],
 });

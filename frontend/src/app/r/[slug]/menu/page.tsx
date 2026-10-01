@@ -3,11 +3,11 @@ import { notFound } from "next/navigation";
 import { FlowFrame } from "@/components/flow/Frame";
 import { ModuleShell, NeutralNotice } from "@/components/hub/ModuleShell";
 import { MenuView } from "@/components/menu/MenuView";
-import { fetchMenu } from "@/lib/hub/api";
+import { loadMenu } from "@/server/pageData";
 
 export default async function MenuPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const data = await fetchMenu(slug);
+  const data = await loadMenu(slug);
   if (data === null) notFound();
   return (
     <FlowFrame>

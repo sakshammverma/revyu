@@ -3,11 +3,11 @@ import { notFound } from "next/navigation";
 import { ConnectView } from "@/components/connect/ConnectView";
 import { FlowFrame } from "@/components/flow/Frame";
 import { ModuleShell, NeutralNotice } from "@/components/hub/ModuleShell";
-import { fetchConnect } from "@/lib/hub/api";
+import { loadConnect } from "@/server/pageData";
 
 export default async function ConnectPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const data = await fetchConnect(slug);
+  const data = await loadConnect(slug);
   if (data === null) notFound();
   return (
     <FlowFrame>

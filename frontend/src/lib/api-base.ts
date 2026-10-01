@@ -8,4 +8,4 @@
  * is no origin to be relative to, so we hit the backend directly.
  */
 export const API_BASE =
-  typeof window === "undefined" ? process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000" : "";
+  typeof window === "undefined" ? process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8000" : "";

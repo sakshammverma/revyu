@@ -3,12 +3,12 @@ import { notFound } from "next/navigation";
 import { FlowFrame } from "@/components/flow/Frame";
 import { ModuleShell, NeutralNotice } from "@/components/hub/ModuleShell";
 import { RewardsView } from "@/components/rewards/RewardsView";
-import { fetchRewardsInfo } from "@/lib/hub/api";
+import { loadRewards } from "@/server/pageData";
 
 // Nothing on this route mentions anything from the customer-flow side (CR-6.2).
 export default async function RewardsPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const info = await fetchRewardsInfo(slug);
+  const info = await loadRewards(slug);
   if (info === null) notFound();
   return (
     <FlowFrame>

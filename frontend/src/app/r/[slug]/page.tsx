@@ -3,9 +3,8 @@ import { notFound } from "next/navigation";
 import { FlowFrame } from "@/components/flow/Frame";
 import { ReviewEntry } from "@/components/flow/ReviewEntry";
 import { HubView } from "@/components/hub/HubView";
-import { fetchHub, type HubPayload } from "@/lib/hub/api";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
+import type { HubPayload } from "@/lib/hub/api";
+import { loadHub, recordScan } from "@/server/pageData";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -23,7 +22,7 @@ export default async function FlowPage({ params, searchParams }: Props) {
   // A hub failure must never take the review flow down with it (C-6).
   let hub: HubPayload | null = null;
   try {
-    hub = await fetchHub(slug);
+    hub = await loadHub(slug);
   } catch {
     hub = null;
   }
@@ -38,12 +37,7 @@ export default async function FlowPage({ params, searchParams }: Props) {
 
   if (hub.collecting && hub.mode === "hub") {
     // The scan still fires before the hub renders (SRS-20.2).
-    if (!quiet)
-      fetch(`${API_BASE}/api/events`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ outlet_id: hub.outlet.id, events: [{ type: "scan", payload: {} }] }),
-      }).catch(() => {});
+    if (!quiet) recordScan(hub.outlet.id);
     return (
       <FlowFrame>
         <HubView slug={slug} hub={hub} quiet={quiet} />
