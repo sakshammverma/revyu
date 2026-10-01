@@ -1,0 +1,14 @@
+{
+  "label": "Shop / general business",
+  "menu_label": "Products & services",
+  "tags": [
+    {"label": "friendly staff", "phrases": ["the staff were friendly", "warm and welcoming team", "everyone was courteous", "felt well looked after"]},
+    {"label": "clean space", "phrases": ["the place was clean", "well-maintained space", "tidy and well kept", "a pleasant environment"]},
+    {"label": "quality products", "phrases": ["good quality products", "well-chosen range", "everything I bought was good quality", "products that live up to the price"]},
+    {"label": "great service", "phrases": ["service was excellent", "attentive from start to finish", "got the help I needed", "really went the extra mile"]},
+    {"label": "fair pricing", "phrases": ["pricing was fair", "reasonable cost", "good value for money", "transparent about charges"]},
+    {"label": "quick and easy", "phrases": ["quick and hassle-free", "no long wait", "everything was smooth", "easy from start to finish"]},
+    {"label": "knowledgeable team", "phrases": ["the team knew their stuff", "explained things clearly", "gave honest advice", "helpful recommendations"]},
+    {"label": "would come back", "phrases": ["I'll definitely be back", "would happily return", "a place I'd recommend to friends", "glad I found this place"]}
+  ]
+}

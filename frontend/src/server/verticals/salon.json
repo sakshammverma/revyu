@@ -1,0 +1,77 @@
+{
+  "label": "Salon",
+  "tags": [
+    {
+      "label": "skilled stylist",
+      "phrases": [
+        "the stylist was skilled",
+        "clearly experienced with hair",
+        "great technique",
+        "knew exactly what to do"
+      ]
+    },
+    {
+      "label": "clean",
+      "phrases": [
+        "the salon was clean",
+        "hygienic setup",
+        "well-maintained space",
+        "kept spotless"
+      ]
+    },
+    {
+      "label": "friendly staff",
+      "phrases": [
+        "the staff were friendly",
+        "warm and welcoming team",
+        "everyone was courteous",
+        "felt well looked after"
+      ]
+    },
+    {
+      "label": "on time",
+      "phrases": [
+        "seen right on time",
+        "no long wait for my appointment",
+        "punctual service",
+        "minimal waiting"
+      ]
+    },
+    {
+      "label": "good products",
+      "phrases": [
+        "good quality products used",
+        "used products that suited me",
+        "well-chosen products",
+        "quality products throughout"
+      ]
+    },
+    {
+      "label": "fair pricing",
+      "phrases": [
+        "fair pricing for the service",
+        "reasonable cost",
+        "good value for the service",
+        "transparent about charges"
+      ]
+    },
+    {
+      "label": "relaxing",
+      "phrases": [
+        "a relaxing experience",
+        "a calm, pleasant visit",
+        "felt genuinely relaxing",
+        "a soothing atmosphere"
+      ]
+    },
+    {
+      "label": "listened to me",
+      "phrases": [
+        "the stylist listened to what I wanted",
+        "took my preferences seriously",
+        "understood exactly what I asked for",
+        "attentive to my requests"
+      ]
+    }
+  ]
+}

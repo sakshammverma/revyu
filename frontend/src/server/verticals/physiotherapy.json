@@ -1,0 +1,77 @@
+{
+  "label": "Physiotherapy",
+  "tags": [
+    {
+      "label": "clear guidance",
+      "phrases": [
+        "clear guidance throughout",
+        "explained the exercises well",
+        "gave clear instructions",
+        "easy to understand advice"
+      ]
+    },
+    {
+      "label": "felt better",
+      "phrases": [
+        "felt noticeably better after sessions",
+        "real improvement in how I feel",
+        "made real progress",
+        "recovered faster than expected"
+      ]
+    },
+    {
+      "label": "patient therapist",
+      "phrases": [
+        "the therapist was patient",
+        "took time with me",
+        "never felt rushed",
+        "attentive and patient throughout"
+      ]
+    },
+    {
+      "label": "on time",
+      "phrases": [
+        "sessions started on time",
+        "no long wait for appointments",
+        "punctual scheduling",
+        "minimal waiting between sessions"
+      ]
+    },
+    {
+      "label": "clean facility",
+      "phrases": [
+        "the facility was clean",
+        "well-maintained space",
+        "hygienic setup",
+        "a tidy, clean clinic"
+      ]
+    },
+    {
+      "label": "good equipment",
+      "phrases": [
+        "good equipment available",
+        "well-equipped for the exercises",
+        "modern therapy equipment",
+        "proper equipment for treatment"
+      ]
+    },
+    {
+      "label": "fair pricing",
+      "phrases": [
+        "fair pricing for the sessions",
+        "reasonable cost",
+        "good value for the treatment",
+        "transparent about fees"
+      ]
+    },
+    {
+      "label": "personalised plan",
+      "phrases": [
+        "a personalised treatment plan",
+        "tailored to my specific needs",
+        "a plan built around my recovery",
+        "customised exercises for me"
+      ]
+    }
+  ]
+}
