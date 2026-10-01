@@ -1,0 +1,31 @@
+databases:
+  - name: revyu-db
+    databaseName: revyu
+    user: revyu
+    plan: free
+
+services:
+  - type: web
+    name: revyu-api
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -e .
+    startCommand: alembic upgrade head && python -m app.seeds.plans && python -m app.seeds.dev_outlet && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: revyu-db
+          property: connectionString
+      - key: ENVIRONMENT
+        value: local
+      - key: ADMIN_SESSION_SECRET
+        generateValue: true
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: FRONTEND_BASE_URL
+        value: http://localhost:3000
+      - key: PUBLIC_FLOW_BASE_URL
+        value: http://localhost:3000
+      - key: CORS_ORIGINS
+        value: http://localhost:3000

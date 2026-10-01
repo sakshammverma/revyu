@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import model_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -11,6 +11,16 @@ class Settings(BaseSettings):
     # Honoured only when ENVIRONMENT=local, so repeated e2e runs are not throttled.
     disable_rate_limits: bool = False
     database_url: str = "postgresql+psycopg://revyu:revyu@localhost:5432/revyu"
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def _normalize_database_url(cls, v: str) -> str:
+        if isinstance(v, str):
+            if v.startswith("postgres://"):
+                return "postgresql+psycopg://" + v[len("postgres://"):]
+            if v.startswith("postgresql://") and not v.startswith("postgresql+"):
+                return "postgresql+psycopg://" + v[len("postgresql://"):]
+        return v
 
     google_places_api_key: str = ""
 
