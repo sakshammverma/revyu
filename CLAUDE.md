@@ -6,41 +6,38 @@ Guidance for Claude Code when working in this repository.
 
 ## Layout
 
-- `backend/` FastAPI + SQLAlchemy 2 + Alembic + APScheduler (Postgres)
-- `frontend/` Next.js 16 (App Router) + React 19 + Tailwind 4
+- `frontend/` Next.js 16 (App Router) + React 19 + Tailwind 4. **It is the whole product**: UI plus the API (`src/app/api/**`, logic in `src/server/`), deployed to Vercel, talking to Supabase Postgres.
+- `backend/` the former FastAPI server, now only the **database toolkit**: Alembic migrations and seed scripts (Postgres). It is not deployed and serves nothing; see `backend/README.md`.
 - `documents/` specs (PRD, SRS with `FR-n`/`SRS-n` IDs, data model, API spec)
 
-## Backend (`cd backend`, use `.venv/Scripts/python.exe` on Windows)
+## Database toolkit (`cd backend`, use `.venv/Scripts/python.exe` on Windows)
 
 ```
 pip install -e .[dev]
-alembic upgrade head
+alembic upgrade head               # the ONLY way to change the schema
 python -m app.seeds.plans          # plans table (no prices in code, FR-71)
+python -m app.seeds.service_catalog
 python -m app.seeds.dev_outlet     # demo outlet at /r/demo-dental
-uvicorn app.main:app --port 8000
-pytest tests -q                    # one test:  pytest tests/test_hardening.py::test_name
+pytest tests -q                    # legacy suite for the retired API; still green
 ```
 
-- Tests use the local dev DB inside a rolled-back transaction (`tests/conftest.py` `db` fixture), so they leave no rows.
-- With `ENVIRONMENT=local` (default) and no keys, payments use the mock provider (signature `"mock-signature"`), Places returns fake data, and email only logs (recorded as `skipped_no_provider`). **Any other `ENVIRONMENT` refuses to boot** unless real secrets/keys are set (`core/config.py`).
-- Public write endpoints are rate-limited by `core/ratelimit.py` (in-process; swap for Redis if you run multiple workers). Scheduled jobs take a Postgres advisory lock so multiple workers don't double-run them.
-- Owner session tokens and magic-link tokens are stored hashed; the raw value only exists on `session.raw_token` right after issue.
-- A trial credit needs a believable journey: `copy_tapped` counts only if the session rated and is older than 5s, capped at 6/hour/outlet (`api/events.py`, `services/trial_metering.py`).
-- Migrations are hand-written; run `alembic upgrade head` after pulling.
+- The FastAPI app (`app/api`, `app/services`, `app/jobs`) is **retired dead code**, kept only until the TypeScript API has run in production for a while (rollback path). Do not add features there. Alembic still imports `app.models`, so the package must stay importable.
+- `DATABASE_URL` here is the Supabase **session pooler** (port 5432); the Next server uses the transaction pooler (see Frontend). The session pooler allows only ~15 client connections project-wide, so `DB_POOL_SIZE` / `DB_MAX_OVERFLOW` cap SQLAlchemy.
+- Migrations are hand-written; run `alembic upgrade head` after pulling, then re-pull the Drizzle schema (see Frontend).
 
 ## Frontend (`cd frontend`)
 
 ```
-npm run dev          # :3000, proxies /api/* to the backend (next.config.ts)
+npm run dev          # :3000, serves the UI and the API
 npx tsc --noEmit
 npx eslint src
-npm run test:e2e     # Playwright; starts/reuses both servers, needs the seeded demo-dental outlet
+npm run test:e2e     # Playwright; starts/reuses the dev server, needs the seeded demo-dental outlet
 npm test             # Vitest for src/server/** against DATABASE_URL in .env.local (rolled-back transactions)
 ```
 
-- **Migration in progress** (`documents/25-SUPABASE-MIGRATION-PLAN.md`, phases 0-7 done): the API is moving from FastAPI to Next route handlers (`src/app/api/**`, logic in `src/server/`), one endpoint at a time. Ported: every API endpoint (customer flow, owner portal, billing, loyalty, staff, admin console, gap report). Still FastAPI: only the 7 scheduled jobs (`backend/app/jobs`) and the root `/health`. Unported paths proxy to FastAPI through the `fallback` rewrite in `next.config.ts` (must stay `fallback`: a plain array runs before dynamic routes and swallows the new handlers). When you change a ported endpoint, change the TypeScript one; the Python copy is dead code until phase 8.
+- **The API is TypeScript now** (Supabase migration finished; `documents/25-SUPABASE-MIGRATION-PLAN.md`). Every endpoint is a Next route handler under `src/app/api/**` with logic in `src/server/services/*` taking a `db: DbLike` so it is testable inside a rolled-back transaction (`src/server/testing/helpers.ts`, `handlerPattern.test.ts`). Scheduled jobs are `src/server/services/jobs.ts`, triggered by Vercel Cron (`vercel.json`, a test keeps it in sync with the registry) through `/api/cron/<job>` guarded by `CRON_SECRET`. There is no proxy or second server.
 - Server code reads `frontend/.env.local` (gitignored; copy `DATABASE_URL` from `backend/.env`; set `DATABASE_POOL_URL` to the same string on port 6543 (transaction pooler); set `DISABLE_RATE_LIMITS=true` locally, since limits now persist in the DB). Supabase's session pooler allows only ~15 client connections project-wide, so keep the Next server on the transaction pooler and restart a long-running `npm run dev` after changing DB env. Schema types in `src/server/db/schema.ts` come from `drizzle-kit pull`; **Alembic is still the only migration tool**, so re-pull after a migration. The DB has no defaults for ids/booleans (Python supplied them), so TS inserts must set them.
-- `E2E_NO_BACKEND=1 npm run test:e2e -- e2e/compliance.spec.ts` runs without FastAPI; it must stay green.
+- Tests are hermetic: `vitest.config.mts` blanks every provider key (Google, Razorpay, Resend, Supabase) whatever is in `.env.local`. Local dev with real test keys in `.env.local` will use them (e.g. Razorpay test mode), so blank them to use the mock provider.
 
 - `e2e/compliance.spec.ts` is the CR-3 boundary (SRS-17.1a-g, ratings 1-5, 360x640). It must stay green. It targets `/r/demo-dental/review`, which works in both hub modes. The e2e run sets `DISABLE_RATE_LIMITS` (honoured only when `ENVIRONMENT=local`) and writes scans/sessions to the dev DB, so dev metrics are not real numbers.
 

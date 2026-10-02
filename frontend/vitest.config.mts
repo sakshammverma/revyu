@@ -22,6 +22,7 @@ export default defineConfig(({ mode }) => ({
       RAZORPAY_PLAN_ID_MONTHLY: "",
       RAZORPAY_PLAN_ID_ANNUAL: "",
       EMAIL_PROVIDER_API_KEY: "",
+      CRON_SECRET: "test-cron-secret-0123456789abcdef",
       SUPABASE_URL: "",
       SUPABASE_SERVICE_ROLE_KEY: "",
     },

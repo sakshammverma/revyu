@@ -14,6 +14,8 @@ export interface Env {
   adminSessionSecret: string;
   /** Signs staff-console tokens (same variable as FastAPI's AUTH_SECRET). */
   authSecret: string;
+  /** Bearer secret for /api/cron/*. Vercel Cron sends it automatically when this env var is set. */
+  cronSecret: string;
   emailProviderApiKey: string;
   emailFromAddress: string;
   /** Where new Growth Service requests are emailed. Empty = log only. */
@@ -53,6 +55,7 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
     frontendBaseUrl: source.FRONTEND_BASE_URL ?? "http://localhost:3000",
     adminSessionSecret: source.ADMIN_SESSION_SECRET ?? "change-me",
     authSecret: source.AUTH_SECRET ?? "change-me",
+    cronSecret: source.CRON_SECRET ?? "",
     emailProviderApiKey: source.EMAIL_PROVIDER_API_KEY ?? "",
     emailFromAddress: source.EMAIL_FROM_ADDRESS ?? "noreply@revyu.in",
     adminNotifyEmail: source.ADMIN_NOTIFY_EMAIL ?? "",
@@ -73,6 +76,7 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
     for (const [name, value] of [
       ["ADMIN_SESSION_SECRET", env.adminSessionSecret],
       ["AUTH_SECRET", env.authSecret],
+      ["CRON_SECRET", env.cronSecret],
     ] as const) {
       if (value === "" || value === "change-me" || value.length < 24) {
         problems.push(`${name} must be a random value of 24+ characters`);

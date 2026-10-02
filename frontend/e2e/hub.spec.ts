@@ -77,6 +77,9 @@ test("hub shows equal neutral tiles that fit a 360px phone", async ({ page }) =>
   await expect(tiles).toHaveCount(4);
   await expect(tiles.nth(0)).toContainText("Share your experience");
 
+  // Under `next dev` the stylesheet can land after the server-rendered HTML; measure once styled.
+  await expect.poll(async () => (await tiles.first().boundingBox())?.height ?? 0).toBeGreaterThanOrEqual(100);
+
   const boxes = await tiles.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().toJSON()));
   expect(Math.abs(boxes[0].width - boxes[1].width)).toBeLessThan(1); // equal weight (FR-80)
   expect(boxes.map((b) => Math.round(b.height)).every((h) => h >= 100), `tile heights: ${boxes.map((b) => Math.round(b.height))}`).toBe(true);

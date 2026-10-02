@@ -1,7 +1,8 @@
 # 25 — Supabase Migration Plan
 
-**Status:** phases 0-7 done (2026-10-03); only phase 8 (scheduled jobs + cut-over)
-remains. See sections 6-9 for what was built and where it differs from the plan below.
+**Status:** all phases done (2026-10-03). The product runs with no Python process.
+See sections 6-10 for what was built and where it differs from the plan below.
+Remaining work is operational (section 10: deploy checklist).
 **Goal:** run Revyu with no Python server. Supabase provides Postgres, Auth,
 Storage and cron. Next.js on Vercel provides the API and the UI.
 
@@ -411,5 +412,59 @@ FastAPI of 28 steps (approvals/ops), 44 steps (outlets + admin hub) and 30 steps
 **Remaining on Python:** the 7 scheduled jobs (`app/jobs/*`) and the root
 `/health`. Everything else is dead code awaiting phase 8.
 
-### Next: phase 8 (7 cron jobs + cut-over: pg_cron routes, retire FastAPI, remove the rewrite)
+---
+
+## 10. Phase 8: scheduled jobs + cut-over (done 2026-10-03)
+
+**Jobs.** The 7 APScheduler jobs are `src/server/services/jobs.ts`, run by
+`/api/cron/<job>` (GET from Vercel Cron, POST from anything else), guarded by
+`Authorization: Bearer $CRON_SECRET` (Vercel sends it automatically). Each job
+runs in one transaction behind `pg_try_advisory_xact_lock`, so an overlapping or
+retried call cannot run it twice (tested across two real connections).
+
+| Route | Schedule (UTC) | Replaces |
+|---|---|---|
+| `/api/cron/places-poll` | Mon 03:00 | `places_poll` (+ competitor snapshots) |
+| `/api/cron/trial-day15` | daily 02:00 | `trial_day15_check` (+ day-10 reminders) |
+| `/api/cron/weekly-digest` | Mon 08:00 | `weekly_digest` |
+| `/api/cron/event-prune` | 1st of month 04:00 | `event_retention_prune` (24 months) |
+| `/api/cron/cancellation-expiry` | daily 02:30 | `cancellation_expiry` |
+| `/api/cron/grace-reminders` | daily 10:00 | `payment_grace_reminders` |
+| `/api/cron/zero-scan` | Mon 09:00 | `zero_scan_alert` |
+
+Deviation from the plan: **Vercel Cron, not pg_cron + pg_net.** All seven run at
+most daily, Vercel authenticates the call itself, and there is nothing to
+configure in Supabase. Vercel Hobby allows 2 cron jobs; these 7 need **Vercel
+Pro** (which production needs anyway). Do not also schedule them in pg_cron.
+Schedules keep the Python's effective time zone, UTC; if you wanted IST,
+change `JOBS` and `vercel.json` together (a test fails if they drift). The
+weekly digest at 08:00 UTC reaches Indian owners at 13:30 IST.
+
+**Cut-over.** `next.config.ts` no longer rewrites anything; the browser, session
+cookie and handlers share one origin. `render.yaml` is deleted (nothing to deploy
+on Render). `playwright.config.ts` starts only the Next dev server.
+`backend/` stays as the database toolkit (Alembic + seeds + legacy tests); see
+`backend/README.md`. The dead FastAPI code is deliberately **not** deleted yet:
+it is the rollback path. Delete `app/api`, `app/jobs` and their services after
+the TypeScript API has run in production for a while.
+
+**Verified with no Python process running:** Playwright 42/42, full Vitest, and a
+live journey through a production `next start` (signup -> payment -> founder
+approval -> owner login -> dashboard/hub/QR/PDFs -> billing -> referrals ->
+competitors -> customer funnel -> admin console -> gap report -> health -> five
+cron jobs -> logout), 50/50, with provider keys blanked.
+
+**Not done / needs a human**
+- **Deploy.** Nothing has been deployed. Checklist: create the Supabase prod
+  project and `alembic upgrade head` + seeds against it (session pooler URL);
+  Vercel project with root `frontend`, Pro plan; set every variable in the
+  section 7 checklist plus `CRON_SECRET` (24+ random chars; production refuses
+  to start without it); create the `outlet-media` public bucket (or let the first
+  upload create it) and verify an upload; point the Razorpay webhook at
+  `https://<domain>/api/webhooks/razorpay`; set `PUBLIC_FLOW_BASE_URL` to the
+  final domain *before printing QR codes*.
+- Live verification of Razorpay (a test-mode order was created once during
+  testing, so the REST path is exercised), Resend, Supabase Storage and the
+  Vercel body-size limit (4.5 MB vs the 5 MB upload cap).
+- The root FastAPI `/health` has no equivalent path; use `/api/health`.
 

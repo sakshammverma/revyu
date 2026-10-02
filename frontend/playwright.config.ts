@@ -1,22 +1,12 @@
-import path from "node:path";
-
 import { defineConfig, devices } from "@playwright/test";
 
-// path.join yields the right separators for the platform (cmd.exe rejects "/").
-const python =
-  process.platform === "win32"
-    ? path.join(".venv", "Scripts", "python.exe")
-    : path.join(".venv", "bin", "python");
-
-// Compliance + UX tests. They run against the real API with the seeded demo
-// outlet (`python -m app.seeds.dev_outlet`, slug demo-dental).
+// Compliance + UX tests. They run against the real API (Next route handlers)
+// and the seeded demo outlet (slug demo-dental; seed with `python -m
+// app.seeds.dev_outlet` from backend/, see CLAUDE.md).
 //   npm run test:e2e
-//   E2E_NO_BACKEND=1 npm run test:e2e -- e2e/compliance.spec.ts
-// The second form never starts FastAPI. It is the proof that a spec only needs
-// endpoints already ported to Next route handlers (Supabase migration plan,
-// phase 2: the customer flow). Rate limits are disabled for the Next server
-// too, because the ported endpoints are limited there now.
-const withBackend = !process.env.E2E_NO_BACKEND;
+// There is no separate API process any more. Rate limits are disabled for the
+// dev server because they persist in the database.
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
@@ -30,25 +20,11 @@ export default defineConfig({
     ...devices["Pixel 5"],
     viewport: { width: 360, height: 640 },
   },
-  webServer: [
-    {
-      command: "npm run dev",
-      env: { DISABLE_RATE_LIMITS: "true" },
-      url: "http://localhost:3000",
-      reuseExistingServer: true,
-      timeout: 120_000,
-    },
-    ...(withBackend
-      ? [
-          {
-            command: `${python} -m uvicorn app.main:app --port 8000`,
-            cwd: "../backend",
-            env: { DISABLE_RATE_LIMITS: "true" },
-            url: "http://127.0.0.1:8000/health",
-            reuseExistingServer: true,
-            timeout: 60_000,
-          },
-        ]
-      : []),
-  ],
+  webServer: {
+    command: "npm run dev",
+    env: { DISABLE_RATE_LIMITS: "true" },
+    url: "http://localhost:3000",
+    reuseExistingServer: true,
+    timeout: 120_000,
+  },
 });

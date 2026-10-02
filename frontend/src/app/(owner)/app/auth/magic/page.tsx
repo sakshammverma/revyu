@@ -3,7 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-const API_BASE = ""; // same-origin, proxied by next.config.ts rewrites
+const API_BASE = ""; // same-origin route handlers
 
 function MagicLoginInner() {
   const router = useRouter();

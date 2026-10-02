@@ -1,0 +1,33 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/cron/places-poll",
+      "schedule": "0 3 * * 1"
+    },
+    {
+      "path": "/api/cron/trial-day15",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-digest",
+      "schedule": "0 8 * * 1"
+    },
+    {
+      "path": "/api/cron/event-prune",
+      "schedule": "0 4 1 * *"
+    },
+    {
+      "path": "/api/cron/cancellation-expiry",
+      "schedule": "30 2 * * *"
+    },
+    {
+      "path": "/api/cron/grace-reminders",
+      "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/zero-scan",
+      "schedule": "0 9 * * 1"
+    }
+  ]
+}

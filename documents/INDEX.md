@@ -185,7 +185,7 @@ the doc wins and this table is stale — fix it.**
 
 | Fact | Value |
 |---|---|
-| Backend | FastAPI (Python) |
+| Backend | Next.js route handlers (TypeScript) on Vercel + Supabase Postgres; the Python in `backend/` is only Alembic + seeds. See [25-SUPABASE-MIGRATION-PLAN.md](25-SUPABASE-MIGRATION-PLAN.md) |
 | Frontend | Next.js (TypeScript) |
 | Database | Postgres |
 | Payments | Razorpay (v1), behind `PaymentProvider` |

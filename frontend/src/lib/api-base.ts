@@ -1,11 +1,7 @@
 /**
- * Base URL for backend calls.
- *
- * In the browser we call same-origin `/api/*`, which next.config.ts rewrites to
- * the FastAPI backend. That keeps the owner session cookie first-party and
- * avoids CORS preflights entirely (PUT from the admin tag editor, sendBeacon
- * with a JSON body from the flow). On the server (RSC / route handlers) there
- * is no origin to be relative to, so we hit the backend directly.
+ * Base URL for API calls. The API is Next.js route handlers in this same app
+ * (src/app/api/**), so every call is same-origin: first-party session cookie,
+ * no CORS, and sendBeacon works with a JSON body. Kept as a constant so call
+ * sites read the same as before the Python backend was retired.
  */
-export const API_BASE =
-  typeof window === "undefined" ? process.env.NEXT_PUBLIC_API_BASE ?? "http://127.0.0.1:8000" : "";
+export const API_BASE = "";
