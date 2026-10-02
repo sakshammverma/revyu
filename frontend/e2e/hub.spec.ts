@@ -130,6 +130,8 @@ test("rewards copy never mentions the review side (CR-6.2)", async ({ page }) =>
 });
 
 test("customer joins, staff records the visit and redeems once", async ({ page, browser }) => {
+  // Three browser contexts and a dozen first-hit route compiles under `next dev`.
+  test.setTimeout(60_000);
   await page.goto(`/r/${SLUG}/rewards`);
   await page.getByLabel("Your name").fill("E2E Customer");
   await page.getByLabel("Mobile number").fill(phone);

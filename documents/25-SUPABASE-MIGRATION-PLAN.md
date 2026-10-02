@@ -1,7 +1,7 @@
 # 25 — Supabase Migration Plan
 
-**Status:** phases 0-5 done (2026-10-02); phases 6-8 not started. See
-sections 6 and 7 for what was built and where it differs from the plan below.
+**Status:** phases 0-6 done (2026-10-03); phases 7-8 not started. See
+sections 6-8 for what was built and where it differs from the plan below.
 **Goal:** run Revyu with no Python server. Supabase provides Postgres, Auth,
 Storage and cron. Next.js on Vercel provides the API and the UI.
 
@@ -317,7 +317,8 @@ the 7 scheduled jobs (phase 8).
 `EMAIL_PROVIDER_API_KEY`, `EMAIL_FROM_ADDRESS`, `ADMIN_NOTIFY_EMAIL`,
 `GOOGLE_PLACES_API_KEY`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`,
 `RAZORPAY_WEBHOOK_SECRET`, `RAZORPAY_PLAN_ID_MONTHLY`, `RAZORPAY_PLAN_ID_ANNUAL`,
-`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`. A non-local `ENVIRONMENT` refuses to
+`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `AUTH_SECRET` (24+ random chars; signs staff
+tokens, so it must be the SAME value as FastAPI's until phase 8). A non-local `ENVIRONMENT` refuses to
 start without them. Keep `NEXT_PUBLIC_API_BASE` pointing at the Render backend
 until phase 8.
 
@@ -328,4 +329,45 @@ payments,one_time_pay,referrals,competitors,qr,print_assets,logo,storage,
 links}.py. `services/places.py` stays until the weekly poll job and admin
 activation move.
 
-### Next: phase 6 (loyalty + staff), then 7 (admin), then 8 (jobs + cut-over)
+---
+
+## 8. Phase 6: loyalty + staff (done 2026-10-03)
+
+**Ported**
+- Customer wallet: `POST /api/flow/{slug}/rewards/{join,recover}`,
+  `GET/DELETE .../rewards/wallet`, `GET .../rewards/code` (with SVG QR).
+- Staff app: `POST /api/staff/{slug}/{login,visits,redeem}`,
+  `GET .../member/{publicId}`, `POST .../member/{publicId}/transfer`.
+- Owner settings: `GET/PUT /api/app/outlets/{id}/hub/loyalty`, `POST .../acknowledge`,
+  badges (create/update/delete), staff PINs (create/toggle), members, redemptions.
+- Nothing from the customer-facing or owner-facing API remains on Python except
+  `/api/admin/*` and the scheduled jobs.
+
+**Verified:** 84 new tests (287 total, 20 files), parity run of 74 steps against
+live FastAPI (join -> wallet -> code -> staff login -> visit -> cooldown ->
+badge -> redeem -> transfer -> recover -> delete, including a concurrent redeem
+split across both stacks), full Playwright suite 42/42. Interoperability both
+ways: PIN hashes, staff tokens (byte-identical), wallet tokens, visit and
+transfer codes work across stacks on the same rows; the code QR is
+byte-identical to python-qrcode (20 samples).
+
+**Deviations and fixes**
+1. Visit cooldown, redeem and transfer-claim are atomic (row lock / conditional
+   UPDATE); the Python had a check-then-insert race on the cooldown.
+2. Non-ASCII staff tokens or visit codes are 401 / `BAD_CODE` (Python 500'd).
+3. Badge default icon is `sparkle` (Python's `star` default failed its own
+   allow-list); blank badge names, reward titles and PIN labels are rejected.
+4. `rewards_ready` lists only available rewards (Python also listed used and
+   expired ones; `pending_rewards` is unchanged).
+5. **No PIN lockout, in either stack.** `failed_attempts` / `locked_until` are
+   unused; only 10 attempts per 15 minutes per IP applies. PINs are matched
+   across all of an outlet's PINs, so failures cannot be attributed to one PIN.
+   Follow-up: a per-outlet limiter on `/api/staff/{slug}/login`.
+
+**Test hygiene (applies to all phases):** `vitest.config.mts` blanks every
+provider key (Google Places, Razorpay, Resend, Supabase), so the suite is
+hermetic whatever a developer keeps in `.env.local`. Without this, a developer
+who adds real Razorpay/Places keys would make tests call the live services.
+
+### Next: phase 7 (admin), then 8 (jobs + cut-over)
+

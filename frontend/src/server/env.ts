@@ -12,6 +12,8 @@ export interface Env {
   disableRateLimits: boolean;
   frontendBaseUrl: string;
   adminSessionSecret: string;
+  /** Signs staff-console tokens (same variable as FastAPI's AUTH_SECRET). */
+  authSecret: string;
   emailProviderApiKey: string;
   emailFromAddress: string;
   /** Where new Growth Service requests are emailed. Empty = log only. */
@@ -50,6 +52,7 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
     disableRateLimits: isLocal && source.DISABLE_RATE_LIMITS === "true",
     frontendBaseUrl: source.FRONTEND_BASE_URL ?? "http://localhost:3000",
     adminSessionSecret: source.ADMIN_SESSION_SECRET ?? "change-me",
+    authSecret: source.AUTH_SECRET ?? "change-me",
     emailProviderApiKey: source.EMAIL_PROVIDER_API_KEY ?? "",
     emailFromAddress: source.EMAIL_FROM_ADDRESS ?? "noreply@revyu.in",
     adminNotifyEmail: source.ADMIN_NOTIFY_EMAIL ?? "",
@@ -67,8 +70,13 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
   const problems: string[] = [];
   if (!databaseUrl) problems.push("DATABASE_URL is required");
   if (!isLocal) {
-    if (env.adminSessionSecret === "" || env.adminSessionSecret === "change-me" || env.adminSessionSecret.length < 24) {
-      problems.push("ADMIN_SESSION_SECRET must be a random value of 24+ characters");
+    for (const [name, value] of [
+      ["ADMIN_SESSION_SECRET", env.adminSessionSecret],
+      ["AUTH_SECRET", env.authSecret],
+    ] as const) {
+      if (value === "" || value === "change-me" || value.length < 24) {
+        problems.push(`${name} must be a random value of 24+ characters`);
+      }
     }
     for (const name of [
       "RAZORPAY_KEY_ID",

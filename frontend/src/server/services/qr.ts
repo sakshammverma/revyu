@@ -97,9 +97,12 @@ function lostPoint(g: Grid): number {
   return lost;
 }
 
-function createWithMask(text: string, mask?: number) {
-  return QRCode.create(text, {
-    errorCorrectionLevel: "H",
+type EcLevel = "L" | "M" | "Q" | "H";
+type QrSegments = { data: string; mode: "numeric" | "alphanumeric" | "byte" }[];
+
+function createWithMask(text: string | QrSegments, mask?: number, level: EcLevel = "H") {
+  return QRCode.create(text as string, {
+    errorCorrectionLevel: level,
     ...(mask === undefined ? {} : { maskPattern: mask as 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 }),
   });
 }
@@ -110,11 +113,11 @@ function createWithMask(text: string, mask?: number) {
  * ~40% of URLs; choosing Python's keeps every code module-for-module identical
  * to what FastAPI produced, so reprints never look different.
  */
-function pythonMask(text: string): number {
+function pythonMask(text: string | QrSegments, level: EcLevel = "H"): number {
   let best = 0;
   let bestScore = Infinity;
   for (let mask = 0; mask < 8; mask++) {
-    const { modules } = createWithMask(text, mask);
+    const { modules } = createWithMask(text, mask, level);
     const g: Grid = Array.from({ length: modules.size }, (_, r) =>
       Array.from({ length: modules.size }, (_, c) => modules.get(r, c) === 1),
     );
@@ -164,6 +167,68 @@ export function generateQrSvg(slug: string): string {
       const x = (c + BORDER) * unit;
       const y = (r + BORDER) * unit;
       d += `M${x},${y}H${x + unit}V${y + unit}H${x}z`;
+    }
+  }
+  return (
+    `<?xml version='1.0' encoding='UTF-8'?>\n` +
+    `<svg width="${total}mm" height="${total}mm" version="1.1" viewBox="0 0 ${total} ${total}" xmlns="http://www.w3.org/2000/svg">` +
+    `<path d="${d}" id="qr-path" fill="#000000" fill-opacity="1" fill-rule="nonzero" stroke="none" /></svg>`
+  );
+}
+
+/**
+ * python-qrcode splits its input into numeric / alphanumeric / byte chunks
+ * (util.optimal_data_chunks, QRCode.add_data optimize=20) before encoding. Passing the same
+ * chunks keeps the module matrix identical for mixed text such as "A7F3-123456".
+ */
+const MIN_RUN = 20;
+
+export function pythonChunks(text: string): QrSegments {
+  if (/[^\x00-\x7f]/.test(text)) return [{ data: text, mode: "byte" }];
+  const short = text.length <= MIN_RUN;
+  const numRe = short ? /^\d+$/ : new RegExp(`\\d{${MIN_RUN},}`);
+  const alnumRe = short ? /^[0-9A-Z $%*+\-./:]+$/ : new RegExp(`[0-9A-Z $%*+\\-./:]{${MIN_RUN},}`);
+  const split = (data: string, re: RegExp): [boolean, string][] => {
+    const out: [boolean, string][] = [];
+    while (data) {
+      const m = re.exec(data);
+      if (!m) break;
+      if (m.index) out.push([false, data.slice(0, m.index)]);
+      out.push([true, m[0]]);
+      data = data.slice(m.index + m[0].length);
+    }
+    if (data) out.push([false, data]);
+    return out;
+  };
+  const segments: QrSegments = [];
+  for (const [isNum, chunk] of split(text, numRe)) {
+    if (isNum) segments.push({ data: chunk, mode: "numeric" });
+    else
+      for (const [isAlnum, sub] of split(chunk, alnumRe))
+        segments.push({ data: sub, mode: isAlnum ? "alphanumeric" : "byte" });
+  }
+  return segments;
+}
+
+/**
+ * Port of python `qrcode.make(text, image_factory=SvgPathImage, box_size, border)`
+ * with the library's default error correction (M), as used for wallet codes.
+ * Coordinates are pixel units / 10, printed like Python's Decimal.
+ */
+export function generateTextQrSvg(text: string, boxSize = 8, border = 2): string {
+  const segments = pythonChunks(text);
+  const mask = pythonMask(segments, "M");
+  const { modules } = createWithMask(segments, mask, "M");
+  const size = modules.size;
+  const u = (px: number) => String(px / 10);
+  const total = u((size + 2 * border) * boxSize);
+  let d = "";
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      if (modules.get(r, c) !== 1) continue;
+      const x0 = (c + border) * boxSize;
+      const y0 = (r + border) * boxSize;
+      d += `M${u(x0)},${u(y0)}H${u(x0 + boxSize)}V${u(y0 + boxSize)}H${u(x0)}z`;
     }
   }
   return (

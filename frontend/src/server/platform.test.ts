@@ -55,6 +55,7 @@ describe("env", () => {
       ENVIRONMENT: "production",
       DATABASE_URL: "postgresql://a@h/d",
       ADMIN_SESSION_SECRET: "x".repeat(32),
+      AUTH_SECRET: "y".repeat(32),
       RAZORPAY_KEY_ID: "k",
       RAZORPAY_KEY_SECRET: "k",
       RAZORPAY_WEBHOOK_SECRET: "k",
