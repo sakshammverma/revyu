@@ -164,6 +164,8 @@ describe("production guard for email", () => {
     ADMIN_SESSION_SECRET: "x".repeat(32),
     AUTH_SECRET: "y".repeat(32),
     CRON_SECRET: "z".repeat(32),
+    FRONTEND_BASE_URL: "https://revyu.example.com",
+    PUBLIC_FLOW_BASE_URL: "https://revyu.example.com",
     RAZORPAY_KEY_ID: "k",
     RAZORPAY_KEY_SECRET: "k",
     RAZORPAY_WEBHOOK_SECRET: "k",
@@ -185,6 +187,14 @@ describe("production guard for email", () => {
   it("refuses to start with no email provider, or an incomplete SMTP login", () => {
     expect(() => loadEnv(prod)).toThrow(/EMAIL_PROVIDER_API_KEY \(Resend\) or SMTP_HOST \+ SMTP_USER \+ SMTP_PASS/);
     expect(() => loadEnv({ ...prod, SMTP_HOST: "h", SMTP_USER: "u" })).toThrow(/SMTP_HOST \+ SMTP_USER \+ SMTP_PASS/);
+  });
+
+  it("refuses localhost, http or missing public addresses", () => {
+    const ok = { ...prod, EMAIL_PROVIDER_API_KEY: "re_x" };
+    expect(() => loadEnv({ ...ok, FRONTEND_BASE_URL: undefined })).toThrow(/FRONTEND_BASE_URL must be your public https/);
+    expect(() => loadEnv({ ...ok, FRONTEND_BASE_URL: "http://localhost:3000" })).toThrow(/FRONTEND_BASE_URL/);
+    expect(() => loadEnv({ ...ok, PUBLIC_FLOW_BASE_URL: "http://revyu.example.com" })).toThrow(/PUBLIC_FLOW_BASE_URL/);
+    expect(() => loadEnv({ ...ok, PUBLIC_FLOW_BASE_URL: "https://127.0.0.1" })).toThrow(/PUBLIC_FLOW_BASE_URL/);
   });
 
   it("local needs no email provider", () => {

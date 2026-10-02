@@ -103,6 +103,17 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
       if (!source[name]) problems.push(`${name} is required when ENVIRONMENT=${environment}`);
     }
   }
+  if (!isLocal) {
+    // Emailed login links and printed QR codes embed these; localhost would ship dead links.
+    for (const [name, value] of [
+      ["FRONTEND_BASE_URL", source.FRONTEND_BASE_URL],
+      ["PUBLIC_FLOW_BASE_URL", source.PUBLIC_FLOW_BASE_URL],
+    ] as const) {
+      if (!value || !/^https:\/\//i.test(value) || /localhost|127\.0\.0\.1/i.test(value)) {
+        problems.push(`${name} must be your public https:// address (not localhost) when ENVIRONMENT=${environment}`);
+      }
+    }
+  }
   if (!isLocal && !env.emailProviderApiKey && !(env.smtpHost && env.smtpUser && env.smtpPass)) {
     problems.push(
       `EMAIL_PROVIDER_API_KEY (Resend) or SMTP_HOST + SMTP_USER + SMTP_PASS is required when ENVIRONMENT=${environment}`,
