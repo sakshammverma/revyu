@@ -34,6 +34,12 @@ class Settings(BaseSettings):
                     v += ("&" if "?" in v else "?") + "sslmode=require"
         return v
 
+    # Supabase's session pooler allows only ~15 client connections for the whole
+    # project (shared with the Next server and migrations), so the SQLAlchemy
+    # default of 5 + 10 overflow can exhaust it alone.
+    db_pool_size: int = 5
+    db_max_overflow: int = 2
+
     google_places_api_key: str = ""
 
     razorpay_key_id: str = ""
