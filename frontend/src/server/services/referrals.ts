@@ -15,6 +15,7 @@ import { and, count, desc, eq, inArray, isNull } from "drizzle-orm";
 
 import { schema, type DbLike } from "@/server/db";
 import { getEnv } from "@/server/env";
+import { HttpError } from "@/server/http";
 import { pyIso } from "./pyDate";
 
 const { accounts, outlets, referralRewards } = schema;
@@ -113,6 +114,52 @@ export async function summary(db: DbLike, accountId: string) {
     earned: counts.get("earned") ?? 0,
     applied: counts.get("applied") ?? 0,
   };
+}
+
+/* ---------------------------------------------------------------- admin */
+
+async function adminRow(db: DbLike, reward: typeof referralRewards.$inferSelect) {
+  const [referrer] = await db.select().from(accounts).where(eq(accounts.id, reward.referrerAccountId)).limit(1);
+  const [outlet] = await db
+    .select({ businessName: outlets.businessName })
+    .from(outlets)
+    .where(eq(outlets.accountId, reward.referredAccountId))
+    .limit(1);
+  return {
+    id: reward.id,
+    referrer_email: referrer.ownerEmail,
+    referrer_name: referrer.ownerName,
+    referred_business: outlet?.businessName ?? "-",
+    status: reward.status,
+    discount_percent: reward.discountPercent,
+    earned_at: reward.earnedAt ? pyIso(reward.earnedAt) : null,
+  };
+}
+
+/** GET /api/admin/referrals */
+export async function adminListRewards(db: DbLike, status: string | null) {
+  const q = db.select().from(referralRewards);
+  const rows = await (status ? q.where(eq(referralRewards.status, status)) : q)
+    .orderBy(desc(referralRewards.createdAt))
+    .limit(200);
+  return Promise.all(rows.map((r) => adminRow(db, r)));
+}
+
+/**
+ * POST /api/admin/referrals/{id}/apply. The founder applies the 70% discount
+ * to the referrer's next invoice in the payment dashboard, then marks it
+ * applied here. The status guard in the UPDATE makes it atomic and one-shot:
+ * a double click or two admins can never apply the same reward twice.
+ */
+export async function adminApplyReward(db: DbLike, rewardId: string) {
+  const [applied] = await db
+    .update(referralRewards)
+    .set({ status: "applied", appliedAt: new Date() })
+    .where(and(eq(referralRewards.id, rewardId), eq(referralRewards.status, "earned")))
+    .returning();
+  if (applied) return adminRow(db, applied);
+  const [exists] = await db.select({ id: referralRewards.id }).from(referralRewards).where(eq(referralRewards.id, rewardId));
+  throw new HttpError(exists ? 409 : 404, exists ? "NOT_EARNED" : "NOT_FOUND");
 }
 
 /** GET /api/app/referrals */

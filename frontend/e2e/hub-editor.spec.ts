@@ -112,7 +112,8 @@ test("menu tab: add a category and an item with a price, then remove them", asyn
 test("rewards tab shows the programme and opens the badge form", async ({ page }) => {
   await openEditor(page);
   await page.getByRole("tab", { name: "Rewards" }).click();
-  await expect(page.getByText("Badges and rewards")).toBeVisible();
+  // First hit of the admin loyalty route compiles under `next dev`, which can exceed the 5s default.
+  await expect(page.getByText("Badges and rewards")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByText("Staff counter").first()).toBeVisible();
   await page.getByRole("button", { name: "+ Add badge" }).click();
   await expect(page.getByRole("dialog", { name: "New badge" })).toBeVisible();

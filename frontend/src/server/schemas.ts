@@ -36,3 +36,10 @@ export const otpVerifyBody = z.object({
   email: z.email(),
   code: z.string().regex(/^\d{6}$/),
 });
+
+export const gapReportQuery = z.object({ place_id: z.string().min(3).max(200) });
+
+export const gapReportEmailBody = z.object({
+  place_id: z.string().min(3).max(200),
+  email: z.email(),
+});

@@ -25,6 +25,8 @@ export default defineConfig(({ mode }) => ({
       SUPABASE_URL: "",
       SUPABASE_SERVICE_ROLE_KEY: "",
     },
+    // The free-tier Supabase pooler drops a connection about once per full run.
+    retry: 1,
     testTimeout: 60_000,
     hookTimeout: 60_000,
     fileParallelism: false,

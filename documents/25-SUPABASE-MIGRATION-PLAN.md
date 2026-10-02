@@ -1,7 +1,7 @@
 # 25 — Supabase Migration Plan
 
-**Status:** phases 0-6 done (2026-10-03); phases 7-8 not started. See
-sections 6-8 for what was built and where it differs from the plan below.
+**Status:** phases 0-7 done (2026-10-03); only phase 8 (scheduled jobs + cut-over)
+remains. See sections 6-9 for what was built and where it differs from the plan below.
 **Goal:** run Revyu with no Python server. Supabase provides Postgres, Auth,
 Storage and cron. Next.js on Vercel provides the API and the UI.
 
@@ -369,5 +369,47 @@ provider key (Google Places, Razorpay, Resend, Supabase), so the suite is
 hermetic whatever a developer keeps in `.env.local`. Without this, a developer
 who adds real Razorpay/Places keys would make tests call the live services.
 
-### Next: phase 7 (admin), then 8 (jobs + cut-over)
+---
+
+## 9. Phase 7: admin console (done 2026-10-03)
+
+**Ported (all `requireAdmin`):** approvals (queue, preview, approve, request-info,
+reject, place), pending sends, metrics cockpit, outlet detail + state override,
+outlets (list, verticals, create, validate-url, tags, activate, bulk CSV), the
+whole admin hub editor (20 routes under `/api/admin/outlets/{id}/hub/**`
+including loyalty and the admin-only `availability`), growth services /
+service-requests / print-kits, and referral rewards (list, apply).
+Also the two public gap-report endpoints and `GET /api/health`, which were
+missing from the original plan (found by diffing FastAPI's OpenAPI against the
+Next route tree: **136 of 139 FastAPI operations had a Next handler before that,
+and 138 now; only the root `/health` stays Python-only**).
+
+**Verified:** 325 Vitest tests (24 files), Playwright 42, parity runs against live
+FastAPI of 28 steps (approvals/ops), 44 steps (outlets + admin hub) and 30 steps
+(growth admin/referrals), plus gap report JSON byte-identical.
+
+**Deviations and fixes**
+1. Approve and reject claim the outlet with a conditional UPDATE
+   (`WHERE state='pending_approval'`), so a double click or retry cannot
+   double-refund, double-email or re-assign the slug. Gateway refund failures
+   are logged for manual follow-up and the owner is told "we're processing your
+   refund", exactly as before. One narrow difference: a hard process crash
+   between claiming and refunding leaves the outlet rejected with the payment
+   captured (Python would have rolled everything back).
+2. Creating an outlet / account with an existing email on a new phone is a 409
+   `DUPLICATE_BUSINESS` (Python: 500 from the unique constraint). Bulk import
+   resolves the Places id first, so a failed row leaves no orphan account.
+3. `PUT /services/{id}` with a taken key is 409 `KEY_TAKEN` (Python: 500).
+   Referral apply is a single conditional UPDATE: idempotent, 404 unknown,
+   409 `NOT_EARNED` otherwise.
+4. `pending-sends` `sent`/`dismiss` only act on still-queued rows (a stale tab
+   can no longer flip a sent message to dismissed).
+5. An undecodable bulk CSV is 422 (Python: 500).
+6. Local Places data differs from Python only when `backend/.env` holds a real
+   key (Python then calls Google with fake ids and gets nulls).
+
+**Remaining on Python:** the 7 scheduled jobs (`app/jobs/*`) and the root
+`/health`. Everything else is dead code awaiting phase 8.
+
+### Next: phase 8 (7 cron jobs + cut-over: pg_cron routes, retire FastAPI, remove the rewrite)
 

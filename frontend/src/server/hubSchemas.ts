@@ -57,3 +57,6 @@ export const itemBody = z.object({
 });
 
 export const orderBody = z.object({ ids: z.array(z.guid()).max(500) });
+
+/** Admin only: PUT .../hub/availability. */
+export const availabilityBody = z.object({ module: z.string(), available: z.boolean() });

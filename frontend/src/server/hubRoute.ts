@@ -1,8 +1,10 @@
 /** Shared plumbing for the /api/app/outlets/[outletId]/hub/... route handlers. */
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
+import { requireAdmin } from "@/server/auth/admin";
 import { requireOwner } from "@/server/auth/owner";
-import { getDb } from "@/server/db";
+import { getDb, schema } from "@/server/db";
 import { HttpError } from "@/server/http";
 import { HubConfigError, requireOwnOutlet, toHttpError } from "@/server/services/hubConfig";
 
@@ -18,6 +20,20 @@ export async function ownOutlet(request: Request, ctx: { params: Promise<{ outle
   const { outletId } = await ctx.params;
   if (!z.guid().safeParse(outletId).success) throw new HttpError(422, "VALIDATION_ERROR");
   return { db, owner, outlet: await requireOwnOutlet(db, owner, outletId) };
+}
+
+/**
+ * Admin variant (backend hub_config.py `_any_outlet`): bearer token (401), then
+ * the path id (422), then existence (404 OUTLET_NOT_FOUND), no ownership check.
+ */
+export async function anyOutlet(request: Request, ctx: { params: Promise<{ outletId: string }> }) {
+  requireAdmin(request);
+  const db = getDb();
+  const { outletId } = await ctx.params;
+  if (!z.guid().safeParse(outletId).success) throw new HttpError(422, "VALIDATION_ERROR");
+  const [outlet] = await db.select().from(schema.outlets).where(eq(schema.outlets.id, outletId)).limit(1);
+  if (!outlet) throw new HttpError(404, "OUTLET_NOT_FOUND");
+  return { db, outlet };
 }
 
 /** A malformed child id in the path is a 422, like pydantic's UUID path type. */

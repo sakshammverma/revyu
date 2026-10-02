@@ -33,7 +33,7 @@ export function normalisePhone(phone: string | null | undefined): string | null 
  * CI never depend on a live provider. The notifications table records the
  * attempt either way (a missing key in production shows as skipped_no_provider).
  */
-async function sendEmail(toEmail: string, template: string, data: TemplateData): Promise<NotifyResult> {
+export async function sendEmail(toEmail: string, template: string, data: TemplateData): Promise<NotifyResult> {
   const [subject, body] = render(template, data);
   const env = getEnv();
 

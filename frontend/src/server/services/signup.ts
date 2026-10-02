@@ -106,7 +106,7 @@ export async function placesSearch(q: string, near: string | null) {
 const placeholderSlug = () => `pending-${crypto.randomUUID().replaceAll("-", "").slice(0, 10)}`;
 
 /** Port of seeds/tags.py seed_tags_for_outlet (CR-1: short fragments only). */
-async function seedTags(db: DbLike, outletId: string, vertical: string, locale = "en") {
+export async function seedTags(db: DbLike, outletId: string, vertical: string, locale = "en") {
   const rows = verticalTags(vertical).map((def, sortOrder) => ({
     id: crypto.randomUUID(),
     outletId,
