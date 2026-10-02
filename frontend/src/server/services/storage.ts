@@ -55,7 +55,10 @@ export async function reencode(data: Uint8Array): Promise<Buffer> {
 
 async function uploadToSupabase(name: string, body: Buffer): Promise<string> {
   const { supabaseUrl, supabaseServiceRoleKey } = getEnv();
-  const headers = { Authorization: `Bearer ${supabaseServiceRoleKey}`, apikey: supabaseServiceRoleKey };
+  // Legacy `service_role` keys are JWTs and go in both headers. The newer
+  // `sb_secret_...` keys are not JWTs and must only be sent as `apikey`.
+  const headers: Record<string, string> = { apikey: supabaseServiceRoleKey };
+  if (!supabaseServiceRoleKey.startsWith("sb_")) headers.Authorization = `Bearer ${supabaseServiceRoleKey}`;
   const put = () =>
     fetch(`${supabaseUrl}/storage/v1/object/${BUCKET}/${name}`, {
       method: "POST",

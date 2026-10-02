@@ -98,6 +98,15 @@ describe("saveImage, Supabase Storage", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it("sends a new-style sb_secret_ key only as apikey (it is not a JWT)", async () => {
+    envState.value = { isLocal: false, supabaseUrl: "https://abc.supabase.co", supabaseServiceRoleKey: "sb_secret_abc123" };
+    fetchMock.mockResolvedValue(new Response("{}", { status: 200 }));
+    await saveImage(await png(20, 20));
+    const headers = fetchMock.mock.calls[0][1].headers;
+    expect(headers).toMatchObject({ apikey: "sb_secret_abc123" });
+    expect(headers).not.toHaveProperty("Authorization");
+  });
+
   it("creates the bucket once on a fresh project, then retries", async () => {
     fetchMock
       .mockResolvedValueOnce(new Response('{"error":"Bucket not found"}', { status: 404 }))
