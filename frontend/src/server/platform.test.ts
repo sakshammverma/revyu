@@ -1,5 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 
+// .env.local turns rate limits off for local dev and e2e; these tests exercise the limiter itself.
+vi.mock("@/server/env", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/server/env")>();
+  return { ...actual, getEnv: () => ({ ...actual.getEnv(), disableRateLimits: false }) };
+});
+
 import { requireAdmin } from "@/server/auth/admin";
 import { hashToken, readCookie, requireOwner, resolveOwnerSession } from "@/server/auth/owner";
 import { schema } from "@/server/db";
@@ -54,6 +60,8 @@ describe("env", () => {
       RAZORPAY_WEBHOOK_SECRET: "k",
       GOOGLE_PLACES_API_KEY: "k",
       EMAIL_PROVIDER_API_KEY: "k",
+      SUPABASE_URL: "https://x.supabase.co",
+      SUPABASE_SERVICE_ROLE_KEY: "k",
       DISABLE_RATE_LIMITS: "true",
     };
     expect(loadEnv(prod).disableRateLimits).toBe(false);

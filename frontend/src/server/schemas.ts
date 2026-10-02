@@ -29,3 +29,10 @@ export const eventsBody = z.object({
     )
     .max(50),
 });
+
+export const otpRequestBody = z.object({ email: z.email() });
+
+export const otpVerifyBody = z.object({
+  email: z.email(),
+  code: z.string().regex(/^\d{6}$/),
+});

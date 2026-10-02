@@ -2,6 +2,7 @@
  * Test helpers. Every test runs inside a transaction that is always rolled
  * back, so the dev database is left untouched (mirrors backend/tests/conftest.py).
  */
+import { hashToken, SESSION_COOKIE } from "@/server/auth/owner";
 import { getDb, schema, type DbLike } from "@/server/db";
 
 class Rollback extends Error {}
@@ -87,3 +88,41 @@ export async function makeSession(
 export async function addEvent(db: DbLike, outlet: { id: string }, sessionId: string | null, type: string) {
   await db.insert(schema.events).values({ outletId: outlet.id, sessionId, type });
 }
+
+/* ---------------------------------------------------------------- HTTP */
+
+/** Insert a live owner session (hashed, like login does) and return the raw cookie value. */
+export async function issueOwnerSession(db: DbLike, account: { id: string }): Promise<string> {
+  const raw = crypto.randomUUID() + crypto.randomUUID();
+  await db.insert(schema.ownerSessions).values({
+    id: crypto.randomUUID(),
+    accountId: account.id,
+    token: hashToken(raw),
+    revoked: false,
+    expiresAt: new Date(Date.now() + 86_400_000),
+  });
+  return raw;
+}
+
+interface RequestOptions {
+  method?: string;
+  body?: unknown;
+  headers?: Record<string, string>;
+  /** Raw session cookie value; omit for an anonymous request. */
+  session?: string;
+}
+
+/** Build a Request the way the browser would send it to a route handler. */
+export function makeRequest(path: string, opts: RequestOptions = {}): Request {
+  const headers: Record<string, string> = { ...opts.headers };
+  if (opts.session) headers.cookie = `${SESSION_COOKIE}=${opts.session}`;
+  if (opts.body !== undefined) headers["content-type"] ??= "application/json";
+  return new Request(new URL(path, "http://localhost:3000"), {
+    method: opts.method ?? (opts.body === undefined ? "GET" : "POST"),
+    headers,
+    body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
+  });
+}
+
+/** Route handler context for dynamic segments: `routeCtx({ slug: "x" })`. */
+export const routeCtx = <P extends Record<string, string>>(params: P) => ({ params: Promise.resolve(params) });

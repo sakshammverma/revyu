@@ -14,6 +14,20 @@ export interface Env {
   adminSessionSecret: string;
   emailProviderApiKey: string;
   emailFromAddress: string;
+  /** Where new Growth Service requests are emailed. Empty = log only. */
+  adminNotifyEmail: string;
+  /** Public origin encoded into printed QR codes (/r/{slug}). */
+  publicFlowBaseUrl: string;
+  googlePlacesApiKey: string;
+  razorpayKeyId: string;
+  razorpayKeySecret: string;
+  razorpayWebhookSecret: string;
+  /** Plan ids created once in the Razorpay dashboard. */
+  razorpayPlanIdMonthly: string;
+  razorpayPlanIdAnnual: string;
+  /** Supabase project URL + service-role key, used for Storage uploads. Server-only. */
+  supabaseUrl: string;
+  supabaseServiceRoleKey: string;
 }
 
 let cached: Env | undefined;
@@ -38,6 +52,16 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
     adminSessionSecret: source.ADMIN_SESSION_SECRET ?? "change-me",
     emailProviderApiKey: source.EMAIL_PROVIDER_API_KEY ?? "",
     emailFromAddress: source.EMAIL_FROM_ADDRESS ?? "noreply@revyu.in",
+    adminNotifyEmail: source.ADMIN_NOTIFY_EMAIL ?? "",
+    publicFlowBaseUrl: source.PUBLIC_FLOW_BASE_URL ?? "http://localhost:3000",
+    googlePlacesApiKey: source.GOOGLE_PLACES_API_KEY ?? "",
+    razorpayKeyId: source.RAZORPAY_KEY_ID ?? "",
+    razorpayKeySecret: source.RAZORPAY_KEY_SECRET ?? "",
+    razorpayWebhookSecret: source.RAZORPAY_WEBHOOK_SECRET ?? "",
+    razorpayPlanIdMonthly: source.RAZORPAY_PLAN_ID_MONTHLY ?? "",
+    razorpayPlanIdAnnual: source.RAZORPAY_PLAN_ID_ANNUAL ?? "",
+    supabaseUrl: (source.SUPABASE_URL ?? "").replace(/\/+$/, ""),
+    supabaseServiceRoleKey: source.SUPABASE_SERVICE_ROLE_KEY ?? "",
   };
 
   const problems: string[] = [];
@@ -52,6 +76,9 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
       "RAZORPAY_WEBHOOK_SECRET",
       "GOOGLE_PLACES_API_KEY",
       "EMAIL_PROVIDER_API_KEY",
+      // Owner uploads go to Supabase Storage; a serverless disk is not durable.
+      "SUPABASE_URL",
+      "SUPABASE_SERVICE_ROLE_KEY",
     ]) {
       if (!source[name]) problems.push(`${name} is required when ENVIRONMENT=${environment}`);
     }

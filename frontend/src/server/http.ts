@@ -30,9 +30,9 @@ export function clientIp(request: Request): string {
  * with no detail leaked to the client.
  */
 export function handler<C>(fn: (request: Request, ctx: C) => Promise<Response>) {
-  return async (request: Request, ctx: C): Promise<Response> => {
+  return async (request: Request, ctx?: C): Promise<Response> => {
     try {
-      return await fn(request, ctx);
+      return await fn(request, ctx as C);
     } catch (err) {
       if (err instanceof HttpError) {
         return Response.json(errorBody(err.code, err.message === err.code ? undefined : err.message), {
