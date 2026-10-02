@@ -1,8 +1,8 @@
 import { and, eq, inArray } from "drizzle-orm";
 
 import { schema, type DbLike } from "@/server/db";
-import { getEnv } from "@/server/env";
 import { render, TEMPLATES, type TemplateData } from "./templates";
+import { deliver, type SendResult } from "./transport";
 
 const { accounts, notifications } = schema;
 
@@ -15,46 +15,15 @@ export const HIGH_VALUE_TEMPLATES: ReadonlySet<string> = new Set([
   "zero_scan_nudge",
 ]);
 
-const RESEND_API_URL = "https://api.resend.com/emails";
-
-interface NotifyResult {
-  channel: string;
-  status: string; // sent | failed | skipped_no_provider
-  error: string | null;
-}
-
 export function normalisePhone(phone: string | null | undefined): string | null {
   const digits = (phone ?? "").replace(/\D/g, "");
   return digits.length >= 8 ? digits : null;
 }
 
-/**
- * Resend over HTTP; falls back to logging when no key is set so local dev and
- * CI never depend on a live provider. The notifications table records the
- * attempt either way (a missing key in production shows as skipped_no_provider).
- */
-export async function sendEmail(toEmail: string, template: string, data: TemplateData): Promise<NotifyResult> {
-  const [subject, body] = render(template, data);
-  const env = getEnv();
-
-  if (!env.emailProviderApiKey) {
-    console.info(`EMAIL [no provider configured] to=${toEmail} subject=${subject}\n${body}`);
-    return { channel: "email", status: "skipped_no_provider", error: null };
-  }
-  try {
-    const resp = await fetch(RESEND_API_URL, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${env.emailProviderApiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: env.emailFromAddress, to: [toEmail], subject, text: body }),
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    return { channel: "email", status: "sent", error: null };
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error(`Email send failed to=${toEmail} template=${template}: ${message}`);
-    return { channel: "email", status: "failed", error: message };
-  }
+/** Renders a template and sends it through the configured provider (see transport.ts). */
+export async function sendEmail(toEmail: string, template: string, data: TemplateData): Promise<SendResult> {
+  const [subject, text] = render(template, data);
+  return deliver({ to: toEmail, subject, text });
 }
 
 export interface NotifyArgs {

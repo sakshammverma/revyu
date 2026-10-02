@@ -11,6 +11,7 @@ import { schema, type DbLike } from "@/server/db";
 import { getEnv } from "@/server/env";
 import { HttpError } from "@/server/http";
 import { render } from "@/server/notifications/templates";
+import { deliver } from "@/server/notifications/transport";
 import { confirmPayment, startPayment } from "./oneTimePay";
 import { pyIso } from "./pyDate";
 
@@ -137,22 +138,9 @@ export async function tellAdmin(subjectLine: string, message: string): Promise<v
     message,
     dashboard_url: `${env.frontendBaseUrl}/admin/services/requests`,
   };
-  const [subject, body] = render("service_update", data);
-  if (!env.emailProviderApiKey) {
-    console.info(`EMAIL [no provider configured] to=${to} subject=${subject}\n${body}`);
-    return;
-  }
-  try {
-    const resp = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${env.emailProviderApiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: env.emailFromAddress, to: [to], subject, text: body }),
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-  } catch (err) {
-    console.error(`Admin email failed to=${to}: ${err instanceof Error ? err.message : err}`);
-  }
+  const [subject, text] = render("service_update", data);
+  // Best-effort: deliver() never throws, and a failure only gets logged.
+  await deliver({ to, subject, text });
 }
 
 async function mine(db: DbLike, owner: Pick<Account, "id">, requestId: string): Promise<ServiceRequest> {

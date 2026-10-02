@@ -17,6 +17,11 @@ export interface Env {
   /** Bearer secret for /api/cron/*. Vercel Cron sends it automatically when this env var is set. */
   cronSecret: string;
   emailProviderApiKey: string;
+  /** SMTP login, an alternative to the Resend key (any provider: Gmail app password, Brevo, Zoho, SES...). */
+  smtpHost: string;
+  smtpPort: number;
+  smtpUser: string;
+  smtpPass: string;
   emailFromAddress: string;
   /** Where new Growth Service requests are emailed. Empty = log only. */
   adminNotifyEmail: string;
@@ -57,6 +62,10 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
     authSecret: source.AUTH_SECRET ?? "change-me",
     cronSecret: source.CRON_SECRET ?? "",
     emailProviderApiKey: source.EMAIL_PROVIDER_API_KEY ?? "",
+    smtpHost: source.SMTP_HOST ?? "",
+    smtpPort: Number(source.SMTP_PORT) || 587,
+    smtpUser: source.SMTP_USER ?? "",
+    smtpPass: source.SMTP_PASS ?? "",
     emailFromAddress: source.EMAIL_FROM_ADDRESS ?? "noreply@revyu.in",
     adminNotifyEmail: source.ADMIN_NOTIFY_EMAIL ?? "",
     publicFlowBaseUrl: source.PUBLIC_FLOW_BASE_URL ?? "http://localhost:3000",
@@ -87,13 +96,17 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
       "RAZORPAY_KEY_SECRET",
       "RAZORPAY_WEBHOOK_SECRET",
       "GOOGLE_PLACES_API_KEY",
-      "EMAIL_PROVIDER_API_KEY",
       // Owner uploads go to Supabase Storage; a serverless disk is not durable.
       "SUPABASE_URL",
       "SUPABASE_SERVICE_ROLE_KEY",
     ]) {
       if (!source[name]) problems.push(`${name} is required when ENVIRONMENT=${environment}`);
     }
+  }
+  if (!isLocal && !env.emailProviderApiKey && !(env.smtpHost && env.smtpUser && env.smtpPass)) {
+    problems.push(
+      `EMAIL_PROVIDER_API_KEY (Resend) or SMTP_HOST + SMTP_USER + SMTP_PASS is required when ENVIRONMENT=${environment}`,
+    );
   }
   if (problems.length) throw new Error("Unsafe configuration: " + problems.join("; "));
   return env;

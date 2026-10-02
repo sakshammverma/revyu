@@ -315,7 +315,9 @@ the 7 scheduled jobs (phase 8).
 `ENVIRONMENT=production`, `DATABASE_POOL_URL` (transaction pooler),
 `DATABASE_URL` (session pooler; Alembic/FastAPI only), `ADMIN_SESSION_SECRET`
 (24+ random chars), `FRONTEND_BASE_URL`, `PUBLIC_FLOW_BASE_URL`,
-`EMAIL_PROVIDER_API_KEY`, `EMAIL_FROM_ADDRESS`, `ADMIN_NOTIFY_EMAIL`,
+`EMAIL_FROM_ADDRESS`, `ADMIN_NOTIFY_EMAIL`, and **one email provider**: either
+`EMAIL_PROVIDER_API_KEY` (Resend) or `SMTP_HOST` + `SMTP_PORT` (default 587; 465 =
+implicit TLS) + `SMTP_USER` + `SMTP_PASS` (Gmail app password, Brevo, Zoho, SES...),
 `GOOGLE_PLACES_API_KEY`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`,
 `RAZORPAY_WEBHOOK_SECRET`, `RAZORPAY_PLAN_ID_MONTHLY`, `RAZORPAY_PLAN_ID_ANNUAL`,
 `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `AUTH_SECRET` (24+ random chars; signs staff
@@ -467,4 +469,20 @@ cron jobs -> logout), 50/50, with provider keys blanked.
   testing, so the REST path is exercised), Resend, Supabase Storage and the
   Vercel body-size limit (4.5 MB vs the 5 MB upload cap).
 - The root FastAPI `/health` has no equivalent path; use `/api/health`.
+
+---
+
+## 11. Email providers (added 2026-10-03)
+
+Supabase cannot send application email (its mailer only sends Supabase Auth
+messages, and the built-in sender reaches team members only), so Revyu sends
+through `src/server/notifications/transport.ts`: **Resend** if
+`EMAIL_PROVIDER_API_KEY` is set, otherwise **SMTP** if `SMTP_HOST`/`SMTP_USER`/
+`SMTP_PASS` are set, otherwise it logs and records `skipped_no_provider`.
+Production refuses to start with neither. `EMAIL_FROM_ADDRESS` is the From
+header; with Gmail it must be the authenticated account (Gmail rewrites others).
+Port 25 is blocked on most hosts; use 587 (STARTTLS) or 465. Gmail needs 2-step
+verification plus an app password; Brevo's free plan allows 300 emails a day.
+Verified end to end against an in-process SMTP server in
+`notifications/transport.test.ts`; not yet against a real provider.
 
