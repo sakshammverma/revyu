@@ -1,7 +1,7 @@
 # 25 — Supabase Migration Plan
 
-**Status:** phases 0, 1 and 2 done (2026-10-02); phases 3-8 not started. See
-section 6 for what was built and where it differs from the plan below.
+**Status:** phases 0-5 done (2026-10-02); phases 6-8 not started. See
+sections 6 and 7 for what was built and where it differs from the plan below.
 **Goal:** run Revyu with no Python server. Supabase provides Postgres, Auth,
 Storage and cron. Next.js on Vercel provides the API and the UI.
 
@@ -230,6 +230,102 @@ risk sits in Phases 2, 5 and 6, where correctness matters most.
 **Known gap:** `build_flow_config` is duplicated in TS and Python until the
 admin approval preview moves (phase 7).
 
-### Next: phase 3 (Auth)
-Needs a decision on the email provider for Supabase Auth (built-in SMTP is
-rate-limited; production needs custom SMTP, e.g. the existing Resend account).
+---
+
+## 7. Phases 3-5 (done 2026-10-02)
+
+**Decision: phase 3 ported the existing login instead of adopting Supabase Auth.**
+Same email code + magic link + hashed 30-day `owner_sessions` cookie, rewritten
+in TypeScript (`services/ownerAuth.ts`). Reasons: no new keys or SMTP needed
+(Supabase's built-in email is capped at a few messages per hour), no owner is
+logged out, and sessions are interchangeable between FastAPI and Next while
+endpoints migrate (verified in both directions). Supabase Auth can replace it
+later behind `requireOwner()`; nothing else depends on how it works.
+
+**Ported (Next route handlers; the Python copy is dead code until phase 8)**
+
+| Area | Endpoints |
+|---|---|
+| Login | `POST /api/app/auth/otp/request`, `POST .../otp/verify`, `GET .../magic`, `POST .../logout` |
+| Dashboard | `GET /api/app/outlets/mine`, `.../{id}/{overview,funnel,tags,rating,feedback}`, `PATCH /api/app/feedback/{id}` |
+| Competitors | `GET/POST /api/app/competitors`, `DELETE .../{id}` |
+| Hub editor | `GET/PATCH .../{id}/hub`, `PUT hub/modules`, `PATCH hub/profile`, `PUT hub/links`, menu categories/items CRUD + ordering, `POST hub/uploads`, `GET hub/insights` |
+| Assets | `GET .../{id}/qr`, `GET .../{id}/print-assets/{asset}`, `GET /uploads/*` (local dev only) |
+| Signup | `GET /api/signup/places/search`, `POST /api/signup`, `POST .../{id}/confirm`, `GET .../{id}/status` |
+| Billing | `GET /api/app/billing/status`, `POST .../checkout`, `POST .../confirm`, `POST /api/webhooks/razorpay`, `GET /api/app/referrals` |
+| Growth (owner) | `GET /api/app/services`, service-requests (list/create/get/messages/accept/cancel/pay/pay-confirm), print-kit (list/create/pay/pay-confirm) |
+
+**Still on FastAPI:** all `/api/admin/*`; `/hub/loyalty*` (needs the loyalty
+service, phase 6); rewards join/recover/wallet/code and `/api/staff/*` (phase 6);
+the 7 scheduled jobs (phase 8).
+
+**Verified**
+- Vitest 203 passing (17 files). pytest 60. Playwright 42 (full suite).
+- Parity against live FastAPI on fixtures in the dev DB: dashboard + competitors
+  58 comparisons identical; hub editor/menu/links/uploads ~45 operations plus
+  459 link inputs and 48 QR codes (module-for-module) identical; money flows
+  98 steps identical including the resulting DB rows.
+- Live journey through a production `next start` + FastAPI (signup -> mock
+  payment -> founder approval -> owner login -> dashboard, hub editing, QR,
+  four print PDFs, billing, referrals, growth catalogue, competitors, customer
+  funnel, logout): 38/38.
+
+**Deviations and fixes found while porting**
+1. OTP lockout now works: the Python incremented `attempts` then raised, which
+   rolled the increment back, so the 5-attempt limit never engaged.
+2. Webhook signature is computed over the raw bytes (`arrayBuffer`), so the HMAC
+   is exact for any body; a malformed JSON body is a 400, not a 500.
+3. Signup duplicate check now covers an email and a phone that belong to
+   different accounts (the Python could 500 on the unique constraint): 409
+   `DUPLICATE_BUSINESS`.
+4. Race fixes: payment recording is `ON CONFLICT DO NOTHING`; the referral
+   "referee paid" step and billing / service-payment confirms claim their
+   transition atomically, so a retried webhook or double click cannot
+   double-count.
+5. Stricter input: whitespace-only menu names and malformed opening-hours pairs
+   are 422 (Python stored an empty name / later crashed the public hub); SVG
+   uploads are rejected; PDFs print `?` for characters Helvetica cannot encode
+   (Python printed garbage).
+6. `plans` are returned ordered by price (the Python had no ORDER BY).
+7. QR: npm `qrcode` picks a different mask than python-qrcode for ~45% of URLs;
+   `services/qr.ts` reimplements python-qrcode's mask scoring so QR matrices
+   stay identical to the ones already printed.
+8. PDFs: same page size/count and image placement; text can be up to 0.24pt off
+   horizontally (font metrics).
+9. Validation errors are `{detail:{error:{code:"VALIDATION_ERROR"}}}`, not
+   pydantic's list; 204 responses carry no content-type.
+
+**Operational findings**
+- **Supabase's session pooler allows ~15 client connections for the whole
+  project.** SQLAlchemy's default pool (5+10) can use all of it, and a
+  long-lived Next dev server holds its pool until restarted. Python is now
+  capped (`DB_POOL_SIZE=5`, `DB_MAX_OVERFLOW=2`). The Next server should use the
+  transaction pooler (`DATABASE_POOL_URL`, port 6543) everywhere: with it the
+  full Vitest suite is stable (203/203); on the session pooler it flaked with
+  `ECONNRESET` / `CONNECTION_CLOSED` and took ~9 minutes.
+- Vercel limits request bodies to ~4.5 MB but the upload cap is 5 MB. Either
+  lower the cap to 4 MB or upload straight to Supabase Storage from the browser
+  with a signed URL.
+- Supabase Storage (`outlet-media` bucket) and the live Razorpay REST calls are
+  covered only with mocked `fetch`. Verify both with real keys before launch.
+- Approval assigns the final public slug (signup creates a placeholder).
+
+**Vercel environment checklist (server-only, none prefixed `NEXT_PUBLIC_`)**
+`ENVIRONMENT=production`, `DATABASE_POOL_URL` (transaction pooler),
+`DATABASE_URL` (session pooler; Alembic/FastAPI only), `ADMIN_SESSION_SECRET`
+(24+ random chars), `FRONTEND_BASE_URL`, `PUBLIC_FLOW_BASE_URL`,
+`EMAIL_PROVIDER_API_KEY`, `EMAIL_FROM_ADDRESS`, `ADMIN_NOTIFY_EMAIL`,
+`GOOGLE_PLACES_API_KEY`, `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`,
+`RAZORPAY_WEBHOOK_SECRET`, `RAZORPAY_PLAN_ID_MONTHLY`, `RAZORPAY_PLAN_ID_ANNUAL`,
+`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`. A non-local `ENVIRONMENT` refuses to
+start without them. Keep `NEXT_PUBLIC_API_BASE` pointing at the Render backend
+until phase 8.
+
+**Python code now superseded (delete in phase 8):** `api/{auth,dashboard,
+competitors,signup,billing,webhooks,assets}.py`, the owner halves of
+`api/{referrals,growth,hub_config}.py`, and services/{owner_auth,billing,
+payments,one_time_pay,referrals,competitors,qr,print_assets,logo,storage,
+links}.py. `services/places.py` stays until the weekly poll job and admin
+activation move.
+
+### Next: phase 6 (loyalty + staff), then 7 (admin), then 8 (jobs + cut-over)

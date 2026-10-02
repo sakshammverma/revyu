@@ -24,3 +24,26 @@ const VERTICALS: Record<string, VerticalConfig> = { coaching, dental, general, g
 export function menuLabel(vertical: string): string {
   return VERTICALS[vertical]?.menu_label ?? "Services";
 }
+
+export const DEFAULT_VERTICAL = "dental";
+
+/** Sorted vertical keys (backend/app/seeds/tags.py list_verticals). */
+export function listVerticals(): string[] {
+  return Object.keys(VERTICALS).sort();
+}
+
+export interface TagSeed {
+  label: string;
+  phrases: string[];
+}
+
+/**
+ * Seed tag set for a vertical (CR-1: short fragments mapped to one
+ * customer-selected attribute, never a full review sentence). Unknown
+ * verticals fall back to dental, like the Python loader; signup rejects them
+ * up front so that fallback is never silently used.
+ */
+export function verticalTags(vertical: string): TagSeed[] {
+  const config = VERTICALS[vertical] ?? VERTICALS[DEFAULT_VERTICAL];
+  return config.tags as TagSeed[];
+}

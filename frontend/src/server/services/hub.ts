@@ -229,7 +229,7 @@ export function profileDict(p: Profile | undefined) {
   };
 }
 
-async function loadProfile(db: DbLike, outletId: string): Promise<Profile | undefined> {
+export async function loadProfile(db: DbLike, outletId: string): Promise<Profile | undefined> {
   const [profile] = await db.select().from(outletProfiles).where(eq(outletProfiles.outletId, outletId)).limit(1);
   return profile;
 }
