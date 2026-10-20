@@ -24,6 +24,13 @@ const PATHS: Record<string, string> = {
   bolt: "M13 3L5 13h6l-1 8 8-10h-6l1-8z",
   sparkle: "M12 3l1.800 5.200L19 10l-5.200 1.800L12 17l-1.800-5.200L5 10l5.200-1.800L12 3z",
   download: "M12 4v11M7 11l5 5 5-5M5 20h14",
+  home: "M3 11l9-8 9 8M5 10v10h14V10M10 20v-6h4v6",
+  chart: "M4 20V10M10 20V4M16 20v-7M22 20H2",
+  flag: "M5 21V4M5 4h11l-2 4 2 4H5",
+  qr: "M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 18h2v2h-2zM14 18v2M20 14v2",
+  layout: "M4 4h16v16H4zM4 9h16M9 9v11",
+  card: "M3 6h18v12H3zM3 10h18M7 15h3",
+  more: "M5 12h.01M12 12h.01M19 12h.01",
   clock: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM12 7v5l3 2",
 };
 

@@ -83,6 +83,7 @@ export async function billingStatus(db: DbLike, owner: Pick<Account, "id">) {
     plan: sub?.plan ?? null,
     current_period_end: sub?.currentPeriodEnd ? pyIso(sub.currentPeriodEnd) : null,
     trial_days_left: trialDaysLeft,
+    trial_days_total: TRIAL_DAYS,
     credits_left: creditsLeft,
     scans_waiting: outlet.trialFlowCount,
     can_pay: PAYABLE_STATES.includes(outlet.state),

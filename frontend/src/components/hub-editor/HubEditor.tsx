@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { ConnectTab } from "@/components/hub-editor/ConnectTab";
 import { MenuTab } from "@/components/hub-editor/MenuTab";
@@ -8,6 +8,19 @@ import { PageTab } from "@/components/hub-editor/PageTab";
 import { RewardsTab } from "@/components/hub-editor/RewardsTab";
 import { useToasts } from "@/components/ui/kit";
 import type { EditorState, HubApi } from "@/lib/hub/api";
+
+const DESKTOP = "(min-width: 1024px)";
+function useDesktop() {
+  return useSyncExternalStore(
+    (notify) => {
+      const m = window.matchMedia(DESKTOP);
+      m.addEventListener("change", notify);
+      return () => m.removeEventListener("change", notify);
+    },
+    () => window.matchMedia(DESKTOP).matches,
+    () => false,
+  );
+}
 
 type TabKey = "page" | "connect" | "menu" | "rewards";
 
@@ -23,6 +36,7 @@ export function HubEditor({ api, isAdmin = false, initialTab = "page" }: { api: 
   const [previewNonce, setPreviewNonce] = useState(0);
   const [formNonce, setFormNonce] = useState({ page: 0, connect: 0 });
   const { push, node } = useToasts();
+  const desktop = useDesktop();
 
   const reload = useCallback(async (resetForm?: "page" | "connect") => {
     try {
@@ -100,13 +114,16 @@ export function HubEditor({ api, isAdmin = false, initialTab = "page" }: { api: 
       >
         Preview your page ↗
       </a>
-      <aside className="hidden lg:block sticky top-20">
+      {/* Mounted only on desktop: a display:none iframe would still load the whole customer page on a phone. */}
+      {desktop && (
+      <aside className="sticky top-20">
         <p className="vf-section-label mb-2">Live preview</p>
         <div className="rounded-[2rem] border-[6px] border-[#1f2429] overflow-hidden bg-[#f2f7f7] shadow-v2-phone">
           <iframe key={previewNonce} title="Customer view preview" src={previewSrc} className="w-full h-[560px] border-0" />
         </div>
         <a href={`/r/${state.slug}`} target="_blank" rel="noreferrer" className="btn-pill-light w-full mt-3 min-h-[44px] inline-flex items-center justify-center">Open on your phone ↗</a>
       </aside>
+      )}
       {node}
     </div>
   );

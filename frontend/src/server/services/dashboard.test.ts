@@ -125,7 +125,7 @@ describe("locked dashboard (SRS-9.6, SRS-9.8)", () => {
 
       const overview = await getOverview(makeRequest(`${base}/overview`, { session }), ctx);
       expect(overview.status).toBe(200);
-      expect(await overview.json()).toMatchObject({ dashboard_locked: true, feedback_count: 1 });
+      expect(await overview.json()).toMatchObject({ dashboard_locked: true, feedback_count: 1, unresolved_count: 1 });
 
       for (const [route, path] of [
         [getFunnel, "funnel"],
@@ -318,6 +318,7 @@ describe("outlets/mine", () => {
         business_name: "Test Clinic",
         state: "suspended",
         collecting: false,
+        slug: outlet.slug,
       });
       const lone = await issueOwnerSession(tx, await makeAccount(tx));
       const none = await getMine(makeRequest("/api/app/outlets/mine", { session: lone }), undefined as never);

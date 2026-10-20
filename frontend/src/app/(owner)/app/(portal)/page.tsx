@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 
+import { FirstRunCard } from "@/components/dashboard/FirstRunCard";
 import { FunnelView } from "@/components/dashboard/FunnelView";
 import { useOwner } from "@/components/portal/OwnerContext";
 import { Button, Card, ErrorState, Skeleton, StatTile } from "@/components/ui";
-import { getFeedbackInbox, getFunnel, getOverview, isDashboardLocked } from "@/lib/dashboard/api";
+import { getFunnel, getOverview, isDashboardLocked } from "@/lib/dashboard/api";
 import { formatMoney } from "@/lib/format";
 import { useAsync } from "@/lib/useAsync";
 
@@ -15,10 +16,7 @@ export default function OverviewPage() {
   const overview = useAsync(() => getOverview(outlet.outlet_id), [outlet.outlet_id]);
   // Detailed views answer 402 while locked; don't ask for them.
   const funnel = useAsync(() => (locked ? Promise.resolve(null) : getFunnel(outlet.outlet_id)), [outlet.outlet_id, locked]);
-  const feedback = useAsync(
-    () => (locked ? Promise.resolve(null) : getFeedbackInbox(outlet.outlet_id)),
-    [outlet.outlet_id, locked],
-  );
+  const firstRun = !locked && overview.data?.scans === 0;
   const monthly = billing?.plans.find((p) => p.code === "monthly");
 
   return (
@@ -66,15 +64,17 @@ export default function OverviewPage() {
         </div>
       )}
 
-      {!locked && overview.data && (
+      {!locked && overview.data && !(firstRun && overview.data.unresolved_count === 0) && (
         <NextBestAction
           scans={overview.data.scans}
           conversion={overview.data.conversion_rate}
-          unresolved={feedback.data?.items.filter((i) => !i.resolved).length ?? 0}
+          unresolved={overview.data.unresolved_count}
         />
       )}
 
-      {locked ? null : funnel.data ? (
+      {firstRun ? (
+        <FirstRunCard outletId={outlet.outlet_id} slug={outlet.slug} />
+      ) : locked ? null : funnel.data ? (
         <FunnelView funnel={funnel.data} />
       ) : funnel.error ? (
         <ErrorState message="We couldn't load the funnel." onRetry={funnel.reload} />
@@ -91,7 +91,7 @@ function StateBanner() {
   if (!billing) return null;
 
   if (outlet.state === "trial" && billing.trial_days_left !== null) {
-    const pct = Math.round(((15 - billing.trial_days_left) / 15) * 100);
+    const pct = Math.round(((billing.trial_days_total - billing.trial_days_left) / billing.trial_days_total) * 100);
     return (
       <Card>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">

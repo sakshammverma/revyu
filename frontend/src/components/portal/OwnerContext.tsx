@@ -2,7 +2,6 @@
 
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import { useRouter } from "next/navigation";
 
 import {
   DashboardApiError,
@@ -15,7 +14,7 @@ import {
 type Ctx = {
   outlet: MyOutlet;
   billing: BillingStatus | null;
-  /** Re-read outlet state + billing (after paying, etc). */
+  /** Re-read outlet state + billing (after paying, etc). Resolves once the new state is in. */
   refresh: () => Promise<void>;
 };
 
@@ -30,6 +29,9 @@ export function useOwner(): Ctx {
 // Not live yet: no billing, no dashboard data, no print files (see outletState.ts).
 const PRE_LIVE = ["draft", "pending_payment", "pending_approval", "rejected"];
 
+// Coming back to a tab that has sat in the background: trial countdown and lock state may be stale.
+const STALE_AFTER_MS = 5 * 60 * 1000;
+
 export function OwnerProvider({
   children,
   preLive,
@@ -41,41 +43,52 @@ export function OwnerProvider({
   loading: ReactNode;
   failed: (retry: () => void) => ReactNode;
 }) {
-  const router = useRouter();
   const [outlet, setOutlet] = useState<MyOutlet | null>(null);
   const [billing, setBilling] = useState<BillingStatus | null>(null);
   const [error, setError] = useState(false);
-  const [version, setVersion] = useState(0);
+  const [loadedAt, setLoadedAt] = useState(0);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const mine = await getMyOutlet();
-        const bill = PRE_LIVE.includes(mine.state) ? null : await getBillingStatus().catch(() => null);
-        if (cancelled) return;
-        setOutlet(mine);
-        setBilling(bill);
-        setError(false);
-      } catch (e) {
-        if (cancelled) return;
-        if (e instanceof DashboardApiError && e.status === 401) {
-          router.replace("/app/login");
-          return;
-        }
-        setError(true);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [router, version]);
-
-  const refresh = useCallback(async () => {
-    setVersion((v) => v + 1);
+  const load = useCallback(async () => {
+    try {
+      // Both at once: billing is only used when the outlet is live, and a failed billing
+      // read must not block the dashboard.
+      const [mine, bill] = await Promise.all([getMyOutlet(), getBillingStatus().catch(() => null)]);
+      setOutlet(mine);
+      setBilling(PRE_LIVE.includes(mine.state) ? null : bill);
+      setError(false);
+      setLoadedAt(Date.now());
+    } catch (e) {
+      // A 401 is already on its way to the login page (redirectToOwnerLogin in the API client).
+      if (e instanceof DashboardApiError && e.status === 401) return;
+      setError(true);
+    }
   }, []);
 
-  if (error) return <>{failed(() => { setError(false); setVersion((v) => v + 1); })}</>;
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- initial fetch on mount
+    load();
+  }, [load]);
+
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible" && Date.now() - loadedAt > STALE_AFTER_MS) load();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [load, loadedAt]);
+
+  const refresh = load;
+
+  if (error) {
+    return (
+      <>
+        {failed(() => {
+          setError(false);
+          load();
+        })}
+      </>
+    );
+  }
   if (!outlet) return <>{loading}</>;
   if (PRE_LIVE.includes(outlet.state)) return <>{preLive(outlet)}</>;
 

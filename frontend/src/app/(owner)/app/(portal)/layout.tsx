@@ -7,6 +7,23 @@ import { AppShell } from "@/components/portal/AppShell";
 import { OwnerProvider } from "@/components/portal/OwnerContext";
 import { SignupStatus } from "@/components/marketing/SignupStatus";
 import { Button, Skeleton, ToastProvider } from "@/components/ui";
+import { Logo } from "@/components/ui/Logo";
+import { logout } from "@/lib/dashboard/api";
+
+async function logOut() {
+  await logout().catch(() => {});
+  // A full load on purpose: it drops every piece of stale owner state.
+  // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+  window.location.assign("/app/login");
+}
+
+function LogOutButton() {
+  return (
+    <button onClick={logOut} className="text-sm font-semibold text-text-2 underline underline-offset-2 min-h-[44px] cursor-pointer">
+      Log out
+    </button>
+  );
+}
 
 export default function PortalLayout({ children }: { children: ReactNode }) {
   return (
@@ -27,17 +44,21 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
               <Button onClick={retry} className="mt-4">
                 Try again
               </Button>
+              <div className="mt-2">
+                <LogOutButton />
+              </div>
             </div>
           </main>
         )}
         preLive={(outlet) => (
           <main className="min-h-screen bg-bg p-4 sm:p-6 flex flex-col items-center justify-center gap-6">
-            <Link href="/" className="font-bold text-lg tracking-tight text-ink">
-              Revyu
+            <Link href="/" aria-label="Revyu home" className="text-ink">
+              <Logo className="text-xl" markClassName="w-6 h-6" />
             </Link>
             <div className="w-full">
               <SignupStatus signupId={outlet.outlet_id} />
             </div>
+            <LogOutButton />
           </main>
         )}
       >

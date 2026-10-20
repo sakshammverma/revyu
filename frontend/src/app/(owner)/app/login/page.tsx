@@ -23,15 +23,17 @@ export default function LoginPage() {
 
 function LoginForm() {
   const router = useRouter();
-  const next = safeNextPath(useSearchParams().get("next"));
+  const params = useSearchParams();
+  const next = safeNextPath(params.get("next"));
 
   const [step, setStep] = useState<"email" | "code">("email");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => params.get("email") ?? "");
   const [code, setCode] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
   const [codeError, setCodeError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [resent, setResent] = useState(false);
 
   // Already signed in? Skip straight to the dashboard.
   useEffect(() => {
@@ -46,7 +48,8 @@ function LoginForm() {
     return () => clearTimeout(t);
   }, [cooldown]);
 
-  async function sendCode() {
+  async function sendCode(isResend = false) {
+    if (busy) return;
     if (!EMAIL_RE.test(email.trim())) {
       setEmailError("Enter a valid email address, like name@business.com");
       return;
@@ -59,6 +62,7 @@ function LoginForm() {
       setCode("");
       setCodeError(null);
       setCooldown(RESEND_SECONDS);
+      setResent(isResend);
     } catch (e) {
       setEmailError(
         e instanceof DashboardApiError && e.code === "RATE_LIMITED"
@@ -123,6 +127,12 @@ function LoginForm() {
             <Button type="submit" loading={busy} full>
               Send code
             </Button>
+            <p className="text-xs text-text-2 text-center">
+              New to Revyu?{" "}
+              <Link href="/signup" className="text-accent font-semibold underline underline-offset-2">
+                Start your free trial
+              </Link>
+            </p>
           </form>
         ) : (
           <form
@@ -135,7 +145,7 @@ function LoginForm() {
             <div>
               <h1 className="font-display text-2xl text-ink">Check your email</h1>
               <p className="text-sm text-text-2 mt-1 leading-relaxed">
-                We sent a 6-digit code and a login link to <strong className="text-ink">{email}</strong>.{" "}
+                If this email has an account, we sent a 6-digit code and a login link to <strong className="text-ink">{email}</strong>.{" "}
                 <button
                   type="button"
                   className="text-accent font-semibold underline underline-offset-2 cursor-pointer"
@@ -170,10 +180,16 @@ function LoginForm() {
                 <button
                   type="button"
                   className="text-accent font-semibold cursor-pointer underline underline-offset-2"
-                  onClick={sendCode}
+                  disabled={busy}
+                  onClick={() => sendCode(true)}
                 >
-                  Resend code
+                  {busy ? "Sending…" : "Resend code"}
                 </button>
+              )}
+              {resent && cooldown > 0 && (
+                <p role="status" className="mt-1 text-xs text-success">
+                  A new code is on its way.
+                </p>
               )}
               <p className="mt-2 text-xs">Not there after a minute? Check your spam folder.</p>
             </div>

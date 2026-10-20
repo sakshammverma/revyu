@@ -3,7 +3,7 @@
  * The funnel ends at "handoff": everything after happens on Google's UI and
  * cannot be measured (C-1). No query here reads review text (CR-1/CR-4).
  */
-import { and, asc, desc, eq, gte, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gte, inArray, sql, type SQL } from "drizzle-orm";
 
 import { schema, type DbLike } from "@/server/db";
 import { HttpError } from "@/server/http";
@@ -80,6 +80,10 @@ export async function getOverview(db: DbLike, outlet: Outlet) {
     .select({ n: sql<number>`count(*)::int` })
     .from(privateFeedback)
     .where(eq(privateFeedback.outletId, outlet.id));
+  const [{ n: unresolved }] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(privateFeedback)
+    .where(and(eq(privateFeedback.outletId, outlet.id), eq(privateFeedback.resolved, false)));
   return {
     outlet_id: outlet.id,
     business_name: outlet.businessName,
@@ -89,6 +93,7 @@ export async function getOverview(db: DbLike, outlet: Outlet) {
     conversion_rate: scans ? pyRound(completed / scans, 4) : 0,
     trial_flow_count: outlet.trialFlowCount,
     feedback_count: feedbackCount,
+    unresolved_count: unresolved,
     dashboard_locked: DASHBOARD_LOCKED_STATES.has(outlet.state),
   };
 }
@@ -97,16 +102,23 @@ export async function getFunnel(db: DbLike, outlet: Outlet, range: string, now: 
   const start = rangeStart(range, now);
   const steps: { step: string; count: number; drop_off_pct: number | null }[] = [];
   let prev: number | null = null;
+  // One grouped query instead of one per step: this sits behind every Overview load.
+  const where: SQL[] = [eq(events.outletId, outlet.id), inArray(events.type, [...FUNNEL_ORDER])];
+  if (start) where.push(gte(events.occurredAt, start));
+  const grouped = await db
+    .select({
+      type: events.type,
+      rows: sql<number>`count(*)::int`,
+      sessions: sql<number>`count(distinct ${events.sessionId})::int`,
+    })
+    .from(events)
+    .where(and(...where))
+    .groupBy(events.type);
+  const byType = new Map(grouped.map((g) => [g.type, g]));
   for (const step of FUNNEL_ORDER) {
-    const where: SQL[] = [eq(events.outletId, outlet.id), eq(events.type, step)];
-    if (start) where.push(gte(events.occurredAt, start));
     // scan has no session_id in most cases, so count rows; later steps count distinct sessions.
-    const countExpr =
-      step === "scan" ? sql<number>`count(*)::int` : sql<number>`count(distinct ${events.sessionId})::int`;
-    const [{ n: count }] = await db
-      .select({ n: countExpr })
-      .from(events)
-      .where(and(...where));
+    const g = byType.get(step);
+    const count = g ? (step === "scan" ? g.rows : g.sessions) : 0;
     const dropOff = prev !== null && prev > 0 ? pyRound((1 - count / prev) * 100, 1) : null;
     steps.push({ step, count, drop_off_pct: dropOff });
     prev = count;
@@ -213,5 +225,7 @@ export async function getMyOutlet(db: DbLike, accountId: string) {
     business_name: outlet.businessName,
     state: outlet.state,
     collecting: isCollecting(outlet.state),
+    // Lets the owner open their own customer page (the "scan it yourself" step) without a second request.
+    slug: outlet.slug,
   };
 }

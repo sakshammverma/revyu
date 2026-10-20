@@ -3,25 +3,19 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { MOBILE_PRIMARY, NAV } from "@/components/portal/nav";
 import { Card } from "@/components/ui";
 import { logout } from "@/lib/dashboard/api";
 
-const ITEMS = [
-  { href: "/app/hub", label: "QR page", note: "Connect, services, rewards and what customers see after scanning" },
-  { href: "/app/grow", label: "Grow", note: "Website, video, content and automation services" },
-  { href: "/app/insights", label: "Insights", note: "Funnel, top compliments and your rating" },
-  { href: "/app/competitors", label: "Competitors", note: "Follow nearby businesses and see who is gaining reviews" },
-  { href: "/app/referrals", label: "Refer & save", note: "70% off when a referral subscribes" },
-];
-
 export default function MorePage() {
   const router = useRouter();
+  const items = NAV.filter((n) => !MOBILE_PRIMARY.includes(n.href));
   return (
     <>
       <h1 className="font-display text-2xl text-ink">More</h1>
       <Card>
         <ul className="divide-y divide-line">
-          {ITEMS.map((i) => (
+          {items.map((i) => (
             <li key={i.href}>
               <Link href={i.href} className="flex items-center justify-between min-h-[56px] py-2">
                 <span>
@@ -40,6 +34,7 @@ export default function MorePage() {
           <li>
             <button
               onClick={async () => {
+                if (!window.confirm("Log out of Revyu?")) return;
                 await logout().catch(() => {});
                 router.replace("/app/login");
               }}

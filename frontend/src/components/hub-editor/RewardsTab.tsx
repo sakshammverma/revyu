@@ -183,7 +183,7 @@ export function RewardsTab({ api, state, reload, toast }: TabProps) {
       <Card
         title="Members"
         hint="Customers who joined your programme, with the details they gave you."
-        action={members === null && <Btn variant="light" className="!min-h-[40px]" onClick={async () => { try { setMembers((await api.members()).items); setLog((await api.redemptions()).items); } catch (e) { fail(e); } }}>Show members</Btn>}
+        action={members === null && <Btn variant="light" className="!min-h-[40px]" onClick={async () => { try { const [m, r] = await Promise.all([api.members(), api.redemptions()]); setMembers(m.items); setLog(r.items); } catch (e) { fail(e); } }}>Show members</Btn>}
       >
         {members && (members.length === 0 ? (
           <EmptyState title="No members yet" body="They appear here when customers create a wallet." />

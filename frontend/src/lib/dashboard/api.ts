@@ -56,6 +56,7 @@ export interface MyOutlet {
   business_name: string;
   state: string;
   collecting: boolean;
+  slug: string;
 }
 
 export interface Overview {
@@ -68,6 +69,7 @@ export interface Overview {
   trial_flow_count: number;
   /** Private messages received, ever (shown as a count on the locked dashboard, SRS-9.8). */
   feedback_count: number;
+  unresolved_count: number;
   dashboard_locked: boolean;
 }
 
@@ -163,6 +165,7 @@ export interface BillingStatus {
   plan: string | null;
   current_period_end: string | null;
   trial_days_left: number | null;
+  trial_days_total: number;
   credits_left: number | null;
   scans_waiting: number;
   can_pay: boolean;

@@ -12,7 +12,7 @@ export default function HubPage() {
   return (
     <>
       <div>
-        <h1 className="font-display text-2xl sm:text-3xl text-ink">QR page</h1>
+        <h1 className="font-display text-2xl sm:text-3xl text-ink">Customer page</h1>
         <p className="text-sm text-text-2 mt-1">
           Choose what customers see after they scan. Your printed QR code never changes.
         </p>
