@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Logo } from "@/components/ui/Logo";
 import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 
@@ -42,8 +43,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-bg lg:flex">
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex w-60 shrink-0 flex-col bg-sheet border-r border-line sticky top-0 h-screen">
-        <Link href="/" className="px-5 h-16 flex items-center font-bold text-xl tracking-tight text-ink">
-          Revyu
+        <Link href="/" className="px-5 h-16 flex items-center text-ink">
+          <Logo className="text-xl" markClassName="w-5 h-5 text-accent" />
         </Link>
         <nav aria-label="Main" className="flex-1 px-3 py-2 flex flex-col gap-1">
           {NAV.map((n) => {
@@ -85,8 +86,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         <header className="sticky top-0 z-30 bg-sheet/90 backdrop-blur-xl border-b border-line">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 lg:h-16 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
-              <Link href="/" className="lg:hidden font-bold text-lg tracking-tight text-ink">
-                Revyu
+              <Link href="/" className="lg:hidden text-ink shrink-0">
+                <Logo className="text-lg" markClassName="w-5 h-5 text-accent" />
               </Link>
               <span className="lg:hidden text-line-strong">/</span>
               <span className="text-sm font-semibold text-ink truncate">{outlet.business_name}</span>

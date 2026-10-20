@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { Logo } from "@/components/ui/Logo";
 import Image from "next/image";
 
 export function Header() {
@@ -49,15 +50,10 @@ export function Header() {
             className="flex items-center gap-2 group cursor-pointer"
             onClick={() => setMegaMenuOpen(false)}
           >
-            {/* 8-Petal Spirograph Flower Mark */}
-            <svg className="w-5 h-5 text-[#1a1e23] group-hover:text-[#397dff] transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M12 2a4 4 0 0 0-4 4v12a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4z" />
-              <path d="M22 12a4 4 0 0 0-4-4H6a4 4 0 0 0 0 8h12a4 4 0 0 0 4-4z" />
-            </svg>
-            <span className="font-sans font-bold text-lg text-[#1a1e23] tracking-tight">
-              Revyu
-            </span>
+            <Logo
+              className="text-lg text-[#1a1e23]"
+              markClassName="w-5 h-5 group-hover:text-[#397dff] transition-colors"
+            />
           </Link>
 
           {/* Desktop Navigation Links */}

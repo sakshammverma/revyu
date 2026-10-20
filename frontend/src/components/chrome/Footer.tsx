@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Logo } from "@/components/ui/Logo";
 import { useRouter } from "next/navigation";
 
 export function Footer() {
@@ -17,13 +18,10 @@ export function Footer() {
           <div className="lg:col-span-6 flex flex-col justify-between max-w-lg">
             <div>
               <Link href="/" className="inline-flex items-center gap-2 mb-4 group">
-                <div className="w-7 h-7 rounded-lg bg-[#397dff] flex items-center justify-center text-white font-bold text-sm shadow-sm group-hover:bg-[#2f68db] transition-colors">
-                  R
-                </div>
-                <span className="font-display text-2xl text-white tracking-tight">
-                  Revyu
-                </span>
-                <span className="w-1.5 h-1.5 rounded-full bg-[#397dff] mb-1" />
+                <Logo
+                  className="text-2xl text-white"
+                  markClassName="w-6 h-6 text-[#397dff] group-hover:text-white transition-colors"
+                />
               </Link>
 
               <h3 className="heading-h3 font-display text-white text-2xl sm:text-3xl leading-snug">

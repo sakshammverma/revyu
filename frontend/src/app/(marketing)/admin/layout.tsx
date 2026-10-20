@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Logo } from "@/components/ui/Logo";
 
 export const metadata: Metadata = { title: "Revyu Admin", robots: { index: false, follow: false } };
 
@@ -18,7 +19,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen bg-bg">
       <nav aria-label="Admin" className="bg-sheet border-b border-line">
         <div className="max-w-5xl mx-auto px-3 sm:px-8 h-14 flex items-center gap-1 overflow-x-auto">
-          <span className="font-bold text-ink mr-3 shrink-0">Revyu Admin</span>
+          <Logo label="Revyu Admin" className="text-ink mr-3 shrink-0" markClassName="w-4 h-4 text-accent" />
           {LINKS.map((l) => (
             <Link
               key={l.href}

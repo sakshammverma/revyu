@@ -2,6 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
+import { Logo } from "@/components/ui/Logo";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button, Field } from "@/components/ui";
@@ -92,8 +93,8 @@ function LoginForm() {
   return (
     <main className="min-h-screen flex items-center justify-center px-4 py-10 bg-bg">
       <div className="v2-sheet border border-line max-w-sm w-full p-6 sm:p-8">
-        <Link href="/" className="font-bold text-xl tracking-tight text-ink block mb-6 pb-5 border-b border-line">
-          Revyu
+        <Link href="/" className="text-ink flex mb-6 pb-5 border-b border-line">
+          <Logo className="text-xl" markClassName="w-5 h-5 text-accent" />
         </Link>
 
         {step === "email" ? (
