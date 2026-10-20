@@ -30,13 +30,21 @@ export function ROICalculatorSection() {
   const scale = monthlyMinor / LAUNCH_MONTHLY_MINOR;
   const scaled = (n: number) => Math.max(1, Math.round(n * scale));
   const show = (minor: number) => (pricing.ready ? pricing.money(minor) : "…");
-  const showMajor = (major: number) => show(major * 100);
+  // Minor units per major unit for this currency (100 for INR/USD, 1 for JPY), as formatMoney does.
+  const unit =
+    10 **
+    (new Intl.NumberFormat(pricing.locale ?? "en-US", { style: "currency", currency: pricing.currency ?? "USD" }).resolvedOptions()
+      .maximumFractionDigits ?? 2);
+  const showMajor = (major: number) => show(major * unit);
 
   const avgBill = scaled(pos);
-  const customersPerYearAnnual = useCountUp(Math.max(1, Math.ceil(annualMinor / 100 / avgBill)));
-  const customersPerYearMonthly = useCountUp(Math.max(1, Math.ceil((monthlyMinor * 12) / 100 / avgBill)));
+  const customersPerYearAnnual = useCountUp(Math.max(1, Math.ceil(annualMinor / unit / avgBill)));
+  const customersPerYearMonthly = useCountUp(Math.max(1, Math.ceil((monthlyMinor * 12) / unit / avgBill)));
   const shownBill = useCountUp(avgBill);
   const fill = ((pos - 200) / (10000 - 200)) * 100;
+
+  // The load finished without a price: hide the section rather than show "…" forever or guess a price.
+  if (!pricing.loading && !pricing.ready) return null;
 
   return (
     <div id="calculator" className="mx-2 sm:mx-3 my-16 sm:my-24">
