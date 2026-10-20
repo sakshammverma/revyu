@@ -78,7 +78,7 @@ export function SignupStatus({ signupId }: Props) {
               ? "bg-[#f0f7ed] text-success-strong border border-[#449127]/25"
               : state === "rejected"
               ? "bg-alert-50 text-alert border border-alert/20"
-              : "bg-accent-50 text-accent border border-accent/20"
+              : "bg-accent-50 text-accent-hover border border-accent/20"
           }`}
         >
           <span
@@ -114,7 +114,7 @@ export function SignupStatus({ signupId }: Props) {
         {state === "pending_payment" && (
           <div className="mt-4 p-4 rounded-xl bg-[#f7fafa] border border-line text-sm text-text-2 leading-relaxed">
             We haven&rsquo;t received your payment authorisation yet. Nothing has been charged.{" "}
-            <Link href="/signup" className="font-semibold text-accent hover:underline">
+            <Link href="/signup" className="font-semibold text-accent-hover hover:underline">
               Return to signup
             </Link>{" "}
             to try again — your details are kept.
@@ -145,7 +145,7 @@ export function SignupStatus({ signupId }: Props) {
         {state === "rejected" && (
           <div className="mt-4 p-4 rounded-xl bg-alert-50 border border-alert/20 text-sm text-text-2 leading-relaxed">
             If you think this is a mistake, reply to our email or{" "}
-            <Link href="/contact" className="font-semibold text-accent hover:underline">
+            <Link href="/contact" className="font-semibold text-accent-hover hover:underline">
               contact us
             </Link>
             .

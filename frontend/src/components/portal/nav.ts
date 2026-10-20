@@ -5,6 +5,8 @@ export interface NavItem {
   icon: string;
   group: "Daily" | "Setup" | "Grow" | "Account";
   note: string;
+  /** Shorter label for the five-slot mobile tab bar, where long names wrap. */
+  tabLabel?: string;
 }
 
 export const NAV: NavItem[] = [
@@ -12,7 +14,7 @@ export const NAV: NavItem[] = [
   { href: "/app/feedback", label: "Feedback", icon: "mail", group: "Daily", note: "Private messages from customers" },
   { href: "/app/insights", label: "Insights", icon: "chart", group: "Daily", note: "Funnel, top compliments and your rating" },
   { href: "/app/qr", label: "QR & Print", icon: "qr", group: "Setup", note: "Your QR code and print-ready files" },
-  { href: "/app/hub", label: "Customer page", icon: "layout", group: "Setup", note: "Links, menu, rewards and what customers see after scanning" },
+  { href: "/app/hub", label: "Customer page", tabLabel: "Page", icon: "layout", group: "Setup", note: "Links, menu, rewards and what customers see after scanning" },
   { href: "/app/competitors", label: "Competitors", icon: "flag", group: "Grow", note: "Follow nearby businesses and see who is gaining reviews" },
   { href: "/app/grow", label: "Grow", icon: "arrow", group: "Grow", note: "Website, video, content and automation services" },
   { href: "/app/referrals", label: "Refer & save", icon: "gift", group: "Grow", note: "70% off when a referral subscribes" },

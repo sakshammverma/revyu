@@ -234,7 +234,7 @@ export function PlatformTabs() {
         <div className="mt-8 pt-8 border-t border-line grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           {current.features.map((feat, i) => (
             <div key={i} className="flex items-start gap-3">
-              <span className="w-5 h-5 rounded-full bg-accent-50 text-accent flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+              <span className="w-5 h-5 rounded-full bg-accent-50 text-accent-hover flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
                 ✓
               </span>
               <div>

@@ -59,7 +59,7 @@ export default function ServiceDetailPage() {
             <Card title="What you get">
               <ul className="flex flex-col gap-2">
                 {service.deliverables.map((d) => (
-                  <li key={d} className="flex gap-2.5 text-sm text-ink"><span aria-hidden className="text-[#449127] font-bold">✓</span>{d}</li>
+                  <li key={d} className="flex gap-2.5 text-sm text-ink"><span aria-hidden className="text-success-strong font-bold">✓</span>{d}</li>
                 ))}
               </ul>
               {service.lead_time_days && <p className="text-xs text-text-2 mt-4">Typical turnaround: about {service.lead_time_days} days after we agree the details.</p>}

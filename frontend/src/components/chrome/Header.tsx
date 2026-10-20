@@ -311,7 +311,7 @@ export function Header() {
                   <Link
                     href="/signup"
                     onClick={() => setMegaMenuOpen(false)}
-                    className="flex items-center gap-2 p-2 rounded bg-accent-50 text-accent font-semibold hover:bg-[#d6edfc] transition-colors mt-2"
+                    className="flex items-center gap-2 p-2 rounded bg-accent-50 text-accent-hover font-semibold hover:bg-[#d6edfc] transition-colors mt-2"
                   >
                     <span>Start 15-day free trial →</span>
                   </Link>

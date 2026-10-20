@@ -53,7 +53,7 @@ export function ComparisonMatrix() {
           </p>
         </div>
 
-        <div className="overflow-x-auto rounded-2xl border border-line bg-white shadow-v2-rest">
+        <div role="region" aria-label="Comparison table" tabIndex={0} className="overflow-x-auto rounded-2xl border border-line bg-white shadow-v2-rest">
           <table className="w-full min-w-[640px] text-left border-collapse text-xs sm:text-sm">
             <thead>
               <tr className="border-b border-line bg-[#f8fafc]">
@@ -72,7 +72,7 @@ export function ComparisonMatrix() {
               {ROWS.map((row) => (
                 <tr key={row.feature} className={row.highlight ? "bg-[#f8fafc]/50" : ""}>
                   <th scope="row" className="p-4 sm:p-5 font-semibold text-ink">{row.feature}</th>
-                  <td className="p-4 sm:p-5 font-bold text-accent bg-accent-50/40 border-x border-accent/20">
+                  <td className="p-4 sm:p-5 font-bold text-accent-hover bg-accent-50/40 border-x border-accent/20">
                     {row.revyu}
                   </td>
                   <td className="p-4 sm:p-5 text-text-2">{row.message}</td>
@@ -87,7 +87,7 @@ export function ComparisonMatrix() {
           <p className="text-sm text-ink max-w-xl">
             Every customer you don&rsquo;t ask is a customer the shop next door can still win on the first thing a stranger reads.
           </p>
-          <Link href="/gap-report" className="text-sm font-semibold text-accent hover:underline shrink-0">
+          <Link href="/gap-report" className="text-sm font-semibold text-accent-hover hover:underline shrink-0">
             See who&rsquo;s ahead of you →
           </Link>
         </div>

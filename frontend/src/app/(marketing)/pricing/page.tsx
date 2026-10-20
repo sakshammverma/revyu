@@ -60,19 +60,19 @@ export default function PricingPage() {
                 </p>
                 <ul className="flex flex-col gap-3 text-sm text-ink">
                   <li className="flex items-center gap-2.5">
-                    <span className="text-[#449127] font-bold">✓</span> 15 days free, first charge after the trial
+                    <span className="text-success-strong font-bold">✓</span> 15 days free, first charge after the trial
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <span className="text-[#449127] font-bold">✓</span> Unlimited scans and completed flows
+                    <span className="text-success-strong font-bold">✓</span> Unlimited scans and completed flows
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <span className="text-[#449127] font-bold">✓</span> Owner dashboard: scans, funnel, top tags, rating
+                    <span className="text-success-strong font-bold">✓</span> Owner dashboard: scans, funnel, top tags, rating
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <span className="text-[#449127] font-bold">✓</span> Private feedback inbox
+                    <span className="text-success-strong font-bold">✓</span> Private feedback inbox
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <span className="text-[#449127] font-bold">✓</span> QR + 4 print-ready PDFs (receipt, card, standee, sticker)
+                    <span className="text-success-strong font-bold">✓</span> QR + 4 print-ready PDFs (receipt, card, standee, sticker)
                   </li>
                 </ul>
               </div>
@@ -100,10 +100,10 @@ export default function PricingPage() {
             </IfPriced>
             <div>
               <div className="flex items-center justify-between border-b border-line pb-4">
-                <h2 className="text-sm font-semibold text-accent">
+                <h2 className="text-sm font-semibold text-accent-hover">
                   Annual Commitment
                 </h2>
-                <span className="text-xs px-2.5 py-1 rounded-full bg-accent-50 text-accent font-semibold">
+                <span className="text-xs px-2.5 py-1 rounded-full bg-accent-50 text-accent-hover font-semibold">
                   Most Popular
                 </span>
               </div>
@@ -116,24 +116,24 @@ export default function PricingPage() {
               </p>
 
               <div className="mt-8 pt-6 border-t border-line">
-                <p className="text-xs font-semibold uppercase tracking-wider text-accent mb-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-accent-hover mb-4">
                   Everything in Monthly — same product
                 </p>
                 <ul className="flex flex-col gap-3 text-sm text-ink">
                   <li className="flex items-center gap-2.5">
-                    <span className="text-[#449127] font-bold">✓</span> 15 days free, first charge after the trial
+                    <span className="text-success-strong font-bold">✓</span> 15 days free, first charge after the trial
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <span className="text-[#449127] font-bold">✓</span> Unlimited scans and completed flows
+                    <span className="text-success-strong font-bold">✓</span> Unlimited scans and completed flows
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <span className="text-[#449127] font-bold">✓</span> Owner dashboard and private feedback inbox
+                    <span className="text-success-strong font-bold">✓</span> Owner dashboard and private feedback inbox
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <span className="text-[#449127] font-bold">✓</span> QR + 4 print-ready PDFs
+                    <span className="text-success-strong font-bold">✓</span> QR + 4 print-ready PDFs
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <span className="text-[#449127] font-bold">✓</span> <Price plan="saving" suffix=" saved versus paying monthly" fallback="Costs less than paying monthly" />
+                    <span className="text-success-strong font-bold">✓</span> <Price plan="saving" suffix=" saved versus paying monthly" fallback="Costs less than paying monthly" />
                   </li>
                 </ul>
               </div>

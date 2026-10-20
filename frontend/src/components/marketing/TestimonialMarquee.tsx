@@ -125,7 +125,7 @@ function MarqueeCard({ item }: { item: Card }) {
     <div className="w-[360px] sm:w-[420px] bg-white rounded-xl p-6 shadow-v2-rest border border-line flex flex-col justify-between shrink-0">
       <div>
         <div className="flex items-center justify-between mb-3">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-accent">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-accent-hover">
             {item.eyebrow}
           </span>
         </div>

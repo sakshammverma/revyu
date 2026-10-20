@@ -77,7 +77,7 @@ export function FAQSection() {
           <span>Something we haven’t answered?</span>
           <Link
             href="/contact"
-            className="font-semibold text-accent hover:text-accent underline"
+            className="font-semibold text-accent-hover hover:text-accent underline"
           >
             Contact us →
           </Link>

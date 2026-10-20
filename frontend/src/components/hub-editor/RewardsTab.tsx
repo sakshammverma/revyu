@@ -143,7 +143,7 @@ export function RewardsTab({ api, reload, toast }: TabProps) {
             {data.badges.filter((b) => b.active).map((b) => (
               <li key={b.id}>
                 <button type="button" onClick={() => { setError(null); setDraft(b); }} className="w-full text-left rounded-xl border border-line p-3.5 flex items-center gap-3 hover:border-[#bfc8ca]">
-                  <span className="w-10 h-10 rounded-xl bg-accent-50 text-accent flex items-center justify-center shrink-0"><Icon name={b.icon} /></span>
+                  <span className="w-10 h-10 rounded-xl bg-accent-50 text-accent-hover flex items-center justify-center shrink-0"><Icon name={b.icon} /></span>
                   <span className="min-w-0 flex-1">
                     <span className="block font-semibold text-ink">{b.name} <span className="font-normal text-text-2">· {b.visits_required} visits</span></span>
                     <span className="block text-sm text-text-2 truncate">{b.reward.title} ({rewardLabel(b)})</span>

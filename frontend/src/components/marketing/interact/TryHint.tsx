@@ -17,14 +17,14 @@ export function TryHint({ label, done, className = "" }: { label: string; done: 
     <span
       aria-live="polite"
       className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold shadow-v2-btn ${
-        done ? "bg-success-50 text-success" : "afford-ring bg-white text-ink border border-accent/40"
+        done ? "bg-success-50 text-success-strong" : "afford-ring bg-white text-ink border border-accent/40"
       } ${className}`}
     >
       {done ? (
         <>✓ You&apos;re driving</>
       ) : (
         <>
-          <svg aria-hidden width="12" height="12" viewBox="0 0 24 24" className="text-accent" fill="currentColor">
+          <svg aria-hidden width="12" height="12" viewBox="0 0 24 24" className="text-accent-hover" fill="currentColor">
             <path d="M5 3l14 8-6 2-2 6z" />
           </svg>
           {label}

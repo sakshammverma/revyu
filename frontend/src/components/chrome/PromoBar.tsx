@@ -32,7 +32,7 @@ export function PromoBar() {
           className="btn-pill-light text-xs font-semibold px-3 py-1 flex items-center gap-1.5 ml-2"
         >
           <span>Start free trial</span>
-          <span className="text-[#397dff] font-bold">→</span>
+          <span className="text-[#6b9bff] font-bold">→</span>
         </Link>
       </div>
 

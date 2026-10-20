@@ -71,7 +71,7 @@ export function ConnectView({ data }: { data: ConnectPayload }) {
           onClick={() => click("google_maps")}
           className="v2-sheet border border-line p-4 flex items-center gap-4 min-h-[72px] active:scale-[0.99] transition-transform"
         >
-          <span className="w-11 h-11 rounded-xl bg-accent-50 text-accent flex items-center justify-center shrink-0">
+          <span className="w-11 h-11 rounded-xl bg-accent-50 text-accent-hover flex items-center justify-center shrink-0">
             <Icon name="pin" className="w-6 h-6" />
           </span>
           <span className="min-w-0 flex-1">

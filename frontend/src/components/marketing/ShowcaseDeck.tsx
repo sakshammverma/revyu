@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type KeyboardEvent } from "react";
+import { useRef, useState } from "react";
 import { assembleDraft } from "@/lib/flow/draft";
 import { getDemoVertical } from "@/lib/marketing/demo";
 import { GhostHand, InteractiveTag, TryHint, useInView, usePlayground } from "./interact";
@@ -62,21 +62,9 @@ export function ShowcaseDeck() {
     markTried();
     setActiveCenter(i);
   };
-  // Side phones: a click brings them to the front; give keyboard users the same.
-  const sidePhone = (i: number) =>
-    activeCenter === i
-      ? {}
-      : {
-          role: "button" as const,
-          tabIndex: 0,
-          "aria-label": `Show step ${i + 1}: ${WORKFLOW_STEPS[i].shortTitle}`,
-          onKeyDown: (e: KeyboardEvent) => {
-            if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) {
-              e.preventDefault();
-              go(i);
-            }
-          },
-        };
+  // Side phones: a click brings them to the front. Keyboard and screen-reader users have the step
+  // pills and Prev/Next buttons for that, so the phone itself is not a button (a button can't hold buttons).
+  const sidePhone = () => ({});
   // The ghost shows the real flow: focus the tag phone, add two tags, open the draft.
   const demoStep = (n: number) => {
     if (tried) return;
@@ -149,6 +137,7 @@ export function ShowcaseDeck() {
               <button
                 key={step.id}
                 type="button"
+                aria-pressed={isActive}
                 onClick={() => go(step.id)}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-medium transition-all shrink-0 cursor-pointer ${
                   isActive
@@ -165,7 +154,7 @@ export function ShowcaseDeck() {
                 </span>
                 <span>{step.shortTitle}</span>
                 {step.id === 2 && (
-                  <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.2 bg-accent/20 text-accent rounded font-semibold ml-1">
+                  <span className={`text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded font-semibold ml-1 ${isActive ? "bg-white/20 text-white" : "bg-accent/20 text-accent-hover"}`}>
                     Core
                   </span>
                 )}
@@ -216,13 +205,14 @@ export function ShowcaseDeck() {
             {/* Phone 0 (Step 1): Scan & rate */}
             <div
               onClick={() => go(0)}
-              {...sidePhone(0)}
+              {...sidePhone()}
               className={`absolute transition-all duration-500 cursor-pointer ${activeCenter === 0 ? "block" : "hidden md:block"} ${
                 activeCenter === 0
                   ? "z-30 scale-100 opacity-100 shadow-v2-phone"
                   : "z-10 -translate-x-[360px] scale-[0.82] opacity-75 hover:opacity-95"
               }`}
             >
+              <div inert={activeCenter !== 0}>
               <IPhoneFrame isCenter={activeCenter === 0}>
                 <div className="bg-white h-full flex flex-col justify-between p-4">
                   {/* Top Bar info */}
@@ -239,7 +229,7 @@ export function ShowcaseDeck() {
 
                   {/* Main Question & Rating Box */}
                   <div className="my-auto py-2 text-center">
-                    <div className="w-12 h-12 rounded-2xl bg-accent/10 text-accent flex items-center justify-center text-xl font-display mx-auto mb-3 shadow-2xs">
+                    <div className="w-12 h-12 rounded-2xl bg-accent/10 text-accent-hover flex items-center justify-center text-xl font-display mx-auto mb-3 shadow-2xs">
                       ✽
                     </div>
                     <h3 className="text-base font-bold font-display text-ink">
@@ -296,18 +286,20 @@ export function ShowcaseDeck() {
                   </div>
                 </div>
               </IPhoneFrame>
+              </div>
             </div>
 
             {/* Phone 1 (Step 2): Tag Selection Matrix */}
             <div
               onClick={() => go(1)}
-              {...sidePhone(1)}
+              {...sidePhone()}
               className={`absolute transition-all duration-500 cursor-pointer ${
                 activeCenter === 1
                   ? "z-30 scale-100 opacity-100 shadow-v2-phone"
                   : "z-15 -translate-x-[180px] sm:-translate-x-[220px] scale-[0.88] opacity-85 hover:opacity-100"
               }`}
             >
+              <div inert={activeCenter !== 1}>
               <IPhoneFrame isCenter={activeCenter === 1}>
                 <div className="bg-white h-full flex flex-col justify-between p-4">
                   {/* Top Bar */}
@@ -355,7 +347,7 @@ export function ShowcaseDeck() {
 
                   {/* Live Assembly Indicator */}
                   <div className="p-2.5 rounded-xl bg-[#f8fafc] border border-[#e2e8f0] text-center">
-                    <div className="flex items-center justify-center gap-1.5 text-[10px] font-medium text-accent">
+                    <div className="flex items-center justify-center gap-1.5 text-[10px] font-medium text-accent-hover">
                       <span className="w-1.5 h-1.5 rounded-full bg-accent animate-ping" />
                       <span>{selectedTags.length} selected · draft updates as you tap</span>
                     </div>
@@ -376,18 +368,20 @@ export function ShowcaseDeck() {
                   </div>
                 </div>
               </IPhoneFrame>
+              </div>
             </div>
 
             {/* Phone 2 (Step 3 - CENTER FRONT ELEVATED): Editable draft & copy */}
             <div
               onClick={() => go(2)}
-              {...sidePhone(2)}
+              {...sidePhone()}
               className={`absolute transition-all duration-500 cursor-pointer ${
                 activeCenter === 2
                   ? "z-30 scale-100 opacity-100 shadow-v2-phone"
                   : "z-15 translate-x-0 scale-[0.92] opacity-90"
               }`}
             >
+              <div inert={activeCenter !== 2}>
               <IPhoneFrame isCenter={activeCenter === 2}>
                 <div className="bg-white h-full flex flex-col justify-between p-4">
                   {/* Business header */}
@@ -396,7 +390,7 @@ export function ShowcaseDeck() {
                       <span className="w-2 h-2 rounded-full bg-success" />
                       <span className="text-xs font-semibold text-ink">{DEMO.exampleBusiness}</span>
                     </div>
-                    <span className="text-[10px] text-[#449127] font-semibold bg-[#ecfdf5] px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] text-success-strong font-semibold bg-[#ecfdf5] px-2 py-0.5 rounded-full">
                       {"★".repeat(selectedRating)}
                     </span>
                   </div>
@@ -404,7 +398,7 @@ export function ShowcaseDeck() {
                   {/* Required Disclosure Banner (documents/16-DRAFT-AND-ROUTING.md) */}
                   <div className="pt-2">
                     <div className="p-2 rounded-lg bg-bg border border-line flex items-start gap-1.5">
-                      <span className="text-accent text-xs mt-0.5">✽</span>
+                      <span className="text-accent-hover text-xs mt-0.5">✽</span>
                       <p className="text-[10px] text-text-2 leading-snug">
                         <strong className="text-ink">We&apos;ve written this from what you selected.</strong>{" "}
                         Edit anything — it&apos;s your review.
@@ -420,7 +414,7 @@ export function ShowcaseDeck() {
                       </p>
                       <div className="mt-2.5 pt-2 border-t border-line flex items-center justify-between text-[9px] text-text-muted">
                         <span>{draft.length} characters</span>
-                        <span className="text-accent font-medium">Editable</span>
+                        <span className="text-accent-hover font-medium">Editable</span>
                       </div>
                     </div>
 
@@ -451,18 +445,20 @@ export function ShowcaseDeck() {
                   </div>
                 </div>
               </IPhoneFrame>
+              </div>
             </div>
 
             {/* Phone 3 (Step 4): Google review page — customer pastes */}
             <div
               onClick={() => go(3)}
-              {...sidePhone(3)}
+              {...sidePhone()}
               className={`absolute transition-all duration-500 cursor-pointer ${
                 activeCenter === 3
                   ? "z-30 scale-100 opacity-100 shadow-v2-phone"
                   : "z-15 translate-x-[180px] sm:translate-x-[220px] scale-[0.88] opacity-85 hover:opacity-100"
               }`}
             >
+              <div inert={activeCenter !== 3}>
               <IPhoneFrame isCenter={activeCenter === 3}>
                 <div className="bg-[#f8f9fa] h-full flex flex-col justify-between">
                   {/* Google Maps Header */}
@@ -504,7 +500,7 @@ export function ShowcaseDeck() {
                     </div>
 
                     {/* 5 Google Stars */}
-                    <div className="flex text-[#fbbc04] text-xl gap-1">
+                    <div aria-hidden className="flex text-[#fbbc04] text-xl gap-1">
                       {"★".repeat(selectedRating)}
                       <span className="text-[#dadce0]">{"★".repeat(5 - selectedRating)}</span>
                     </div>
@@ -529,18 +525,20 @@ export function ShowcaseDeck() {
                   </div>
                 </div>
               </IPhoneFrame>
+              </div>
             </div>
 
             {/* Phone 4 (Step 5): Low-rating routing & owner inbox */}
             <div
               onClick={() => go(4)}
-              {...sidePhone(4)}
+              {...sidePhone()}
               className={`absolute transition-all duration-500 cursor-pointer ${activeCenter === 4 ? "block" : "hidden md:block"} ${
                 activeCenter === 4
                   ? "z-30 scale-100 opacity-100 shadow-v2-phone"
                   : "z-10 translate-x-[360px] scale-[0.82] opacity-75 hover:opacity-95"
               }`}
             >
+              <div inert={activeCenter !== 4}>
               <IPhoneFrame isCenter={activeCenter === 4}>
                 <div className="bg-[#f0f2f5] h-full flex flex-col justify-between">
                   {/* Mode Toggle Header */}
@@ -638,7 +636,7 @@ export function ShowcaseDeck() {
                         </p>
                         <div className="pt-1.5 border-t border-line flex items-center justify-between text-[9px] text-text-muted">
                           <span>Sample</span>
-                          <span className="text-accent font-bold">✓ Mark as resolved</span>
+                          <span className="text-accent-hover font-bold">✓ Mark as resolved</span>
                         </div>
                       </div>
 
@@ -656,6 +654,7 @@ export function ShowcaseDeck() {
                   </div>
                 </div>
               </IPhoneFrame>
+              </div>
             </div>
           </div>
         </div>
@@ -663,7 +662,7 @@ export function ShowcaseDeck() {
         {/* Dynamic Detail Card for Active Selected Step */}
         <div className="mt-8 p-6 rounded-2xl bg-[#fcfcfc] border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="max-w-2xl">
-            <div className="flex items-center gap-2 text-xs font-semibold text-accent uppercase tracking-wider mb-1">
+            <div className="flex items-center gap-2 text-xs font-semibold text-accent-hover uppercase tracking-wider mb-1">
               <span>Step {currentStep.number}</span>
               <span>•</span>
               <span>{currentStep.shortTitle}</span>

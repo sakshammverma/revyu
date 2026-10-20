@@ -41,7 +41,7 @@ export function EngineStats() {
 
         {/* Stat 2 */}
         <div className="py-6 sm:py-0 px-4">
-          <p className="font-display text-4xl sm:text-5xl lg:text-6xl text-accent tracking-tight">
+          <p className="font-display text-4xl sm:text-5xl lg:text-6xl text-accent-hover tracking-tight">
             1 tap
           </p>
           <p className="text-sm font-medium text-text-2 mt-2">
@@ -54,7 +54,7 @@ export function EngineStats() {
 
         {/* Stat 3 */}
         <div className="py-6 sm:py-0 px-4">
-          <p className="font-display text-4xl sm:text-5xl lg:text-6xl text-[#449127] tracking-tight">
+          <p className="font-display text-4xl sm:text-5xl lg:text-6xl text-success-strong tracking-tight">
             <Price plan="monthly" fallback="Flat" />
           </p>
           <p className="text-sm font-medium text-text-2 mt-2">

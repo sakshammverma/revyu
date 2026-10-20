@@ -64,7 +64,7 @@ export function ROICalculatorSection() {
                 <label htmlFor="avg-bill" className="text-sm font-semibold text-ink">
                   Average bill per customer
                 </label>
-                <span className="font-display text-2xl font-bold text-accent px-3 py-1 rounded-lg bg-accent/10">
+                <span className="font-display text-2xl font-bold text-accent-hover px-3 py-1 rounded-lg bg-accent/10">
                   {showMajor(shownBill)}
                 </span>
               </div>
@@ -111,9 +111,9 @@ export function ROICalculatorSection() {
               </div>
               <div className="flex items-center justify-between text-xs pt-1">
                 <span className="font-semibold text-ink flex items-center gap-1.5">
-                  <span className="text-accent">✽</span> Annual plan
+                  <span className="text-accent-hover">✽</span> Annual plan
                 </span>
-                <span className="font-bold text-[#16a34a] text-sm">{show(annualMinor)} / year</span>
+                <span className="font-bold text-success-strong text-sm">{show(annualMinor)} / year</span>
               </div>
             </div>
 
@@ -166,7 +166,7 @@ function Stat({
   note: string;
   tone?: "ink" | "green" | "blue";
 }) {
-  const color = tone === "green" ? "text-[#16a34a]" : tone === "blue" ? "text-accent" : "text-ink";
+  const color = tone === "green" ? "text-success-strong" : tone === "blue" ? "text-accent-hover" : "text-ink";
   return (
     <div className="p-5 rounded-xl bg-white border border-line shadow-2xs">
       <p className="text-xs text-text-muted">{label}</p>

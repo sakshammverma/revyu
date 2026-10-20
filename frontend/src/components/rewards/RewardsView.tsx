@@ -189,7 +189,7 @@ export function RewardsView({ slug, info }: { slug: string; info: RewardsInfo })
     <ul className="flex flex-col gap-2">
       {(info.badges ?? []).map((b) => (
         <li key={b.name} className="v2-sheet border border-line p-3.5 flex items-center gap-3">
-          <span className="w-10 h-10 rounded-xl bg-accent-50 text-accent flex items-center justify-center shrink-0"><Icon name={b.icon} /></span>
+          <span className="w-10 h-10 rounded-xl bg-accent-50 text-accent-hover flex items-center justify-center shrink-0"><Icon name={b.icon} /></span>
           <span className="min-w-0">
             <span className="block font-semibold text-ink">{b.name} <span className="font-normal text-text-2">· {b.visits_required} visits</span></span>
             {b.reward_title && <span className="block text-sm text-text-2">{b.reward_title}</span>}

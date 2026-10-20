@@ -148,7 +148,7 @@ function Card({
             <strong className="text-ink font-semibold">{title} </strong>
             {body}
           </p>
-          <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[11px] text-accent font-medium">
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[11px] text-accent-hover font-medium">
             {chips.map((c, i) => (
               <span key={c}>{i > 0 && <span className="mr-2">•</span>}✓ {c}</span>
             ))}
@@ -220,7 +220,7 @@ export function BuildCards() {
   return (
     <section id="build" className="max-w-[1296px] mx-auto px-4 sm:px-8 pt-16 sm:pt-24 pb-6 sm:pb-10">
       <div className="max-w-3xl mb-12">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-50 border border-accent/20 text-accent text-xs font-semibold uppercase tracking-wider mb-3">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-50 border border-accent/20 text-accent-hover text-xs font-semibold uppercase tracking-wider mb-3">
           <span>● The product, screen by screen</span>
         </div>
         <InteractiveTag className="ml-3 align-top" />
@@ -374,7 +374,7 @@ export function BuildCards() {
                           <p className="text-xs text-[#70757a]">Their own Google account</p>
                         </div>
                       </div>
-                      <div className="text-[#fbbc04] text-3xl tracking-wide">★★★★★</div>
+                      <div aria-hidden className="text-[#fbbc04] text-3xl tracking-wide">★★★★★</div>
                       <div className="bg-white p-3 rounded-lg border border-[#dadce0] text-[15px] text-[#202124] leading-relaxed min-h-[120px]">
                         {draft || "They paste here, or write their own."}
                       </div>
@@ -422,7 +422,7 @@ export function BuildCards() {
                         <p className="font-display text-lg text-ink">Revyu</p>
                         <p className="text-xs text-text-2">{DEMO.exampleBusiness}</p>
                       </div>
-                      <span className="text-xs font-semibold text-success bg-success-50 px-2 py-1 rounded-full">Collecting</span>
+                      <span className="text-xs font-semibold text-success-strong bg-success-50 px-2 py-1 rounded-full">Collecting</span>
                     </div>
                     <div className="p-4 flex flex-col gap-4 flex-1 overflow-hidden">
                       <Heading title="Overview" sub="How your QR code is performing, last 30 days." />
@@ -439,7 +439,7 @@ export function BuildCards() {
                     </div>
                     <div className="grid grid-cols-5 border-t border-line bg-white pb-6 pt-2 text-center text-[11px] text-text-2">
                       {["Overview", "Feedback", "QR & Print", "Billing", "More"].map((t, i) => (
-                        <span key={t} className={i === 0 ? "font-semibold text-accent" : ""}>{t}</span>
+                        <span key={t} className={i === 0 ? "font-semibold text-accent-hover" : ""}>{t}</span>
                       ))}
                     </div>
                   </div>

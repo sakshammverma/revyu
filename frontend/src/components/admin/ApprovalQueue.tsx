@@ -30,7 +30,7 @@ function Queue() {
       <div className="flex items-center justify-between gap-3 pb-4 border-b border-[#dfe5e5]">
         <div className="flex items-center gap-3">
           <span className="text-sm font-semibold text-ink">Pending Outlets</span>
-          <span className="text-xs tabular-nums px-2.5 py-0.5 rounded-full bg-accent-50 border border-accent/20 text-accent font-semibold">
+          <span className="text-xs tabular-nums px-2.5 py-0.5 rounded-full bg-accent-50 border border-accent/20 text-accent-hover font-semibold">
             {items.length} in queue
           </span>
         </div>
@@ -129,7 +129,7 @@ function QueueRow({ item, onDone }: { item: ApprovalQueueItem; onDone: () => voi
     >
       <div className="flex flex-wrap items-center justify-between pb-3 border-b border-line gap-2">
         <div className="flex items-center gap-2">
-          <span className="text-xs uppercase tracking-wide font-semibold text-accent bg-accent-50 border border-accent/20 px-2.5 py-0.5 rounded-full">
+          <span className="text-xs uppercase tracking-wide font-semibold text-accent-hover bg-accent-50 border border-accent/20 px-2.5 py-0.5 rounded-full">
             {item.vertical}
           </span>
           <span className="text-xs tabular-nums text-text-2">

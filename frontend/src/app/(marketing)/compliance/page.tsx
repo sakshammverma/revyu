@@ -66,7 +66,7 @@ export function CompliancePage() {
               className="v2-sheet p-6 sm:p-8 border border-line flex flex-col sm:flex-row sm:items-start gap-5 hover:border-accent/40 transition-colors"
             >
               <div className="shrink-0">
-                <span className="font-mono text-xs font-bold text-accent bg-accent-50 border border-accent/20 px-3.5 py-1.5 rounded-lg inline-block">
+                <span className="font-mono text-xs font-bold text-accent-hover bg-accent-50 border border-accent/20 px-3.5 py-1.5 rounded-lg inline-block">
                   {rule.id}
                 </span>
               </div>

@@ -158,7 +158,7 @@ export function HardwareShowcase() {
 
             {/* Print asset card */}
             <div className="relative z-10 p-6 sm:p-8 max-w-sm w-full bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-white/80 text-center">
-              <div className="w-12 h-12 rounded-xl bg-accent-50 text-accent flex items-center justify-center text-xl font-bold mx-auto mb-3">
+              <div className="w-12 h-12 rounded-xl bg-accent-50 text-accent-hover flex items-center justify-center text-xl font-bold mx-auto mb-3">
                 ▦
               </div>
               <p className="font-display text-base sm:text-lg font-bold text-ink">
@@ -186,7 +186,7 @@ export function HardwareShowcase() {
           {/* Detailed Specs (Right 5 cols) */}
           <div className="lg:col-span-5 flex flex-col justify-between">
             <div>
-              <span className="inline-block text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded bg-accent/10 text-accent mb-2">
+              <span className="inline-block text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded bg-accent/10 text-accent-hover mb-2">
                 Included with every plan
               </span>
               <h3 className="font-display text-xl sm:text-2xl text-ink leading-snug mb-3">

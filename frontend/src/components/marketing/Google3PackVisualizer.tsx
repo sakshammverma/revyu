@@ -73,7 +73,7 @@ export function Google3PackVisualizer() {
               </div>
               <div className="p-3.5 rounded-xl bg-white border border-line shadow-2xs">
                 <p className="text-[10px] text-text-muted font-medium">Why it happens</p>
-                <p className="text-lg font-bold text-accent mt-0.5">Asking</p>
+                <p className="text-lg font-bold text-accent-hover mt-0.5">Asking</p>
                 <p className="text-[10px] text-text-muted mt-0.5">Not quality — consistency</p>
               </div>
             </div>
@@ -94,7 +94,8 @@ export function Google3PackVisualizer() {
           </div>
 
           {/* Right Column: search-result mockup (7 cols) */}
-          <div className="lg:col-span-7 bg-white rounded-xl border border-[#dadce0] p-4 sm:p-6 shadow-v2-rest">
+          {/* An illustration of a search result, not content: hidden from assistive tech. */}
+          <div aria-hidden data-illustration className="lg:col-span-7 bg-white rounded-xl border border-[#dadce0] p-4 sm:p-6 shadow-v2-rest">
             <div className="flex items-center gap-3 pb-3 border-b border-[#dadce0] text-xs">
               <span className="text-base text-[#4285f4]">🔍</span>
               <span className="font-medium text-[#202124]">shop near me</span>
@@ -169,14 +170,14 @@ function Listing({
       <div className="flex items-start justify-between">
         <div>
           <p className={`${highlight ? "text-sm font-bold" : "text-xs font-semibold"} text-[#202124]`}>{name}</p>
-          <div className="flex items-center gap-1 text-[#fbbc04] text-xs mt-1">
+          <div aria-hidden className="flex items-center gap-1 text-[#fbbc04] text-xs mt-1">
             <span>{rating} ★</span>
             <span className="text-[#5f6368] text-[11px] font-normal">({count}) · Store</span>
           </div>
           {note && <p className="text-[11px] text-[#5f6368] mt-1">{note}</p>}
         </div>
         {highlight && (
-          <span className="text-[10px] font-semibold text-accent bg-accent/10 px-2 py-0.5 rounded-full">
+          <span className="text-[10px] font-semibold text-accent-hover bg-accent/10 px-2 py-0.5 rounded-full">
             You
           </span>
         )}

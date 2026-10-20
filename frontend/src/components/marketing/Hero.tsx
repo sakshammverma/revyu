@@ -56,7 +56,7 @@ export function Hero() {
     return () => clearInterval(timer);
   }, [isPaused, activeStory, autoplay]);
 
-  const { listProps, tabProps } = useTablist(STORIES.length, activeStory, (i) => handleSelectStory(i), "hero");
+  const { listProps, tabProps, panelProps } = useTablist(STORIES.length, activeStory, (i) => handleSelectStory(i), "hero");
 
   function handleSelectStory(idx: number) {
     setManual(true);
@@ -109,6 +109,7 @@ export function Hero() {
 
         {/* Cinematic Stage with Overlapping Email Pill and 3.3s Dynamic Landscape */}
         <div
+          {...panelProps}
           className="relative w-full aspect-[21/9] sm:aspect-[2.8/1] min-h-[420px] sm:min-h-[520px] overflow-hidden group"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
@@ -193,7 +194,7 @@ export function Hero() {
               {current.tags.map((t) => (
                 <span
                   key={t.id}
-                  className="px-2.5 py-1 rounded-full bg-accent-50 text-accent text-[11px] font-semibold"
+                  className="px-2.5 py-1 rounded-full bg-accent-50 text-accent-hover text-[11px] font-semibold"
                 >
                   ✓ {t.label}
                 </span>
@@ -209,7 +210,7 @@ export function Hero() {
               </div>
               <a
                 href="/how-it-works"
-                className="text-xs font-semibold text-accent hover:underline cursor-pointer flex items-center gap-0.5 shrink-0"
+                className="text-xs font-semibold text-accent-hover hover:underline cursor-pointer flex items-center gap-0.5 shrink-0"
               >
                 <span>How it works →</span>
               </a>

@@ -60,10 +60,10 @@ export default function HowItWorksPage() {
             >
               <div>
                 <div className="flex items-center justify-between mb-5">
-                  <span className="w-10 h-10 rounded-xl bg-accent-50 text-accent font-mono font-bold text-sm flex items-center justify-center">
+                  <span className="w-10 h-10 rounded-xl bg-accent-50 text-accent-hover font-mono font-bold text-sm flex items-center justify-center">
                     {step.index}
                   </span>
-                  <span className="text-xs text-[#449127] font-semibold px-2.5 py-1 rounded-full bg-success/10">
+                  <span className="text-xs text-success-strong font-semibold px-2.5 py-1 rounded-full bg-success/10">
                     {step.highlight}
                   </span>
                 </div>
@@ -80,7 +80,7 @@ export default function HowItWorksPage() {
         <div className="v2-card-elevated p-8 sm:p-10 border border-line bg-white">
           <div className="flex items-center gap-2 mb-2">
             <span className="h-2 w-2 rounded-full bg-accent" />
-            <span className="text-xs uppercase tracking-wider text-accent font-semibold">
+            <span className="text-xs uppercase tracking-wider text-accent-hover font-semibold">
               Policy Transparency
             </span>
           </div>

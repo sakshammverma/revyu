@@ -54,7 +54,7 @@ export function HubView({ slug, hub, quiet = false }: { slug: string; hub: HubPa
               }}
               className="v2-sheet border border-line min-h-[132px] h-full p-4 flex flex-col justify-between gap-4 transition-transform duration-150 active:scale-[0.98] hover:border-[#bfc8ca] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent motion-reduce:transition-none"
             >
-              <span className="w-10 h-10 rounded-xl bg-accent-50 text-accent flex items-center justify-center">
+              <span className="w-10 h-10 rounded-xl bg-accent-50 text-accent-hover flex items-center justify-center">
                 <Icon name={m.icon} />
               </span>
               <span>

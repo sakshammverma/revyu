@@ -53,7 +53,7 @@ export function EditorialRail() {
         </div>
         <Link
           href="/how-it-works"
-          className="text-sm font-semibold text-accent hover:text-accent flex items-center gap-1 group self-start sm:self-end"
+          className="text-sm font-semibold text-accent-hover hover:text-accent flex items-center gap-1 group self-start sm:self-end"
         >
           <span>How it works</span>
           <span className="group-hover:translate-x-0.5 transition-transform">→</span>
@@ -93,7 +93,7 @@ export function EditorialRail() {
               </p>
             </div>
 
-            <div className="mt-5 pt-3 border-t border-line flex items-center text-xs font-semibold text-accent">
+            <div className="mt-5 pt-3 border-t border-line flex items-center text-xs font-semibold text-accent-hover">
               <span>Read more</span>
               <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span>
             </div>

@@ -24,7 +24,7 @@ export function FinalCTA() {
 
         {/* Content Container */}
         <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
-          <div className="w-12 h-12 rounded-2xl bg-accent/10 text-accent flex items-center justify-center text-xl font-display mb-6 shadow-2xs">
+          <div className="w-12 h-12 rounded-2xl bg-accent/10 text-accent-hover flex items-center justify-center text-xl font-display mb-6 shadow-2xs">
             ✽
           </div>
 
@@ -65,13 +65,13 @@ export function FinalCTA() {
           {/* Reassurance Badges */}
           <div className="mt-6 flex flex-wrap items-center justify-center gap-5 text-xs text-text-muted">
             <span className="flex items-center gap-1.5">
-              <span className="text-[#16a34a] font-bold">✓</span> 15-day free trial
+              <span className="text-success-strong font-bold">✓</span> 15-day free trial
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="text-[#16a34a] font-bold">✓</span> QR + print files by email
+              <span className="text-success-strong font-bold">✓</span> QR + print files by email
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="text-[#16a34a] font-bold">✓</span> Cancel anytime
+              <span className="text-success-strong font-bold">✓</span> Cancel anytime
             </span>
           </div>
         </div>

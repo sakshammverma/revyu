@@ -175,8 +175,10 @@ test.describe("steps behave like pages", () => {
     await startAndRate(page, 5);
     await page.getByRole("button", { name: /skip|write my draft/i }).click();
     await page.getByLabel(/your review draft/i).fill("My own words");
-    // The save effect runs after the state update; give it a tick before navigating away.
-    await page.waitForTimeout(200);
+    // Reload only once the flow has been written to sessionStorage (the save runs in an effect).
+    await page.waitForFunction(() =>
+      Object.keys(sessionStorage).some((k) => k.startsWith("revyu:flow:") && sessionStorage.getItem(k)?.includes("My own words")),
+    );
     await page.reload();
     await expect(page.getByLabel(/your review draft/i)).toHaveValue("My own words");
   });

@@ -25,7 +25,7 @@ export function Footer() {
                 />
               </Link>
 
-              <p className="heading-h3 font-display text-white text-2xl sm:text-3xl leading-snug">
+              <p className="heading-h3 font-display text-white! text-2xl sm:text-3xl leading-snug">
                 A printed QR that helps your customers write their own Google reviews.
               </p>
               <p className="mt-3 text-sm text-text-on-dark leading-relaxed">
@@ -144,7 +144,7 @@ export function Footer() {
               </p>
               <ul className="flex flex-col gap-3 text-sm text-[#e2e4e5]">
                 <li>
-                  <Link href="/signup" className="text-[#397dff] font-semibold hover:underline transition-colors">
+                  <Link href="/signup" className="text-[#6b9bff] font-semibold hover:underline transition-colors">
                     Start 15-day trial →
                   </Link>
                 </li>

@@ -55,7 +55,7 @@ function ContactRow({ label, value, href }: { label: string; value: string; href
   return (
     <div className="flex items-center justify-between gap-4 border-b border-line pb-4 last:border-b-0 last:pb-0">
       <p className="text-xs font-semibold uppercase tracking-wider text-text-2">{label}</p>
-      <a href={href} className="font-display text-lg sm:text-xl text-accent hover:text-ink transition-colors">
+      <a href={href} className="font-display text-lg sm:text-xl text-accent-hover hover:text-ink transition-colors">
         {value}
       </a>
     </div>
