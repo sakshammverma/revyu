@@ -21,7 +21,7 @@ export function Footer() {
               <Link href="/" className="inline-flex items-center gap-2 mb-4 group">
                 <Logo
                   className="text-2xl text-white"
-                  markClassName="w-8 h-8 transition-transform group-hover:scale-105"
+                  markClassName="w-7 h-7 transition-transform group-hover:scale-105"
                 />
               </Link>
 

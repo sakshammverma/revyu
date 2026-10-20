@@ -53,7 +53,7 @@ export function Header() {
           >
             <Logo
               className="text-lg text-[#1a1e23]"
-              markClassName="w-7 h-7 transition-transform group-hover:scale-105"
+              markClassName="w-6 h-6 transition-transform group-hover:scale-105"
             />
           </Link>
 
