@@ -5,17 +5,20 @@ import Link from "next/link";
 import { FunnelView } from "@/components/dashboard/FunnelView";
 import { useOwner } from "@/components/portal/OwnerContext";
 import { Button, Card, ErrorState, Skeleton, StatTile } from "@/components/ui";
-import { getFeedbackInbox, getFunnel, getOverview } from "@/lib/dashboard/api";
+import { getFeedbackInbox, getFunnel, getOverview, isDashboardLocked } from "@/lib/dashboard/api";
 import { formatMoney } from "@/lib/format";
 import { useAsync } from "@/lib/useAsync";
 
 export default function OverviewPage() {
   const { outlet, billing } = useOwner();
+  const locked = isDashboardLocked(outlet.state);
   const overview = useAsync(() => getOverview(outlet.outlet_id), [outlet.outlet_id]);
-  const funnel = useAsync(() => getFunnel(outlet.outlet_id), [outlet.outlet_id]);
-  const feedback = useAsync(() => getFeedbackInbox(outlet.outlet_id), [outlet.outlet_id]);
-
-  const locked = outlet.state === "locked" || outlet.state === "suspended";
+  // Detailed views answer 402 while locked; don't ask for them.
+  const funnel = useAsync(() => (locked ? Promise.resolve(null) : getFunnel(outlet.outlet_id)), [outlet.outlet_id, locked]);
+  const feedback = useAsync(
+    () => (locked ? Promise.resolve(null) : getFeedbackInbox(outlet.outlet_id)),
+    [outlet.outlet_id, locked],
+  );
   const monthly = billing?.plans.find((p) => p.code === "monthly");
 
   return (
@@ -31,6 +34,7 @@ export default function OverviewPage() {
         <UnlockCard
           scans={overview.data?.scans ?? 0}
           completed={billing.scans_waiting}
+          feedbackCount={overview.data?.feedback_count ?? 0}
           creditsLeft={billing.credits_left}
           suspended={outlet.state === "suspended"}
           price={monthly ? formatMoney(monthly.amount_minor, monthly.currency_code) : "₹499"}
@@ -70,10 +74,8 @@ export default function OverviewPage() {
         />
       )}
 
-      {funnel.data ? (
-        <div className={locked ? "blur-sm select-none pointer-events-none" : ""} aria-hidden={locked || undefined}>
-          <FunnelView funnel={funnel.data} />
-        </div>
+      {locked ? null : funnel.data ? (
+        <FunnelView funnel={funnel.data} />
       ) : funnel.error ? (
         <ErrorState message="We couldn't load the funnel." onRetry={funnel.reload} />
       ) : (
@@ -136,12 +138,14 @@ function StateBanner() {
 function UnlockCard({
   scans,
   completed,
+  feedbackCount,
   creditsLeft,
   suspended,
   price,
 }: {
   scans: number;
   completed: number;
+  feedbackCount: number;
   creditsLeft: number | null;
   suspended: boolean;
   price: string;
@@ -154,6 +158,11 @@ function UnlockCard({
       <h2 className="font-display text-2xl sm:text-3xl text-ink mt-2">
         {scans} scans and {completed} completed reviews are waiting for you
       </h2>
+      {feedbackCount > 0 && (
+        <p className="mt-1 font-semibold text-ink">
+          Plus {feedbackCount} private {feedbackCount === 1 ? "message" : "messages"} from customers
+        </p>
+      )}
       <p className="text-text-2 mt-2 max-w-lg mx-auto">
         {suspended
           ? "Your QR now shows a neutral page. Pay to switch review collection back on, with the same QR code."

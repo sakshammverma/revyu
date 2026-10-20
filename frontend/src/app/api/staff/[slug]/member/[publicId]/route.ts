@@ -14,6 +14,10 @@ export const GET = handler(async (request: Request, { params }: Ctx) => {
   return Response.json({
     member: { public_id: member.publicId, name: member.name },
     visits: await visitCount(db, member.id),
-    pending_rewards: (await openGrants(db, member.id)).filter((g) => g.status === "available"),
+    // No redeem codes here: a lookup by member id doesn't prove the customer is
+    // at the counter, so redeeming from a lookup needs the code on their phone.
+    pending_rewards: (await openGrants(db, member.id))
+      .filter((g) => g.status === "available")
+      .map(({ redeem_code: _code, ...g }) => g), // eslint-disable-line @typescript-eslint/no-unused-vars
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   confirmSignup,
@@ -20,31 +20,55 @@ const STEPS: { key: Step; label: string; number: string }[] = [
   { key: "plan", label: "Plan", number: "4" },
 ];
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+/** Same rule as the server: digits with optional + and separators, 7-15 digits. */
+function phoneProblem(raw: string): string | null {
+  const v = raw.trim();
+  if (!/^\+?[0-9\s()-]+$/.test(v)) return "Use digits only in the phone number, like +91 98765 43210.";
+  const digits = v.replace(/\D/g, "").length;
+  if (digits < 7 || digits > 15) return "That phone number looks too short or too long.";
+  return null;
+}
+
 const VERTICALS = ["general", "dental", "physiotherapy", "gym", "salon", "coaching"];
 
-export function SignupForm({ initialEmail = "", referralCode = "" }: { initialEmail?: string; referralCode?: string }) {
+export function SignupForm({
+  initialEmail = "",
+  referralCode = "",
+  initialPlace,
+}: {
+  initialEmail?: string;
+  referralCode?: string;
+  /** Preselected Google place (the gap report's "Start free trial" link). */
+  initialPlace?: { place_id: string; name: string };
+}) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("details");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // State alone can't stop a double tap that lands before the re-render disables the button.
+  const inFlight = useRef(false);
 
-  const [businessName, setBusinessName] = useState("");
+  const [businessName, setBusinessName] = useState(initialPlace?.name ?? "");
   const [vertical, setVertical] = useState(VERTICALS[0]);
   const [ownerName, setOwnerName] = useState("");
   const [ownerPhone, setOwnerPhone] = useState("");
   // Email pills on the marketing pages link here as /signup?email=...
   const [ownerEmail, setOwnerEmail] = useState(initialEmail);
 
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialPlace?.name ?? "");
   const [results, setResults] = useState<PlaceSearchResult[]>([]);
-  const [selectedPlace, setSelectedPlace] = useState<PlaceSearchResult | null>(null);
+  const [selectedPlace, setSelectedPlace] = useState<PlaceSearchResult | null>(
+    initialPlace ? { ...initialPlace, address: "", rating: null, review_count: null } : null,
+  );
   const [searching, setSearching] = useState(false);
 
   const [placementAck, setPlacementAck] = useState(false);
   const [plan, setPlan] = useState<"monthly" | "annual">("monthly");
 
   async function handleSearch() {
-    if (!query.trim()) return;
+    if (!query.trim() || searching) return;
     setSearching(true);
     setError(null);
     try {
@@ -58,7 +82,8 @@ export function SignupForm({ initialEmail = "", referralCode = "" }: { initialEm
   }
 
   async function handleSubmit() {
-    if (!selectedPlace) return;
+    if (!selectedPlace || inFlight.current) return;
+    inFlight.current = true;
     setSubmitting(true);
     setError(null);
     try {
@@ -89,7 +114,23 @@ export function SignupForm({ initialEmail = "", referralCode = "" }: { initialEm
         setError("Signup failed.");
       }
       setSubmitting(false);
+      inFlight.current = false;
     }
+  }
+
+  function continueFromDetails() {
+    if (!EMAIL_RE.test(ownerEmail.trim())) {
+      setError("Enter a valid email address, like name@business.com. Your login codes go here.");
+      return;
+    }
+    const phoneError = phoneProblem(ownerPhone);
+    if (phoneError) {
+      setError(phoneError);
+      return;
+    }
+    setError(null);
+    if (!selectedPlace) setQuery(businessName);
+    setStep("place");
   }
 
   const currentStepIndex = STEPS.findIndex((s) => s.key === step);
@@ -132,7 +173,7 @@ export function SignupForm({ initialEmail = "", referralCode = "" }: { initialEm
       </div>
 
       {error && (
-        <div className="mb-6 p-4 rounded-xl bg-red-50 border border-urgency/40 text-urgency text-xs sm:text-sm flex items-center gap-2">
+        <div role="alert" className="mb-6 p-4 rounded-xl bg-red-50 border border-urgency/40 text-urgency text-xs sm:text-sm flex items-center gap-2">
           <span>⚠️</span>
           <span>{error}</span>
         </div>
@@ -173,11 +214,8 @@ export function SignupForm({ initialEmail = "", referralCode = "" }: { initialEm
 
           <div className="mt-4 pt-4 border-t border-line flex justify-end">
             <button
-              disabled={!businessName || !ownerName || !ownerPhone || !ownerEmail}
-              onClick={() => {
-                setQuery(businessName);
-                setStep("place");
-              }}
+              disabled={!businessName.trim() || !ownerName.trim() || !ownerPhone.trim() || !ownerEmail.trim()}
+              onClick={continueFromDetails}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-cta hover:bg-cta-hover text-white font-semibold text-sm tracking-tight transition-all duration-150 disabled:opacity-40 cursor-pointer shadow-xs hover:shadow"
             >
               <span>Continue to Google Place</span>
@@ -469,6 +507,11 @@ function PlanOption({
 
 function describeError(code: string): string {
   switch (code) {
+    case "VALIDATION_FAILED":
+    case "VALIDATION_ERROR":
+      return "Some details don't look right. Check your phone number and email, then try again.";
+    case "RATE_LIMITED":
+      return "Too many attempts. Please wait a few minutes and try again.";
     case "DUPLICATE_BUSINESS":
       return "This business, phone, or email is already registered. Contact support if this seems wrong.";
     case "PLACES_UNAVAILABLE":

@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { FlowFrame } from "@/components/flow/Frame";
 import { ModuleShell, NeutralNotice } from "@/components/hub/ModuleShell";
 import { RewardsView } from "@/components/rewards/RewardsView";
 import { loadRewards } from "@/server/pageData";
+
+export const metadata: Metadata = { title: "Rewards" };
 
 // Nothing on this route mentions anything from the customer-flow side (CR-6.2).
 export default async function RewardsPage({ params }: { params: Promise<{ slug: string }> }) {

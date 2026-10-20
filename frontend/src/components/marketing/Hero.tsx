@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 import { assembleDraft } from "@/lib/flow/draft";
 import { getDemoVertical } from "@/lib/marketing/demo";
@@ -13,11 +14,11 @@ const WORDS_LINE_2 = ["goes", "to", "the", "shop", "next", "door."];
 // config; the draft is assembled by the same function the live flow uses.
 // Background photos are decorative only.
 const STORIES = [
-  { name: "Kirana & grocery", business: "Sharma General Store", locality: "Indiranagar, Bengaluru", picks: [0, 2, 4], image: "/images/hero-coastal-scenic.jpg" },
-  { name: "Fashion & boutiques", business: "Threads & Co", locality: "Koregaon Park, Pune", picks: [3, 2, 7], image: "/images/landscape-dolomites-alpine.jpg" },
-  { name: "Cafés & restaurants", business: "The Corner Table", locality: "Sector 18, Noida", picks: [0, 5, 7], image: "/images/landscape-yosemite-valley.jpg" },
-  { name: "Electronics & repairs", business: "FixIt Mobiles", locality: "Anna Nagar, Chennai", picks: [6, 5, 4], image: "/images/landscape-emerald-forest.jpg" },
-  { name: "Services & studios", business: "Pathway Studio", locality: "Vijay Nagar, Indore", picks: [3, 1, 0], image: "/images/landscape-ocean-horizon.jpg" },
+  { name: "Kirana & grocery", business: "Sharma General Store", locality: "Indiranagar, Bengaluru", picks: [0, 2, 4], image: "/images/shop-kirana-interior.jpg" },
+  { name: "Fashion & boutiques", business: "Threads & Co", locality: "Koregaon Park, Pune", picks: [3, 2, 7], image: "/images/shop-saree-boutique.jpg" },
+  { name: "Cafés & restaurants", business: "The Corner Table", locality: "Sector 18, Noida", picks: [0, 5, 7], image: "/images/shop-cafe-interior.jpg" },
+  { name: "Electronics & repairs", business: "FixIt Mobiles", locality: "Anna Nagar, Chennai", picks: [6, 5, 4], image: "/images/shop-mobile-display.jpg" },
+  { name: "Services & studios", business: "Pathway Studio", locality: "Vijay Nagar, Indore", picks: [3, 1, 0], image: "/images/shop-salon-varanasi.jpg" },
 ].map((s) => {
   const v = getDemoVertical("general");
   const tags = s.picks.map((i) => v.tags[i]);
@@ -32,6 +33,7 @@ const STORIES = [
 });
 
 export function Hero() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [activeStory, setActiveStory] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -133,11 +135,7 @@ export function Hero() {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                if (email.trim()) {
-                  window.location.href = `/signup?email=${encodeURIComponent(email.trim())}`;
-                } else {
-                  window.location.href = "/signup";
-                }
+                router.push(email.trim() ? `/signup?email=${encodeURIComponent(email.trim())}` : "/signup");
               }}
               className="w-full max-w-[460px] flex items-center p-1.5 rounded-xl bg-white border border-[#e8ecec] shadow-v2-elevated focus-within:border-[#397dff] transition-all"
             >

@@ -128,6 +128,19 @@ describe("submitFeedback", () => {
       ).rejects.toBeInstanceOf(HttpError);
     }));
 
+  it("a retried feedback_id stores one row and sends one email", () =>
+    inRolledBackTx(async (db) => {
+      const outlet = await makeOutlet(db, await makeAccount(db));
+      const s = await makeSession(db, outlet);
+      const feedbackId = crypto.randomUUID();
+      const input = { sessionId: s.id, rating: 2, message: "cold coffee", contact: null, feedbackId };
+      const first = await submitFeedback(db, outlet, input);
+      const second = await submitFeedback(db, outlet, input);
+      expect(second.id).toBe(first.id);
+      expect(await db.select().from(privateFeedback).where(eq(privateFeedback.outletId, outlet.id))).toHaveLength(1);
+      expect(await db.select().from(notifications).where(eq(notifications.outletId, outlet.id))).toHaveLength(1);
+    }));
+
   it("rejects a blank message", () =>
     inRolledBackTx(async (db) => {
       const outlet = await makeOutlet(db, await makeAccount(db));

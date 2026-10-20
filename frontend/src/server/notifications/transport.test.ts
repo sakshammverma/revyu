@@ -169,6 +169,8 @@ describe("production guard for email", () => {
     RAZORPAY_KEY_ID: "k",
     RAZORPAY_KEY_SECRET: "k",
     RAZORPAY_WEBHOOK_SECRET: "k",
+    RAZORPAY_PLAN_ID_MONTHLY: "plan_m",
+    RAZORPAY_PLAN_ID_ANNUAL: "plan_a",
     GOOGLE_PLACES_API_KEY: "k",
     SUPABASE_URL: "https://x.supabase.co",
     SUPABASE_SERVICE_ROLE_KEY: "k",

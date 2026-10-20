@@ -41,6 +41,13 @@ export async function staffContext(db: DbLike, request: Request, slug: string) {
   const raw = (header.startsWith("Bearer ") ? header.slice(7) : header).trim();
   const parsed = readStaffToken(raw);
   if (!parsed || parsed.outletId !== outlet.id) throw new HttpError(401, "UNAUTHORIZED");
+  // Tokens are stateless for 8h: switching a PIN off must cut its sessions now.
+  const [pin] = await db
+    .select({ id: schema.staffPins.id })
+    .from(schema.staffPins)
+    .where(and(eq(schema.staffPins.id, parsed.pinId), eq(schema.staffPins.outletId, outlet.id), eq(schema.staffPins.active, true)))
+    .limit(1);
+  if (!pin) throw new HttpError(401, "UNAUTHORIZED");
   return { outlet, pinId: parsed.pinId };
 }
 

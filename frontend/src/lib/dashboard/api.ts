@@ -1,5 +1,6 @@
-// Same-origin, proxied by next.config.ts rewrites so the session cookie
-// works without cross-site SameSite restrictions.
+import { redirectToOwnerLogin } from "@/lib/ownerSession";
+
+// Same-origin route handlers (src/app/api/**), so the session cookie just works.
 const API_BASE = "";
 
 function withCreds(init: RequestInit = {}): RequestInit {
@@ -16,8 +17,9 @@ export class DashboardApiError extends Error {
   }
 }
 
-async function get<T>(path: string): Promise<T> {
+async function get<T>(path: string, { redirectOn401 = true } = {}): Promise<T> {
   const res = await fetch(`${API_BASE}${path}`, withCreds({ cache: "no-store" }));
+  if (res.status === 401 && redirectOn401) redirectToOwnerLogin();
   if (!res.ok) {
     const body = await res.json().catch(() => null);
     throw new DashboardApiError(body?.detail?.error?.code ?? "UNKNOWN", res.status);
@@ -64,8 +66,13 @@ export interface Overview {
   completed_flows: number;
   conversion_rate: number;
   trial_flow_count: number;
+  /** Private messages received, ever (shown as a count on the locked dashboard, SRS-9.8). */
+  feedback_count: number;
   dashboard_locked: boolean;
 }
+
+/** Mirrors DASHBOARD_LOCKED_STATES on the server: detailed views answer 402 in these states. */
+export const isDashboardLocked = (state: string) => state === "locked" || state === "suspended";
 
 export interface FunnelStep {
   step: string;
@@ -99,7 +106,8 @@ export interface FeedbackItem {
   created_at: string;
 }
 
-export const getMyOutlet = () => get<MyOutlet>("/api/app/outlets/mine");
+export const getMyOutlet = (opts?: { redirectOn401?: boolean }) =>
+  get<MyOutlet>("/api/app/outlets/mine", opts);
 export const getOverview = (outletId: string) => get<Overview>(`/api/app/outlets/${outletId}/overview`);
 export const getFunnel = (outletId: string, range = "30d") =>
   get<Funnel>(`/api/app/outlets/${outletId}/funnel?range=${range}`);
@@ -118,6 +126,7 @@ export async function resolveFeedback(feedbackId: string, resolved: boolean): Pr
       body: JSON.stringify({ resolved }),
     })
   );
+  if (res.status === 401) redirectToOwnerLogin();
   if (!res.ok) throw new DashboardApiError("UNKNOWN", res.status);
 }
 
@@ -130,6 +139,7 @@ async function send<T>(method: string, path: string, body?: unknown): Promise<T>
       body: body === undefined ? undefined : JSON.stringify(body),
     })
   );
+  if (res.status === 401 && path !== "/api/app/auth/logout") redirectToOwnerLogin();
   if (!res.ok) {
     const b = await res.json().catch(() => null);
     throw new DashboardApiError(b?.detail?.error?.code ?? "UNKNOWN", res.status);

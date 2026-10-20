@@ -1,5 +1,9 @@
+import type { Metadata } from "next";
+
 import { FlowFrame } from "@/components/flow/Frame";
 import { ReviewEntry } from "@/components/flow/ReviewEntry";
+
+export const metadata: Metadata = { title: "Share your experience" };
 
 interface Props {
   params: Promise<{ slug: string }>;

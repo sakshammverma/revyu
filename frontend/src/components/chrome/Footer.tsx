@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function Footer() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
 
   return (
@@ -37,7 +39,7 @@ export function Footer() {
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
-                  window.location.href = `/signup?email=${encodeURIComponent(email)}`;
+                  router.push(`/signup?email=${encodeURIComponent(email.trim())}`);
                 }}
                 className="flex items-center p-1.5 rounded-xl bg-white/5 border border-white/15 focus-within:border-[#397dff] focus-within:bg-white/10 transition-all max-w-[400px]"
               >
@@ -162,6 +164,11 @@ export function Footer() {
                 <li>
                   <Link href="/contact" className="hover:text-white hover:underline transition-colors">
                     Contact &amp; Support
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/credits" className="hover:text-white hover:underline transition-colors">
+                    Photo Credits
                   </Link>
                 </li>
               </ul>

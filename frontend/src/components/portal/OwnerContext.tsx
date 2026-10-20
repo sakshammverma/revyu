@@ -27,7 +27,8 @@ export function useOwner(): Ctx {
   return v;
 }
 
-const PRE_LIVE = ["pending_payment", "pending_approval", "rejected"];
+// Not live yet: no billing, no dashboard data, no print files (see outletState.ts).
+const PRE_LIVE = ["draft", "pending_payment", "pending_approval", "rejected"];
 
 export function OwnerProvider({
   children,

@@ -160,11 +160,30 @@ export async function createOutlet(db: DbLike, body: CreateOutletBody) {
 
 /* ----------------------------------------------------------- validate-url */
 
+/**
+ * FR-35: structural check only (the write-review endpoint with a placeid). The
+ * URL is parsed, not substring-matched, so "javascript:...writereview?placeid="
+ * can never become the button customers tap.
+ */
+export function isGoogleReviewUrl(raw: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(raw.trim());
+  } catch {
+    return false;
+  }
+  return (
+    url.protocol === "https:" &&
+    url.hostname === "search.google.com" &&
+    url.pathname === "/local/writereview" &&
+    Boolean(url.searchParams.get("placeid"))
+  );
+}
+
 export async function validateReviewUrl(db: DbLike, outletId: string, url: string) {
-  // FR-35: structural check only (the write-review endpoint with a placeid).
-  const valid = url.includes("search.google.com/local/writereview") && url.includes("placeid=");
+  const valid = isGoogleReviewUrl(url);
   if (valid) {
-    await db.update(outlets).set({ googleReviewUrl: url, updatedAt: new Date() }).where(eq(outlets.id, outletId));
+    await db.update(outlets).set({ googleReviewUrl: url.trim(), updatedAt: new Date() }).where(eq(outlets.id, outletId));
   }
   return { valid, reason: valid ? null : "URL does not match the expected Google review-write format" };
 }

@@ -12,6 +12,27 @@
 
 ---
 
+## 0a. Production-readiness pass (2026-10-09)
+
+Audit of the TypeScript app after the Supabase migration, then fixes. Runbook: [26-DEPLOYMENT.md](26-DEPLOYMENT.md).
+
+**Fixed**
+- Security: an unset `ENVIRONMENT` on a deployment is now `production` (it used to fall back to `local`: mock payments, `change-me` secrets). Razorpay plan ids are required in production. Cross-origin cookie writes refused (CSRF). Session token no longer returned in JSON. Staff PINs: per-outlet lockout (20 wrong/hour) and a turned-off PIN ends its sessions at once. Trial-credit burn: rating must come in an earlier request, device hash required, 3 credits/day per IP per outlet. Webhooks: replayed charges can't extend access, a stale `payment.failed` can't undo a later charge. `place_id` validated before it reaches the Places URL; review URLs parsed (no `javascript:`). Rate limits on Places search and per-recipient gap-report email. Signup fields bounded, phone validated. Client IP from Vercel's headers. Security headers + `no-store` on the API.
+- Product/UX: an owner whose session expires mid-visit goes to login and back to the same page. Editor sheets no longer lose focus on every keystroke (focus trap + restore added). Billing: retry when status fails to load; a payment that succeeded but failed to confirm no longer tells the owner to pay again. Magic-link failure has a way back. Low raters can go back to change a mis-tapped star; focus moves to each new step; a tag without phrasing can't produce "X and ."; no "Continue to Google" when there is no Google URL. Private feedback self-heals a missing session and is idempotent. Buffered events keep their own outlet. Signup: format validation, double-submit guard, gap-report place preselected. Status page stops polling once decided and handles unknown ids. Rewards visit-code screen no longer refetches every second after an error. Staff camera no longer restarts on every render. Insights show when a new range is loading. Rating card no longer claims "Tracking live" before Google was checked.
+- Marketing: pricing/FAQ now describe the real billing (autopay set up at signup, first charge after the trial); print-asset claims match the four real files.
+- Hygiene: lint 0 errors/0 warnings (was 10 errors); 13 unused components and 13 unused images removed; photos recompressed (public/images 14 MB to about 3 MB); three.js loaded only when its logo nears the viewport and paused offscreen; branded favicon/icons, metadata, robots, sitemap, noindex on private pages; `/admin` redirects to the cockpit.
+
+**Follow-up (2026-10-20), the open items above, done:**
+- Low-rating screen no longer auto-focuses the textarea (keyboard was covering the Google button); 16 §2.2 updated.
+- Staff redemption from a member lookup now needs the reward code from the customer's phone; the lookup API no longer returns codes. One-tap redeem stays after a live visit code (customer present).
+- Dashboard lock enforced on the server: funnel, tags, rating, feedback inbox/resolve and hub insights answer 402 `DASHBOARD_LOCKED` in `locked`/`suspended`; the overview keeps its counts plus a new `feedback_count` (SRS-9.8). Feedback and Insights pages show an unlock card.
+- Error monitoring without a vendor: structured server and browser error logs (26 §8), root `error`/`global-error`/`not-found` pages.
+- The "Wherever customers pay" tabs now show renders of the four real print files (`frontend/scripts/print-mockups.mjs`) instead of landscape photos.
+
+**Still open**
+- Hero, build cards, editorial rail and print-kit section keep landscape photos as stylised backdrops behind product cards (kept as part of the current design). Swap for real shop photos when you have them.
+- Uptime monitor and log alerts (account setup), Supabase Pro + a restore drill, lawyer review of legal pages.
+
 ## 0. Progress since this audit (updated 2026-10-01)
 
 Owner decisions: **keep the current blue/serif design** (recorded in CLAUDE.md; the brief's indigo/amber is superseded); referral = **70% off the referrer's next bill once the referred business pays**; Competitor Watch wanted; Pro tier **parked**; Business Profile service **dropped**.

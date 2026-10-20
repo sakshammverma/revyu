@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { schema } from "@/server/db";
 import { addEvent, inRolledBackTx, makeAccount, makeOutlet, makeSession } from "@/server/testing/helpers";
-import { recordEvents, sanitizePayload } from "./events";
+import { MAX_CREDITS_PER_IP_PER_DAY, recordEvents, sanitizePayload } from "./events";
 
 const { events, notifications, outlets, sessions } = schema;
 
@@ -110,6 +110,53 @@ describe("recordEvents", () => {
       const [row] = await db.select().from(sessions).where(eq(sessions.id, s.id));
       expect(row.completed).toBe(true);
       expect(row.countedForTrial).toBe(true);
+    }));
+
+  it("rating + copy_tapped in one batch earns no credit (the rating must come first)", () =>
+    inRolledBackTx(async (db) => {
+      const outlet = await makeOutlet(db, await makeAccount(db));
+      const s = await makeSession(db, outlet, { ageSeconds: 30 });
+      await recordEvents(db, {
+        outletId: outlet.id,
+        sessionId: s.id,
+        events: [{ type: "rating_selected" }, { type: "copy_tapped" }],
+      });
+      const [o] = await db.select().from(outlets).where(eq(outlets.id, outlet.id));
+      expect(o.trialFlowCount).toBe(0);
+    }));
+
+  it("a session without a device hash earns no credit", () =>
+    inRolledBackTx(async (db) => {
+      const outlet = await makeOutlet(db, await makeAccount(db));
+      const s = await makeSession(db, outlet, { ageSeconds: 30, device: null });
+      await addEvent(db, outlet, s.id, "rating_selected");
+      await recordEvents(db, { outletId: outlet.id, sessionId: s.id, events: [{ type: "copy_tapped" }] });
+      const [o] = await db.select().from(outlets).where(eq(outlets.id, outlet.id));
+      expect(o.trialFlowCount).toBe(0);
+    }));
+
+  it("one IP consumes at most MAX_CREDITS_PER_IP_PER_DAY credits per outlet", () =>
+    inRolledBackTx(async (db) => {
+      const outlet = await makeOutlet(db, await makeAccount(db));
+      const ip = `203.0.113.${Math.floor(Math.random() * 250)}-${crypto.randomUUID()}`;
+      for (let i = 0; i < MAX_CREDITS_PER_IP_PER_DAY + 2; i++) {
+        const s = await makeSession(db, outlet, { ageSeconds: 30 });
+        await addEvent(db, outlet, s.id, "rating_selected");
+        await recordEvents(db, { outletId: outlet.id, sessionId: s.id, events: [{ type: "copy_tapped" }], clientIp: ip });
+      }
+      const [o] = await db.select().from(outlets).where(eq(outlets.id, outlet.id));
+      expect(o.trialFlowCount).toBe(MAX_CREDITS_PER_IP_PER_DAY);
+    }));
+
+  it("events never carry another outlet's session id", () =>
+    inRolledBackTx(async (db) => {
+      const account = await makeAccount(db);
+      const outlet = await makeOutlet(db, account);
+      const other = await makeOutlet(db, account);
+      const s = await makeSession(db, other, { ageSeconds: 30 });
+      await recordEvents(db, { outletId: outlet.id, sessionId: s.id, events: [{ type: "flow_start" }] });
+      const [row] = await db.select().from(events).where(eq(events.outletId, outlet.id));
+      expect(row.sessionId).toBeNull();
     }));
 
   it("a session from another outlet never meters this one", () =>

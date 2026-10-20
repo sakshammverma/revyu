@@ -14,7 +14,7 @@
  */
 import { createHash, createHmac, randomBytes, randomInt, scrypt, timingSafeEqual } from "node:crypto";
 
-import { and, asc, count, desc, eq, gt, gte, inArray, isNotNull, isNull, lte, max } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, gte, inArray, isNotNull, isNull, lte, max, or } from "drizzle-orm";
 
 import { schema, type DbLike } from "@/server/db";
 import { getEnv } from "@/server/env";
@@ -484,7 +484,14 @@ export async function redeem(db: DbLike, outletId: string, pinId: string, redeem
     const burned = await tx
       .update(loyaltyRewardGrants)
       .set({ redeemedAt: now, redeemedByPinId: pinId })
-      .where(and(eq(loyaltyRewardGrants.id, grant.id), isNull(loyaltyRewardGrants.redeemedAt)))
+      .where(
+        and(
+          eq(loyaltyRewardGrants.id, grant.id),
+          isNull(loyaltyRewardGrants.redeemedAt),
+          // Re-checked inside the UPDATE so a grant can't expire between the read and the burn.
+          or(isNull(loyaltyRewardGrants.expiresAt), gt(loyaltyRewardGrants.expiresAt, now)),
+        ),
+      )
       .returning({ id: loyaltyRewardGrants.id });
     if (burned.length !== 1) throw new LoyaltyError("ALREADY_USED", "This reward was already redeemed");
     await tx.insert(loyaltyLedger).values({

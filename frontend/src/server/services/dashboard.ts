@@ -7,7 +7,7 @@ import { and, asc, desc, eq, gte, sql, type SQL } from "drizzle-orm";
 
 import { schema, type DbLike } from "@/server/db";
 import { HttpError } from "@/server/http";
-import { isCollecting } from "@/server/services/outletState";
+import { DASHBOARD_LOCKED_STATES, isCollecting } from "@/server/services/outletState";
 
 const { events, outlets, placeSnapshots, privateFeedback, sessions, tags } = schema;
 
@@ -61,6 +61,11 @@ export function rangeStart(range: string, now: Date = new Date()): Date | null {
   return null;
 }
 
+/** 402 for the detailed dashboard while it is locked; pay to unlock (SRS-12.4). */
+export function requireUnlocked(outlet: Pick<Outlet, "state">): void {
+  if (DASHBOARD_LOCKED_STATES.has(outlet.state)) throw new HttpError(402, "DASHBOARD_LOCKED");
+}
+
 export async function getOverview(db: DbLike, outlet: Outlet) {
   const [{ n: scans }] = await db
     .select({ n: sql<number>`count(*)::int` })
@@ -70,6 +75,11 @@ export async function getOverview(db: DbLike, outlet: Outlet) {
     .select({ n: sql<number>`count(distinct ${sessions.id})::int` })
     .from(sessions)
     .where(and(eq(sessions.outletId, outlet.id), eq(sessions.completed, true)));
+  // SRS-9.8: the private-feedback count is part of what a locked owner sees waiting.
+  const [{ n: feedbackCount }] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(privateFeedback)
+    .where(eq(privateFeedback.outletId, outlet.id));
   return {
     outlet_id: outlet.id,
     business_name: outlet.businessName,
@@ -78,7 +88,8 @@ export async function getOverview(db: DbLike, outlet: Outlet) {
     completed_flows: completed,
     conversion_rate: scans ? pyRound(completed / scans, 4) : 0,
     trial_flow_count: outlet.trialFlowCount,
-    dashboard_locked: outlet.state === "locked",
+    feedback_count: feedbackCount,
+    dashboard_locked: DASHBOARD_LOCKED_STATES.has(outlet.state),
   };
 }
 
@@ -186,6 +197,7 @@ export async function resolveFeedback(db: DbLike, accountId: string, feedbackId:
   if (!feedback) throw new HttpError(404, "OUTLET_NOT_FOUND");
   const [outlet] = await db.select().from(outlets).where(eq(outlets.id, feedback.outletId)).limit(1);
   if (!outlet || outlet.accountId !== accountId) throw new HttpError(403, "FORBIDDEN");
+  requireUnlocked(outlet);
   await db
     .update(privateFeedback)
     .set({ resolved, resolvedAt: resolved ? new Date() : null })

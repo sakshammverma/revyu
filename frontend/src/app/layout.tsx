@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Lora, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 
@@ -17,9 +17,29 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: "swap",
 });
 
+const siteUrl = process.env.FRONTEND_BASE_URL || "http://localhost:3000";
+const description =
+  "For any local shop or business. Customers scan, tap what stood out, edit a draft and paste it on Google. Google link at every rating. ₹499/month, 15-day free trial.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  // Pages set full titles ("Pricing — Revyu"), so there is no template.
   title: "Revyu — A printed QR that helps customers write their own Google reviews",
-  description: "For any local shop or business. Customers scan, tap what stood out, edit a draft and paste it on Google. Google link at every rating. ₹499/month, 15-day free trial.",
+  description,
+  applicationName: "Revyu",
+  openGraph: {
+    type: "website",
+    siteName: "Revyu",
+    locale: "en_IN",
+    title: "Revyu — More honest Google reviews from a printed QR",
+    description,
+  },
+  twitter: { card: "summary", title: "Revyu", description },
+  formatDetection: { telephone: false, email: false, address: false },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#f2f7f7",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -28,7 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${lora.variable} ${plusJakartaSans.variable} h-full scroll-smooth`}
     >
-      <body className="min-h-full flex flex-col bg-[#f2f7f7] text-[#1a1e23] font-sans antialiased selection:bg-[#397dff]/15 selection:text-[#1a1e23]">
+      <body className="min-h-full flex flex-col bg-bg text-ink font-sans antialiased selection:bg-accent/15 selection:text-ink">
         {children}
       </body>
     </html>

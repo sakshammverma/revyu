@@ -8,7 +8,7 @@ const ARTICLES = [
     title: "See exactly how far ahead they are",
     category: "Free report",
     readTime: "Your numbers, not ours",
-    image: "/images/landscape-dolomites-alpine.jpg",
+    image: "/images/street-mumbai-shops.jpg",
     href: "/gap-report",
     summary:
       "Look up your shop and the ones around you. Your rating, theirs, and the count a stranger reads before anything else.",
@@ -17,7 +17,7 @@ const ARTICLES = [
     title: "A scan, a few taps, a review on Google",
     category: "How it works",
     readTime: "Three steps",
-    image: "/images/landscape-yosemite-valley.jpg",
+    image: "/images/street-kirana-row.jpg",
     href: "/how-it-works",
     summary:
       "Nothing for your customer to install or learn. Nothing for you to remember once it is printed.",
@@ -26,7 +26,7 @@ const ARTICLES = [
     title: "\u20B9499 a month. Less than one regular.",
     category: "Pricing",
     readTime: "One flat price",
-    image: "/images/landscape-ocean-horizon.jpg",
+    image: "/images/portrait-shopkeeper.jpg",
     href: "/pricing",
     summary:
       "What one loyal customer spends with you in a year is more than this. What not asking costs you never shows up on a bill.",

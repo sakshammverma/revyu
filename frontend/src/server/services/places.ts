@@ -103,7 +103,7 @@ export async function searchPlaces(query: string, near?: string | null): Promise
  * customer to sign in and type/paste manually (C-1); no prefill exists.
  */
 export function buildReviewUrl(placeId: string): string {
-  return `https://search.google.com/local/writereview?placeid=${placeId}`;
+  return `https://search.google.com/local/writereview?placeid=${encodeURIComponent(placeId)}`;
 }
 
 /** Current rating + review count, for baseline capture (FR-39) and the weekly poll (SRS-14.1). */
@@ -114,7 +114,7 @@ export async function getPlaceSnapshot(placeId: string): Promise<[rating: number
     throw new PlacesUnavailableError("GOOGLE_PLACES_API_KEY is not configured");
   }
   try {
-    const resp = await fetch(PLACES_DETAILS_URL + placeId, {
+    const resp = await fetch(PLACES_DETAILS_URL + encodeURIComponent(placeId), {
       headers: { "X-Goog-Api-Key": env.googlePlacesApiKey, "X-Goog-FieldMask": "rating,userRatingCount" },
       signal: AbortSignal.timeout(10_000),
     });

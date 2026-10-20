@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { describe, expect, it } from "vitest";
 
 import { schema } from "@/server/db";
@@ -71,7 +71,10 @@ describe("hub modules (port of test_hub_loyalty hub resolution)", () => {
       const body = [{ module: "review", enabled: true }, { module: "menu", enabled: true }];
       expect(await code(setModules(db, outlet, body))).toBe("409:MODULE_UNAVAILABLE");
       await setModules(db, outlet, body, { isAdmin: true });
-      const [menu] = await db.select().from(outletModules).where(eq(outletModules.module, "menu"));
+      const [menu] = await db
+        .select()
+        .from(outletModules)
+        .where(and(eq(outletModules.outletId, outlet.id), eq(outletModules.module, "menu")));
       expect(menu.enabled).toBe(true);
     }));
 

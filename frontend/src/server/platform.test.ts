@@ -46,6 +46,12 @@ describe("env", () => {
     );
   });
 
+  it("a deployment with no ENVIRONMENT is production, not local", () => {
+    for (const marker of [{ NODE_ENV: "production" }, { VERCEL_ENV: "preview" }]) {
+      expect(() => loadEnv({ ...marker, DATABASE_URL: "postgresql://a@h/d" })).toThrow(/ADMIN_SESSION_SECRET/);
+    }
+  });
+
   it("requires a database URL", () => {
     expect(() => loadEnv({})).toThrow(/DATABASE_URL is required/);
   });
@@ -62,6 +68,8 @@ describe("env", () => {
       RAZORPAY_KEY_ID: "k",
       RAZORPAY_KEY_SECRET: "k",
       RAZORPAY_WEBHOOK_SECRET: "k",
+      RAZORPAY_PLAN_ID_MONTHLY: "plan_m",
+      RAZORPAY_PLAN_ID_ANNUAL: "plan_a",
       GOOGLE_PLACES_API_KEY: "k",
       EMAIL_PROVIDER_API_KEY: "k",
       SUPABASE_URL: "https://x.supabase.co",

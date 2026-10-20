@@ -36,10 +36,23 @@ export function MenuTab({ api, state, reload, toast }: TabProps) {
 
   const fail = (e: unknown) => toast(e instanceof HubApiError ? e.message : "Something went wrong.", "error");
 
+  // One category action at a time, so a double tap can't create two.
+  const [catBusy, setCatBusy] = useState(false);
+
   async function addCategory(e: React.FormEvent) {
     e.preventDefault();
-    if (!newCat.trim()) return;
-    try { await api.addCategory(newCat.trim()); setNewCat(""); await reload(); } catch (err) { fail(err); }
+    if (!newCat.trim() || catBusy) return;
+    setCatBusy(true);
+    try {
+      await api.addCategory(newCat.trim());
+      setNewCat("");
+      await reload();
+      toast("Category added");
+    } catch (err) {
+      fail(err);
+    } finally {
+      setCatBusy(false);
+    }
   }
 
   async function saveItem(e: React.FormEvent) {
@@ -104,10 +117,21 @@ export function MenuTab({ api, state, reload, toast }: TabProps) {
               <Btn variant="light" className="!min-h-[40px]" onClick={() => { setError(null); setConfirmDel(false); setDraft(blank(c.id)); }}>+ Add item</Btn>
               <button
                 type="button"
-                className="text-sm text-[#c62445] px-2"
+                disabled={catBusy}
+                className="text-sm text-[#c62445] px-3 min-h-[40px] disabled:opacity-50"
+                aria-label={`Delete category ${c.name}`}
                 onClick={async () => {
                   if (c.items.length && !window.confirm(`Delete “${c.name}” and its ${c.items.length} items?`)) return;
-                  try { await api.deleteCategory(c.id); await reload(); } catch (err) { fail(err); }
+                  setCatBusy(true);
+                  try {
+                    await api.deleteCategory(c.id);
+                    await reload();
+                    toast("Category deleted");
+                  } catch (err) {
+                    fail(err);
+                  } finally {
+                    setCatBusy(false);
+                  }
                 }}
               >Delete</button>
             </div>
@@ -146,7 +170,7 @@ export function MenuTab({ api, state, reload, toast }: TabProps) {
           placeholder="New category, e.g. Haircuts"
           className="flex-1 min-w-0 rounded-lg border border-[#d5dcdc] bg-white px-3.5 py-2.5 text-base outline-none focus:border-[#397dff] focus:ring-2 focus:ring-[#397dff]/25"
         />
-        <Btn type="submit" variant="light" disabled={!newCat.trim()}>Add category</Btn>
+        <Btn type="submit" variant="light" disabled={!newCat.trim()} busy={catBusy}>Add category</Btn>
       </form>
 
       <Sheet open={!!draft} title={draft?.id ? "Edit item" : "New item"} onClose={() => setDraft(null)}>

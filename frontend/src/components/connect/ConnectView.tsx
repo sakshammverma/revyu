@@ -26,9 +26,12 @@ const ICONS: Record<string, string> = {
   custom: "link",
 };
 
+/** vCard text values escape backslash, comma, semicolon and newlines (RFC 6350 §3.4). */
+const vEscape = (v: string) => v.replace(/[\\,;]/g, (c) => `\\${c}`).replace(/\r?\n/g, "\\n");
+
 function vcard(name: string, phone?: string | null, url?: string) {
-  const lines = ["BEGIN:VCARD", "VERSION:3.0", `FN:${name}`, `ORG:${name}`];
-  if (phone) lines.push(`TEL;TYPE=WORK:${phone}`);
+  const lines = ["BEGIN:VCARD", "VERSION:3.0", `FN:${vEscape(name)}`, `ORG:${vEscape(name)}`];
+  if (phone) lines.push(`TEL;TYPE=WORK:${vEscape(phone)}`);
   if (url) lines.push(`URL:${url}`);
   lines.push("END:VCARD");
   const blob = new Blob([lines.join("\r\n")], { type: "text/vcard" });
@@ -36,7 +39,8 @@ function vcard(name: string, phone?: string | null, url?: string) {
   a.href = URL.createObjectURL(blob);
   a.download = `${name.replace(/\W+/g, "-")}.vcf`;
   a.click();
-  URL.revokeObjectURL(a.href);
+  // Revoking immediately can cancel the download in Safari.
+  setTimeout(() => URL.revokeObjectURL(a.href), 10_000);
 }
 
 // Links open in a new context; each tap emits link_clicked {kind} (FR-88).
@@ -55,7 +59,13 @@ export function ConnectView({ data }: { data: ConnectPayload }) {
     <div className="flex flex-col gap-3">
       {(maps || profile?.address_line) && (
         <a
-          href={maps?.url ?? "#"}
+          href={
+            maps?.url ??
+            // No Maps link saved: search the address instead of a dead "#".
+            `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+              [data.outlet.name, profile?.address_line, profile?.locality].filter(Boolean).join(", "),
+            )}`
+          }
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => click("google_maps")}

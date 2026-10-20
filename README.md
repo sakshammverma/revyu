@@ -1,90 +1,58 @@
 # Revyu
 
-> Compliant Google Review collection & customer engagement hub for single-outlet local businesses.
+> Compliant Google review collection and customer hub for single-outlet local businesses (launch market: India).
 
----
+Customers scan a printed QR, tap a rating and what stood out, edit a draft built only from their own choices, and paste it on Google. The Google option is on screen at every rating, and private feedback to the owner is always available too (compliance rules CR-1 to CR-6 in [`documents/03-COMPLIANCE.md`](documents/03-COMPLIANCE.md)).
 
-## Overview
+## Layout
 
-**Revyu** is built for independent local business owners (dentists, cafes, salons, retail outlets) in India and global markets to turn offline customer visits into authentic Google reviews and repeat visits.
+| Path | What it is |
+|---|---|
+| `frontend/` | **The whole product**: Next.js 16 (App Router) + React 19 + Tailwind 4. UI and API (`src/app/api/**`, logic in `src/server/`). Deployed to Vercel. |
+| `backend/` | Database toolkit only: Alembic migrations and seed scripts for Postgres. Not deployed. (The old FastAPI server under `backend/app/api` is retired.) |
+| `documents/` | PRD, SRS, compliance rules, data model, API spec. Start at [`documents/INDEX.md`](documents/INDEX.md). |
 
-### Core Highlights
+## Local development
 
-- **100% Policy Compliant**: Strict adherence to Google's anti-gating policies (CR-1 to CR-6). The option to leave a public Google review is always accessible at every rating level.
-- **Frictionless Customer Journey**: Clean, lightweight mobile web flow (`/r/[slug]`) triggered via physical QR codes without requiring app installations or forced sign-ups.
-- **Smart Draft Suggestions**: Generates customized draft review text from customer-selected tags to remove reviewer friction.
-- **Private Feedback Loop**: Direct channel for constructive customer suggestions and private issue resolution.
-- **Customer Hub**: Lightweight digital hub for menus, loyalty punch cards, and social/contact links.
-- **Owner Dashboard & Analytics**: Real-time scan metrics, rating distributions, tag frequencies, and printable QR standees.
-
----
-
-## Architecture & Tech Stack
-
-- **Backend**:
-  - Python 3.11+ / FastAPI
-  - SQLAlchemy 2.0 (async engine) & PostgreSQL
-  - Alembic for database migrations
-  - APScheduler for background jobs & advisory lock management
-  - Pytest with transactional rollback test fixtures
-- **Frontend**:
-  - Next.js 16 (App Router) & React 19
-  - Tailwind CSS 4
-  - Playwright for end-to-end compliance test suites
-- **Documentation**:
-  - Comprehensive PRD, SRS, compliance specifications, and data models in [`documents/`](documents/).
-
----
-
-## Getting Started
-
-### 1. Backend Setup
+Prerequisites: Node 22+, Python 3.11+, a Postgres database (a Supabase project works).
 
 ```bash
+# 1. Database schema and seed data
 cd backend
-python -m venv .venv
-# Activate virtual environment:
-# Windows: .venv\Scripts\activate
-# Linux/macOS: source .venv/bin/activate
-
+python -m venv .venv && .venv/Scripts/activate      # Linux/macOS: source .venv/bin/activate
 pip install -e .[dev]
+cp .env.example .env                                 # set DATABASE_URL
 alembic upgrade head
-
-# Seed initial plans and demo outlet
 python -m app.seeds.plans
-python -m app.seeds.dev_outlet
+python -m app.seeds.service_catalog
+python -m app.seeds.dev_outlet                       # demo outlet at /r/demo-dental
 
-# Start backend server
-uvicorn app.main:app --port 8000 --reload
+# 2. App (UI + API)
+cd ../frontend
+npm install
+cp .env.example .env.local                           # same DATABASE_URL; see comments inside
+npm run dev                                          # http://localhost:3000
 ```
 
-### 2. Frontend Setup
+With empty provider keys and `ENVIRONMENT=local`, payments use a mock Razorpay, Places returns fake data, and email is printed to the console.
+
+## Tests and checks
 
 ```bash
 cd frontend
-npm install
-npm run dev
+npx tsc --noEmit
+npx eslint src
+npm test              # Vitest: server services and routes, each test in a rolled-back DB transaction
+npm run test:e2e      # Playwright: compliance boundary (SRS-17.1a-g at ratings 1-5), drafts, hub, hub editor
+npx next build
 ```
 
-The frontend will run on [http://localhost:3000](http://localhost:3000) and proxy `/api/*` requests to FastAPI on port 8000.
+`e2e/compliance.spec.ts` is the compliance boundary and must stay green.
 
----
+## Deploying
 
-## Testing
-
-- **Backend Tests**:
-  ```bash
-  cd backend
-  pytest tests -q
-  ```
-- **Frontend E2E Tests**:
-  ```bash
-  cd frontend
-  npm run test:e2e
-  ```
-
----
+See [`documents/26-DEPLOYMENT.md`](documents/26-DEPLOYMENT.md): required services, every environment variable, first deploy, migrations, smoke test, backups, and troubleshooting.
 
 ## License
 
-Proprietary - All rights reserved.
+Proprietary. All rights reserved.

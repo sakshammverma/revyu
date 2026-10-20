@@ -165,12 +165,12 @@ function ReportView({ report, placeId }: { report: GapReport; placeId: string })
         </p>
       </Card>
 
-      <EmailCapture placeId={placeId} />
+      <EmailCapture key={placeId} placeId={placeId} businessName={report.business.name} />
     </div>
   );
 }
 
-function EmailCapture({ placeId }: { placeId: string }) {
+function EmailCapture({ placeId, businessName }: { placeId: string; businessName: string }) {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -206,7 +206,7 @@ function EmailCapture({ placeId }: { placeId: string }) {
             A QR on your receipt helps every happy customer write a Google review in their own words. ₹499/month, 15-day free trial.
           </p>
           <Link
-            href={`/signup?place=${encodeURIComponent(placeId)}`}
+            href={`/signup?place=${encodeURIComponent(placeId)}&name=${encodeURIComponent(businessName)}`}
             className="btn-primary mt-4 min-h-[48px] w-full sm:w-auto"
           >
             Start free trial

@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { FlowFrame } from "@/components/flow/Frame";
 import { ModuleShell, NeutralNotice } from "@/components/hub/ModuleShell";
 import { MenuView } from "@/components/menu/MenuView";
 import { loadMenu } from "@/server/pageData";
+
+export const metadata: Metadata = { title: "Menu & prices" };
 
 export default async function MenuPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

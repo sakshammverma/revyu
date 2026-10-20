@@ -56,12 +56,16 @@ export function assembleDraft(
     return "";
   }
 
-  const phraseFragments = selectedTags.map((tag, i) => {
-    const variants = tag.phrases;
-    if (variants.length === 0) return "";
-    const idx = hashIndex(sessionId, `tag:${tag.id}:${i}`, variants.length);
-    return variants[idx];
-  });
+  const phraseFragments = selectedTags
+    .map((tag, i) => {
+      const variants = tag.phrases.filter((p) => p.trim() !== "");
+      if (variants.length === 0) return "";
+      const idx = hashIndex(sessionId, `tag:${tag.id}:${i}`, variants.length);
+      return variants[idx].trim();
+    })
+    // A tag with no phrasing contributes nothing (never "X and .").
+    .filter((f) => f !== "");
+  if (phraseFragments.length === 0) return "";
 
   const openingIdx = hashIndex(sessionId, "opening", OPENING_TEMPLATES.length);
   const opening = OPENING_TEMPLATES[openingIdx].replace("{name}", facts.businessName);

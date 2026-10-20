@@ -27,13 +27,24 @@ function Scanner({ onCode, onClose }: { onCode: (v: string) => void; onClose: ()
   const video = useRef<HTMLVideoElement>(null);
   const [err, setErr] = useState<string | null>(null);
 
+  // Read the callback through a ref: the parent passes a new function each
+  // render, and restarting the camera on every render is slow and flickers.
+  const onCodeRef = useRef(onCode);
+  useEffect(() => {
+    onCodeRef.current = onCode;
+  });
+
   useEffect(() => {
     let stream: MediaStream | null = null;
     let stop = false;
     (async () => {
       try {
         stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-        if (!video.current) return;
+        // Closed while the permission prompt was up: release the camera now.
+        if (stop || !video.current) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
         video.current.srcObject = stream;
         await video.current.play();
         const Ctor = (window as unknown as { BarcodeDetector: new (o: { formats: string[] }) => Detector }).BarcodeDetector;
@@ -42,7 +53,7 @@ function Scanner({ onCode, onClose }: { onCode: (v: string) => void; onClose: ()
           if (stop || !video.current) return;
           const found = await detector.detect(video.current).catch(() => []);
           const hit = found.find((f) => /^[A-Z0-9]{4}-\d{6}$/.test(f.rawValue));
-          if (hit) onCode(hit.rawValue);
+          if (hit) onCodeRef.current(hit.rawValue);
           else setTimeout(tick, 250);
         };
         tick();
@@ -54,7 +65,7 @@ function Scanner({ onCode, onClose }: { onCode: (v: string) => void; onClose: ()
       stop = true;
       stream?.getTracks().forEach((t) => t.stop());
     };
-  }, [onCode]);
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center gap-4 p-4" role="dialog" aria-modal="true" aria-label="Scan customer code">
@@ -110,6 +121,8 @@ export function StaffConsole({ slug }: { slug: string }) {
   const [redeemed, setRedeemed] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
   const [transfer, setTransfer] = useState<{ code: string; valid_minutes: number } | null>(null);
+  // Reward codes typed by staff in lookup mode, keyed by grant id.
+  const [typedCodes, setTypedCodes] = useState<Record<string, string>>({});
 
   // eslint-disable-next-line react-hooks/set-state-in-effect -- sync with external/async source on mount
   useEffect(() => setAuthed(!!getStaffToken(slug)), [slug]);
@@ -168,10 +181,12 @@ export function StaffConsole({ slug }: { slug: string }) {
   }
 
   async function redeem(g: Grant) {
+    const rc = g.redeem_code ?? typedCodes[g.id]?.trim();
+    if (!rc) return;
     setBusy(true);
     setError(null);
     try {
-      const r = await staffRedeem(slug, g.redeem_code);
+      const r = await staffRedeem(slug, rc);
       setRedeemed(`${r.title} redeemed for ${r.member}`);
       setResult((cur) => (cur ? { ...cur, pending_rewards: cur.pending_rewards.filter((x) => x.id !== g.id) } : cur));
       setLookup((cur) => (cur ? { ...cur, pending_rewards: cur.pending_rewards.filter((x) => x.id !== g.id) } : cur));
@@ -236,9 +251,11 @@ export function StaffConsole({ slug }: { slug: string }) {
           )}
           <button
             type="button"
-            disabled={busy}
+            // A second tap would replace the code already read out to the customer.
+            disabled={busy || transfer !== null}
             onClick={async () => {
-              try { setTransfer(await staffTransferCode(slug, member.public_id)); } catch (e) { expire(e); }
+              setBusy(true);
+              try { setTransfer(await staffTransferCode(slug, member.public_id)); } catch (e) { expire(e); } finally { setBusy(false); }
             }}
             className="mt-3 text-sm text-[#515a63] underline min-h-[44px]"
           >
@@ -252,9 +269,36 @@ export function StaffConsole({ slug }: { slug: string }) {
           {pending.length > 0 ? (
             <ul className="mt-3 flex flex-col gap-2">
               {pending.map((g) => (
-                <li key={g.id} className="flex items-center justify-between gap-3 rounded-xl border border-[#d5dcdc] p-3">
-                  <span className="min-w-0 text-sm"><span className="block font-semibold text-[#1a1e23]">{g.title}</span><span className="text-[#59636a]">{rewardLine(g)}</span></span>
-                  <button type="button" disabled={busy} onClick={() => redeem(g)} className="btn-primary min-h-[44px] px-4 shrink-0">Redeem</button>
+                <li key={g.id} className="rounded-xl border border-[#d5dcdc] p-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="min-w-0 text-sm"><span className="block font-semibold text-[#1a1e23]">{g.title}</span><span className="text-[#59636a]">{rewardLine(g)}</span></span>
+                    {g.redeem_code && (
+                      <button type="button" disabled={busy} onClick={() => redeem(g)} className="btn-primary min-h-[44px] px-4 shrink-0">Redeem</button>
+                    )}
+                  </div>
+                  {!g.redeem_code && (
+                    // Looked up by member id: the customer must be here to read out the code on their phone.
+                    <form
+                      className="mt-2 flex gap-2"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        redeem(g);
+                      }}
+                    >
+                      <label className="sr-only" htmlFor={`rc-${g.id}`}>Reward code from the customer&rsquo;s phone</label>
+                      <input
+                        id={`rc-${g.id}`}
+                        value={typedCodes[g.id] ?? ""}
+                        onChange={(e) => setTypedCodes((c) => ({ ...c, [g.id]: e.target.value.toUpperCase() }))}
+                        placeholder="Code on their phone"
+                        autoComplete="off"
+                        autoCapitalize="characters"
+                        maxLength={12}
+                        className="min-w-0 flex-1 rounded-lg border border-[#d5dcdc] px-3 font-mono tracking-widest outline-none focus:border-[#397dff] focus:ring-2 focus:ring-[#397dff]/25"
+                      />
+                      <button type="submit" disabled={busy || !(typedCodes[g.id] ?? "").trim()} className="btn-primary min-h-[44px] px-4 shrink-0 disabled:opacity-40">Redeem</button>
+                    </form>
+                  )}
                 </li>
               ))}
             </ul>

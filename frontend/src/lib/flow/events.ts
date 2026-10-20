@@ -5,7 +5,8 @@
  */
 
 import { API_BASE } from "@/lib/api-base";
-const STORAGE_KEY = "revyu:pending-events";
+const STORAGE_KEY = "revyu:pending-events:v2";
+const MAX_BUFFERED = 50;
 
 export type EventType =
   | "scan"
@@ -47,16 +48,25 @@ function sendBatch(ctx: EventContext, events: QueuedEvent[]): boolean {
     headers: { "Content-Type": "application/json" },
     body,
     keepalive: true,
-  }).catch(() => bufferForRetry(events));
+  }).catch(() => bufferForRetry(ctx, events));
 
   return true;
 }
 
-function bufferForRetry(events: QueuedEvent[]) {
+// Each buffered entry keeps the outlet and session it belongs to, so a retry
+// from another outlet's page never files events under the wrong business.
+type Buffered = EventContext & { events: QueuedEvent[] };
+
+function readBuffer(): Buffered[] {
+  const parsed = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "[]");
+  return Array.isArray(parsed) ? parsed : [];
+}
+
+function bufferForRetry(ctx: EventContext, events: QueuedEvent[]) {
   if (typeof window === "undefined") return;
   try {
-    const existing = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? "[]");
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify([...existing, ...events]));
+    const next = [...readBuffer(), { outletId: ctx.outletId, sessionId: ctx.sessionId, events }].slice(-MAX_BUFFERED);
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
   } catch {
     // Best-effort only — never throw from telemetry.
   }
@@ -71,15 +81,17 @@ export function track(ctx: EventContext, type: EventType, payload?: Record<strin
 }
 
 /** Retry anything buffered from a previous failed send. Call once on mount. */
-export function retryBuffered(ctx: EventContext) {
+export function retryBuffered() {
   if (typeof window === "undefined") return;
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return;
-    const events: QueuedEvent[] = JSON.parse(raw);
-    if (events.length === 0) return;
+    const entries = readBuffer();
+    if (entries.length === 0) return;
     window.localStorage.removeItem(STORAGE_KEY);
-    sendBatch(ctx, events);
+    for (const e of entries) {
+      if (e && typeof e.outletId === "string" && Array.isArray(e.events) && e.events.length) {
+        sendBatch({ outletId: e.outletId, sessionId: e.sessionId }, e.events);
+      }
+    }
   } catch {
     // Ignore — best-effort retry only.
   }

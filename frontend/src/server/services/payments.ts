@@ -37,6 +37,8 @@ export interface CreateCheckoutArgs {
   planCode: string;
   amountMinor: number;
   currencyCode: string;
+  /** The gateway's recurring-plan id for this price (plans.provider_plan_id). */
+  providerPlanId?: string | null;
   customerEmail: string;
   trialDays: number;
 }
@@ -185,8 +187,9 @@ export class RazorpayProvider implements PaymentProvider {
   }
 
   private async createMandate(args: CreateCheckoutArgs): Promise<CheckoutIntent> {
-    const planId = this.planIds[args.planCode];
-    if (!planId) throw new PaymentProviderUnavailableError(`No Razorpay plan id configured for '${args.planCode}'`);
+    // The env ids are INR plans: never use them for another currency.
+    const planId = args.providerPlanId ?? (args.currencyCode === "INR" ? this.planIds[args.planCode] : undefined);
+    if (!planId) throw new PaymentProviderUnavailableError(`No Razorpay plan id configured for '${args.planCode}' in ${args.currencyCode}`);
     const data = await this.post(
       "/subscriptions",
       {

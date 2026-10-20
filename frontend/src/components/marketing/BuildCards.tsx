@@ -28,8 +28,6 @@ export function BuildCards() {
     "quick and easy",
   ]);
 
-  // Interactive state for Card 2 (Visitors can click copy!)
-  const [copiedToast, setCopiedToast] = useState(false);
 
   // Same assembler as the live customer flow — zero tags gives an empty draft (CR-1).
   const draft = assembleDraft(
@@ -75,12 +73,8 @@ export function BuildCards() {
 
   function handleCopyCard2() {
     navigator.clipboard?.writeText(draft);
-    setCopiedToast(true);
     setStepCard2(1);
-    setTimeout(() => {
-      setStepCard2(2);
-      setCopiedToast(false);
-    }, 1200);
+    setTimeout(() => setStepCard2(2), 1200);
   }
 
   return (
@@ -107,9 +101,9 @@ export function BuildCards() {
             onMouseEnter={() => setPaused1(true)}
             onMouseLeave={() => setPaused1(false)}
           >
-            {/* Cinematic Scenic Background with Frost Overlay */}
+            {/* Shop photo background with frost overlay */}
             <Image
-              src="/images/landscape-architectural-haven.jpg"
+              src="/images/shop-supermart-front.jpg"
               alt=""
               fill
               className="object-cover"
@@ -291,9 +285,9 @@ export function BuildCards() {
             onMouseEnter={() => setPaused2(true)}
             onMouseLeave={() => setPaused2(false)}
           >
-            {/* Cinematic Scenic Background */}
+            {/* Shop photo background */}
             <Image
-              src="/images/landscape-emerald-forest.jpg"
+              src="/images/shop-supermarket-evening.jpg"
               alt=""
               fill
               className="object-cover"
@@ -450,9 +444,9 @@ export function BuildCards() {
             onMouseEnter={() => setPaused3(true)}
             onMouseLeave={() => setPaused3(false)}
           >
-            {/* Cinematic Scenic Background */}
+            {/* Shop photo background */}
             <Image
-              src="/images/landscape-dolomites-alpine.jpg"
+              src="/images/shop-medical-counter.jpg"
               alt=""
               fill
               className="object-cover"

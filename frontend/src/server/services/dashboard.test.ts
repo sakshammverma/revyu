@@ -111,6 +111,41 @@ describe("overview", () => {
     }));
 });
 
+describe("locked dashboard (SRS-9.6, SRS-9.8)", () => {
+  it.each(["locked", "suspended"])("%s: overview counts stay readable, detailed views answer 402", (state) =>
+    inTx(async (tx) => {
+      const { outlet, session } = await owner(tx, { state });
+      const s = await makeSession(tx, outlet);
+      const fb = crypto.randomUUID();
+      await tx.insert(privateFeedback).values({
+        id: fb, outletId: outlet.id, sessionId: s.id, rating: 2, message: "cold", contact: null, resolved: false,
+      });
+      const ctx = routeCtx({ outletId: outlet.id });
+      const base = `/api/app/outlets/${outlet.id}`;
+
+      const overview = await getOverview(makeRequest(`${base}/overview`, { session }), ctx);
+      expect(overview.status).toBe(200);
+      expect(await overview.json()).toMatchObject({ dashboard_locked: true, feedback_count: 1 });
+
+      for (const [route, path] of [
+        [getFunnel, "funnel"],
+        [getTags, "tags"],
+        [getRating, "rating"],
+        [getFeedback, "feedback"],
+      ] as const) {
+        const res = await route(makeRequest(`${base}/${path}`, { session }), ctx);
+        expect(res.status, path).toBe(402);
+        expect(await res.json()).toEqual({ detail: { error: { code: "DASHBOARD_LOCKED" } } });
+      }
+      const patch = await patchFeedback(
+        makeRequest(`/api/app/feedback/${fb}`, { method: "PATCH", body: { resolved: true }, session }),
+        routeCtx({ feedbackId: fb }),
+      );
+      expect(patch.status).toBe(402);
+    }),
+  );
+});
+
 describe("funnel", () => {
   it("counts rows for scan, distinct sessions after, drop-off rounded, range windows", () =>
     inTx(async (tx) => {

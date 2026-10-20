@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function FinalCTA() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
 
   return (
@@ -39,11 +40,7 @@ export function FinalCTA() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              if (email.trim()) {
-                window.location.href = `/signup?email=${encodeURIComponent(email.trim())}`;
-              } else {
-                window.location.href = "/signup";
-              }
+              router.push(email.trim() ? `/signup?email=${encodeURIComponent(email.trim())}` : "/signup");
             }}
             className="mt-8 sm:mt-10 w-full max-w-md bg-white border border-[#e8ecec] p-1.5 rounded-full shadow-v2-elevated flex items-center gap-2 hover:border-[#cbd5e1] transition-colors"
           >

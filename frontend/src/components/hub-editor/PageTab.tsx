@@ -195,8 +195,8 @@ export function PageTab({ api, state, reload, toast, isAdmin }: TabProps) {
               {hoursSet && (
                 <ul className="flex flex-col gap-2">
                   {DAYS.map(([k, label]) => (
-                    <li key={k} className="flex items-center gap-2 text-sm">
-                      <span className="w-20 text-[#515a63]">{label.slice(0, 3)}</span>
+                    <li key={k} className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm">
+                      <span className="w-12 sm:w-20 text-[#515a63]">{label.slice(0, 3)}</span>
                       <label className="inline-flex items-center gap-1.5 w-20">
                         <input type="checkbox" checked={days[k].closed} onChange={(e) => setDays({ ...days, [k]: { ...days[k], closed: e.target.checked } })} /> Closed
                       </label>

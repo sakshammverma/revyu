@@ -40,8 +40,13 @@ export function RewardsTab({ api, state, reload, toast }: TabProps) {
     setTerms(d.terms ?? "");
   }, [api]);
 
+  const [loadFailed, setLoadFailed] = useState(false);
+  const retryLoad = () => {
+    setLoadFailed(false);
+    load().catch(() => setLoadFailed(true));
+  };
   // eslint-disable-next-line react-hooks/set-state-in-effect -- sync with external/async source on mount
-  useEffect(() => { load().catch(() => toast("Couldn't load rewards.", "error")); }, [load, toast]);
+  useEffect(() => { load().catch(() => setLoadFailed(true)); }, [load]);
 
   const fail = (e: unknown) => toast(e instanceof HubApiError ? e.message : "Something went wrong.", "error");
 
@@ -67,6 +72,15 @@ export function RewardsTab({ api, state, reload, toast }: TabProps) {
     }
   }
 
+  if (!data && loadFailed)
+    return (
+      <div role="alert" className="p-6 text-center bg-alert-50 rounded-xl border border-alert/20">
+        <p className="text-alert font-semibold">We couldn&rsquo;t load your rewards settings.</p>
+        <button type="button" className="btn-primary mt-4 min-h-[44px] px-5" onClick={retryLoad}>
+          Try again
+        </button>
+      </div>
+    );
   if (!data) return <div className="ui-skeleton h-48 rounded-2xl" />;
 
   if (!data.acknowledged)

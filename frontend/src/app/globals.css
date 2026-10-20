@@ -469,6 +469,12 @@ body {
   border-radius: 4px;
 }
 
+/* Headings focused in code (step changes) are landmarks, not controls. */
+h1[tabindex="-1"]:focus,
+h2[tabindex="-1"]:focus {
+  outline: none;
+}
+
 @keyframes uiShimmer {
   from { background-position: 200% 0; }
   to { background-position: -200% 0; }

@@ -2,6 +2,15 @@ import type { FlowConfig } from "@/lib/flow/api";
 import { API_BASE } from "@/lib/api-base";
 const TOKEN_KEY = "revyu:admin-token";
 
+// The token lives in sessionStorage (cleared when the tab closes). Listeners
+// let <AdminTokenGate> re-prompt as soon as a request comes back 401.
+const listeners = new Set<() => void>();
+
+export function subscribeAdminToken(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
 export function getAdminToken(): string | null {
   if (typeof window === "undefined") return null;
   return window.sessionStorage.getItem(TOKEN_KEY);
@@ -9,10 +18,12 @@ export function getAdminToken(): string | null {
 
 export function setAdminToken(token: string) {
   window.sessionStorage.setItem(TOKEN_KEY, token);
+  listeners.forEach((l) => l());
 }
 
 export function clearAdminToken() {
   window.sessionStorage.removeItem(TOKEN_KEY);
+  listeners.forEach((l) => l());
 }
 
 async function adminFetch(path: string, init: RequestInit = {}) {
@@ -22,7 +33,7 @@ async function adminFetch(path: string, init: RequestInit = {}) {
     ...init,
     headers: {
       ...init.headers,
-      Authorization: `Bearer ${token}`,
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       // Never set Content-Type for FormData — the browser must set its own
       // multipart boundary, or the backend can't parse the upload.
       ...(init.body && !isFormData ? { "Content-Type": "application/json" } : {}),

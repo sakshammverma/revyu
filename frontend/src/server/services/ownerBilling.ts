@@ -5,20 +5,21 @@
  * interface and webhook machinery of signup; the synchronous confirm just
  * makes the unlock instant instead of waiting for the webhook.
  */
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
 
 import { schema, type DbLike } from "@/server/db";
 import { HttpError } from "@/server/http";
 import { DAY_MS, latestSubscription, periodDays, recordPayment } from "./billing";
 import { getProvider, getProviderByName, PaymentProviderUnavailableError } from "./payments";
+import { countryPricingFor, plansFor } from "./pricing";
 import { pyIso } from "./pyDate";
 import { summary as referralSummary } from "./referrals";
 import { checkoutInfo, paymentUnavailable } from "./signup";
 import { TRIAL_DAYS } from "./trial";
 import { TRIAL_CREDITS } from "./trialMetering";
 
-const { outlets, payments, plans, subscriptions } = schema;
+const { outlets, payments, subscriptions } = schema;
 
 type Account = typeof schema.accounts.$inferSelect;
 type OutletRow = typeof outlets.$inferSelect;
@@ -33,13 +34,7 @@ export async function ownOutlet(db: DbLike, owner: Pick<Account, "id">): Promise
   return outlet;
 }
 
-const activePlans = (db: DbLike, outlet: OutletRow) =>
-  db
-    .select()
-    .from(plans)
-    .where(and(eq(plans.countryCode, outlet.countryCode), eq(plans.active, true)))
-    // The Python has no ORDER BY (heap order, in practice cheapest first); pin it.
-    .orderBy(asc(plans.amountMinor));
+const activePlans = async (db: DbLike, outlet: OutletRow) => (await plansFor(db, outlet.countryCode)).plans;
 
 export async function billingStatus(db: DbLike, owner: Pick<Account, "id">) {
   const outlet = await ownOutlet(db, owner);
@@ -116,6 +111,7 @@ export async function createBillingCheckout(db: DbLike, owner: Account, planCode
       planCode: plan.code,
       amountMinor: plan.amountMinor,
       currencyCode: plan.currencyCode,
+      providerPlanId: plan.providerPlanId,
       customerEmail: owner.ownerEmail,
       trialDays: 0,
     });
@@ -186,6 +182,9 @@ export async function confirmBillingCheckout(db: DbLike, owner: Account, body: C
   }
 
   const plan = (await activePlans(db, outlet)).find((p) => p.code === sub.plan);
+  // Payment is already verified, so never fail here: if the price row has since
+  // changed, record in the outlet's own currency rather than assuming INR.
+  const currencyCode = plan?.currencyCode ?? (await countryPricingFor(db, outlet.countryCode)).currency_code;
   const now = new Date();
   await db.transaction(async (tx) => {
     // Claim the transition atomically so a double submit (or a webhook racing
@@ -204,7 +203,7 @@ export async function confirmBillingCheckout(db: DbLike, owner: Account, body: C
     await recordPayment(tx, sub, {
       providerPaymentId: sub.provider === "mock" ? null : body.razorpay_payment_id,
       amountMinor: plan?.amountMinor ?? 0,
-      currencyCode: plan?.currencyCode ?? "INR",
+      currencyCode,
       // A mandate is only authorised here; its charge is confirmed by the webhook.
       status: sub.razorpayOrderId ? "captured" : "authorized",
       webhookVerified: false,

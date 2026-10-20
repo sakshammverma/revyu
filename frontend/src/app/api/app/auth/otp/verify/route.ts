@@ -19,7 +19,8 @@ export const POST = handler(async (request: Request) => {
       : new HttpError(400, "OTP_INVALID");
   }
   return Response.json(
-    { session_token: result.session.rawToken, expires_at: result.session.expiresAt.toISOString() },
+    // The token travels only in the HttpOnly cookie, never in a body script can read.
+    { expires_at: result.session.expiresAt.toISOString() },
     { headers: { "Set-Cookie": sessionCookie(result.session.rawToken, !getEnv().isLocal) } },
   );
 });

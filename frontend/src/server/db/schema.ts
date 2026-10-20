@@ -17,15 +17,30 @@ export const alembicVersion = pgTable("alembic_version", {
 	versionNum: varchar("version_num", { length: 32 }).primaryKey().notNull(),
 });
 
+export const pricingTiers = pgTable("pricing_tiers", {
+	code: text().primaryKey().notNull(),
+	name: text().notNull(),
+});
+
+export const countryPricing = pgTable("country_pricing", {
+	countryCode: text("country_code").primaryKey().notNull(),
+	tierCode: text("tier_code").notNull().references(() => pricingTiers.code),
+	currencyCode: varchar("currency_code", { length: 3 }).notNull(),
+	locale: text().notNull(),
+	active: boolean().default(true).notNull(),
+});
+
 export const plans = pgTable("plans", {
 	id: uuid().primaryKey().notNull(),
 	code: varchar().notNull(),
-	countryCode: varchar("country_code").notNull(),
+	countryCode: varchar("country_code"),
 	currencyCode: varchar("currency_code").notNull(),
 	amountMinor: integer("amount_minor").notNull(),
 	active: boolean().notNull(),
+	tierCode: text("tier_code").references(() => pricingTiers.code),
+	providerPlanId: text("provider_plan_id"),
 }, (table) => [
-	uniqueIndex("ux_plans_code_country_active").using("btree", table.code.asc().nullsLast().op("text_ops"), table.countryCode.asc().nullsLast().op("text_ops")).where(sql`active`),
+	uniqueIndex("ux_plans_code_tier_currency_active").using("btree", table.code.asc().nullsLast().op("text_ops"), table.tierCode.asc().nullsLast().op("text_ops"), table.currencyCode.asc().nullsLast().op("text_ops")).where(sql`active`),
 ]);
 
 export const events = pgTable("events", {

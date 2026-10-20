@@ -169,14 +169,13 @@ describe("login over HTTP handlers", () => {
       const ok = await otpVerify(makeRequest("/api/app/auth/otp/verify", { body: { email: account.ownerEmail, code: otp.code } }));
       expect(ok.status).toBe(200);
       const body = await ok.json();
-      expect(Object.keys(body).sort()).toEqual(["expires_at", "session_token"]);
+      expect(Object.keys(body)).toEqual(["expires_at"]); // token only in the HttpOnly cookie
       const cookie = cookieOf(ok);
       expect(cookie).toContain("HttpOnly");
       expect(cookie).toContain("SameSite=Lax");
       expect(cookie).toContain(`Max-Age=${30 * 24 * 3600}`);
       expect(cookie).not.toContain("Secure"); // ENVIRONMENT=local
       const raw = rawFrom(ok);
-      expect(body.session_token).toBe(raw);
 
       expect((await requireOwner(makeRequest("/api/app/x", { session: raw }), tx)).id).toBe(account.id);
 

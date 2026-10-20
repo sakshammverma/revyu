@@ -69,19 +69,20 @@ function CounterCode({ slug, onClose }: { slug: string; onClose: () => void }) {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- sync with external/async source on mount
     load();
   }, [load]);
+  // Count down once a second; fetching a fresh code is a separate step so it
+  // runs once per expiry (never inside a state updater, which StrictMode doubles).
   useEffect(() => {
     if (!code) return;
-    const t = setInterval(() => {
-      setLeft((n) => {
-        if (n <= 1) {
-          load();
-          return 0;
-        }
-        return n - 1;
-      });
-    }, 1000);
+    const t = setInterval(() => setLeft((n) => Math.max(0, n - 1)), 1000);
     return () => clearInterval(t);
-  }, [code, load]);
+  }, [code]);
+  // Refresh on expiry. After an error, wait for "Try again" instead of retrying
+  // every second (a paused outlet or a dead connection won't fix itself).
+  useEffect(() => {
+    if (!code || left > 0 || err) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- refetch from an external source on expiry
+    load();
+  }, [code, left, err, load]);
 
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center p-6 text-center" role="dialog" aria-modal="true" aria-label="Your visit code">
@@ -102,7 +103,14 @@ function CounterCode({ slug, onClose }: { slug: string; onClose: () => void }) {
         <div className="h-full bg-[#2f68db] transition-[width] duration-1000 ease-linear motion-reduce:transition-none" style={{ width: `${(left / 60) * 100}%` }} />
       </div>
       <p className="mt-2 text-xs text-[#59636a]">Refreshes automatically · turn your screen brightness up</p>
-      {err && <p className="mt-4 text-sm text-[#c62445]" role="alert">{err}</p>}
+      {err && (
+        <div className="mt-4" role="alert">
+          <p className="text-sm text-[#c62445]">{err}</p>
+          <button type="button" onClick={load} className="mt-2 min-h-[44px] px-4 text-sm font-semibold underline underline-offset-2 text-[#1a1e23]">
+            Try again
+          </button>
+        </div>
+      )}
       <button type="button" onClick={onClose} className="btn-pill-light min-h-[48px] px-8 mt-10">Done</button>
     </div>
   );

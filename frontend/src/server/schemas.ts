@@ -15,6 +15,8 @@ export const feedbackBody = z.object({
   rating: z.number().int().min(1).max(5).nullish(),
   message: z.string().max(2000),
   contact: z.string().max(200).nullish(),
+  /** Client-generated, so a retry after a timeout can't store the message twice. */
+  feedback_id: z.guid().nullish(),
 });
 
 export const eventsBody = z.object({
@@ -37,9 +39,12 @@ export const otpVerifyBody = z.object({
   code: z.string().regex(/^\d{6}$/),
 });
 
-export const gapReportQuery = z.object({ place_id: z.string().min(3).max(200) });
+/** Google place ids are URL-safe base64; anything else never reaches the Places URL path. */
+export const placeIdSchema = z.string().regex(/^[A-Za-z0-9_-]{3,300}$/);
+
+export const gapReportQuery = z.object({ place_id: placeIdSchema });
 
 export const gapReportEmailBody = z.object({
-  place_id: z.string().min(3).max(200),
+  place_id: placeIdSchema,
   email: z.email(),
 });

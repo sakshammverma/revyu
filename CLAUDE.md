@@ -8,7 +8,8 @@ Guidance for Claude Code when working in this repository.
 
 - `frontend/` Next.js 16 (App Router) + React 19 + Tailwind 4. **It is the whole product**: UI plus the API (`src/app/api/**`, logic in `src/server/`), deployed to Vercel, talking to Supabase Postgres.
 - `backend/` the former FastAPI server, now only the **database toolkit**: Alembic migrations and seed scripts (Postgres). It is not deployed and serves nothing; see `backend/README.md`.
-- `documents/` specs (PRD, SRS with `FR-n`/`SRS-n` IDs, data model, API spec)
+- `documents/` specs (PRD, SRS with `FR-n`/`SRS-n` IDs, data model, API spec). Production runbook (env vars, deploy, backups): `documents/26-DEPLOYMENT.md`; template env: `frontend/.env.example`.
+- Every route handler goes through `handler()` in `src/server/http.ts` (error mapping, CSRF guard for cookie writes). Rate limits: `rateLimit` (per IP) / `rateLimitKey` (any key) / `rateLimitReached` (peek, for failure-only lockouts).
 
 ## Database toolkit (`cd backend`, use `.venv/Scripts/python.exe` on Windows)
 

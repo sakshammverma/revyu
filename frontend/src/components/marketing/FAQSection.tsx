@@ -26,7 +26,7 @@ const FAQS = [
   },
   {
     q: "What does it cost?",
-    a: "15 days free, then 10 more credits, then \u20B9499 a month or \u20B94,499 a year. One price for every kind of business. Less than one regular customer brings you in a year.",
+    a: "\u20B9499 a month or \u20B94,499 a year, one price for every kind of business. The first 15 days are free: you set up autopay at signup, the first charge comes after the trial, and if you cancel before then you pay nothing.",
   },
   {
     q: "Will this fix my rating overnight?",

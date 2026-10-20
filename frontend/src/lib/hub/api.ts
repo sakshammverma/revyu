@@ -1,5 +1,6 @@
 import { API_BASE } from "@/lib/api-base";
 import { getAdminToken } from "@/lib/admin/api";
+import { redirectToOwnerLogin } from "@/lib/ownerSession";
 import type { CheckoutInfo } from "@/lib/signup/api";
 
 /* ------------------------------------------------------------------ types */
@@ -109,7 +110,8 @@ export interface Grant {
   percent: number | null;
   value_minor: number | null;
   currency_code: string;
-  redeem_code: string;
+  /** Absent in a staff member lookup: there the customer reads it out from their phone. */
+  redeem_code?: string;
   expires_at: string | null;
   status: "available" | "used" | "expired";
 }
@@ -296,6 +298,7 @@ export const ownerTransport: Transport = async (method, path, b) => {
     credentials: "include",
     cache: "no-store",
   });
+  if (res.status === 401) redirectToOwnerLogin();
   return parse(res);
 };
 

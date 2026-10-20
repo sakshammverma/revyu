@@ -155,7 +155,8 @@ test("customer joins, staff records the visit and redeems once", async ({ page, 
   await staff.getByRole("button", { name: "Go" }).click();
   await staff.getByLabel("Customer code").fill(code);
   await staff.getByRole("button", { name: "Record visit" }).click();
-  await expect(staff.getByText(/Visit recorded/)).toBeVisible();
+  // First hit compiles the staff routes under `next dev`, which can take longer than the 5s default.
+  await expect(staff.getByText(/Visit recorded/)).toBeVisible({ timeout: 20_000 });
   await expect(staff.getByText(/New badge: Regular/)).toBeVisible();
 
   await staff.getByRole("button", { name: "Redeem", exact: true }).click();

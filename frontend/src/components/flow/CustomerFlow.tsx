@@ -55,20 +55,34 @@ export function CustomerFlow({ slug, config }: Props) {
   const [feedbackBusy, setFeedbackBusy] = useState(false);
   const [feedbackError, setFeedbackError] = useState(false);
   const feedbackRef = useRef<HTMLTextAreaElement>(null);
+  const feedbackId = useRef<string | null>(null);
   // Where "Back" returns to from the private-feedback screen.
   const returnStep = useRef<Step>("rating");
 
   useEffect(() => {
     if (preview) return;
     createSession(slug, sessionId, deviceHash);
-    retryBuffered(ctx);
+    retryBuffered();
     track(ctx, "flow_start");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Keep each new screen at the top so the primary action is in view.
+  // Keep each new screen at the top so the primary action is in view, and move
+  // focus to its heading: the button that was pressed has just unmounted, and
+  // screen-reader users need to hear where they are.
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const firstStep = useRef(true);
   useEffect(() => {
     window.scrollTo({ top: 0 });
+    if (firstStep.current) {
+      firstStep.current = false;
+      return;
+    }
+    const heading = sheetRef.current?.querySelector<HTMLElement>("h1, h2");
+    if (heading) {
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+    }
   }, [step]);
 
   const positive = rating !== null && rating >= 4;
@@ -133,16 +147,24 @@ export function CustomerFlow({ slug, config }: Props) {
     if (!feedbackText.trim() || feedbackBusy) return;
     setFeedbackBusy(true);
     setFeedbackError(false);
-    const ok = preview
-      ? true
-      : await submitFeedback(slug, {
-          session_id: sessionId,
-          rating,
-          message: feedbackText,
-          contact: contact.trim() || undefined,
-        });
+    // One id per message: a retry after a timeout can't store it twice.
+    feedbackId.current ??= crypto.randomUUID();
+    let ok = true;
+    if (!preview) {
+      // The session is created fire-and-forget on load; if the customer was
+      // offline then, create it now (idempotent) or the feedback is refused.
+      await createSession(slug, sessionId, deviceHash);
+      ok = await submitFeedback(slug, {
+        session_id: sessionId,
+        rating,
+        message: feedbackText,
+        contact: contact.trim() || undefined,
+        feedback_id: feedbackId.current,
+      });
+    }
     setFeedbackBusy(false);
     if (ok) {
+      feedbackId.current = null;
       emit("private_feedback_submitted", { rating });
       setStep("private_sent");
     } else {
@@ -160,7 +182,7 @@ export function CustomerFlow({ slug, config }: Props) {
 
   return (
     <>
-      <div className={`v2-sheet border border-line p-5 sm:p-8 ${showStickyOptions ? "mb-36" : ""}`}>
+      <div ref={sheetRef} className={`v2-sheet border border-line p-5 sm:p-8 ${showStickyOptions ? "mb-36" : ""}`}>
         {/* Brand header */}
         <div className="flex items-center justify-between gap-3 pb-4 mb-5 border-b border-line">
           <div className="flex items-center gap-2 min-w-0">
@@ -221,7 +243,6 @@ export function CustomerFlow({ slug, config }: Props) {
             onSend={handleSendFeedback}
             onGoogle={googleUrl ? goToGoogle : undefined}
             onBack={() => setStep(returnStep.current)}
-            autoFocus={!positive}
           />
         )}
 
@@ -270,7 +291,7 @@ export function CustomerFlow({ slug, config }: Props) {
               onChange={(e) => handleDraftChange(e.target.value)}
             />
             <FlowButton variant="primary" onClick={handleCopyAndHandoff} disabled={!googleUrl && !draft.trim()}>
-              Copy &amp; Continue to Google →
+              {googleUrl ? <>Copy &amp; Continue to Google →</> : "Copy my review"}
             </FlowButton>
             <BackLink onClick={() => setStep("tags")} />
           </div>
@@ -343,7 +364,7 @@ function HandoffScreen({ copied, draft, onContinue }: { copied: boolean; draft: 
         </span>
         <div role="status">
           <h2 className="text-base font-semibold text-ink">{copied ? "Copied to your clipboard!" : "Select and copy your review"}</h2>
-          <p className="text-sm text-text-2">Ready to paste into Google Maps.</p>
+          <p className="text-sm text-text-2">{onContinue ? "Ready to paste into Google Maps." : "Paste it wherever you like to share it."}</p>
         </div>
       </div>
 
@@ -353,9 +374,11 @@ function HandoffScreen({ copied, draft, onContinue }: { copied: boolean; draft: 
         </div>
       )}
 
-      <p className="text-sm text-text-2 leading-relaxed">
-        Next step: paste your draft into Google Maps. You may need to sign in with your Google account first.
-      </p>
+      {onContinue && (
+        <p className="text-sm text-text-2 leading-relaxed">
+          Next step: paste your draft into Google Maps. You may need to sign in with your Google account first.
+        </p>
+      )}
 
       {onContinue ? (
         <FlowButton variant="primary" onClick={onContinue}>
@@ -401,7 +424,6 @@ function PrivateScreen({
   onSend,
   onGoogle,
   onBack,
-  autoFocus,
 }: {
   positive: boolean;
   busy: boolean;
@@ -414,7 +436,6 @@ function PrivateScreen({
   onSend: () => void;
   onGoogle?: () => void;
   onBack: () => void;
-  autoFocus: boolean;
 }) {
   return (
     <div className="flex flex-col gap-4">
@@ -434,7 +455,6 @@ function PrivateScreen({
       <textarea
         id="private-message"
         ref={feedbackRef}
-        autoFocus={autoFocus}
         maxLength={2000}
         className="w-full min-h-[104px] rounded-xl border border-line-strong bg-white p-4 text-base leading-relaxed text-ink placeholder:text-text-muted outline-none focus:border-accent focus:ring-2 focus:ring-accent/25 transition-colors"
         placeholder={positive ? "Your message to the owner" : "What went wrong with your visit?"}
@@ -473,7 +493,8 @@ function PrivateScreen({
           </FlowButton>
         </>
       )}
-      {positive && <BackLink onClick={onBack} />}
+      {/* Every rating can go back, e.g. to fix a mis-tapped star. */}
+      <BackLink onClick={onBack} />
     </div>
   );
 }

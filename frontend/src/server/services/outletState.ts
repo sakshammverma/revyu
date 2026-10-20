@@ -15,6 +15,13 @@ export function isCollecting(state: string): boolean {
   return COLLECTING_STATES.has(state);
 }
 
+/**
+ * States whose owner dashboard is behind the paywall (SRS-9.6, FR-51). The
+ * overview's counts stay visible as the teaser (SRS-9.8); every detailed view
+ * is refused on the server, not just blurred in the browser.
+ */
+export const DASHBOARD_LOCKED_STATES: ReadonlySet<string> = new Set(["locked", "suspended"]);
+
 /** States in which an outlet records no events at all (SRS-11.17). */
 export const NON_RECORDING_STATES: ReadonlySet<string> = new Set([
   "draft",

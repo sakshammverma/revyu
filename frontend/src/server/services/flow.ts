@@ -131,7 +131,7 @@ export async function createSession(
 export async function submitFeedback(
   db: DbLike,
   outlet: Outlet,
-  input: { sessionId: string; rating: number | null; message: string; contact: string | null },
+  input: { sessionId: string; rating: number | null; message: string; contact: string | null; feedbackId?: string | null },
 ): Promise<{ id: string; created_at: string }> {
   const [session] = await db
     .select({ id: customerSessions.id, outletId: customerSessions.outletId })
@@ -144,18 +144,32 @@ export async function submitFeedback(
   if (!message) throw new HttpError(400, "EMPTY_MESSAGE");
 
   return db.transaction(async (tx) => {
-    const id = crypto.randomUUID();
+    const id = input.feedbackId ?? crypto.randomUUID();
     const createdAt = new Date();
-    await tx.insert(privateFeedback).values({
-      id,
-      outletId: outlet.id,
-      sessionId: session.id,
-      rating: input.rating,
-      message,
-      contact: input.contact,
-      resolved: false,
-      createdAt,
-    });
+    const inserted = await tx
+      .insert(privateFeedback)
+      .values({
+        id,
+        outletId: outlet.id,
+        sessionId: session.id,
+        rating: input.rating,
+        message,
+        contact: input.contact,
+        resolved: false,
+        createdAt,
+      })
+      .onConflictDoNothing({ target: privateFeedback.id })
+      .returning({ id: privateFeedback.id });
+    if (inserted.length === 0) {
+      // A retry of a message that already landed: same answer, no second email.
+      const [prior] = await tx
+        .select({ id: privateFeedback.id, outletId: privateFeedback.outletId, createdAt: privateFeedback.createdAt })
+        .from(privateFeedback)
+        .where(eq(privateFeedback.id, id))
+        .limit(1);
+      if (!prior || prior.outletId !== outlet.id) throw new HttpError(409, "CONFLICT");
+      return { id: prior.id, created_at: prior.createdAt.toISOString() };
+    }
     const [account] = await tx.select().from(accounts).where(eq(accounts.id, outlet.accountId)).limit(1);
     if (account) {
       await notify(tx, {

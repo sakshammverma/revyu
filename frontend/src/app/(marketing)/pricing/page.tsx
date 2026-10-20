@@ -54,7 +54,7 @@ export default function PricingPage() {
                 </p>
                 <ul className="flex flex-col gap-3 text-sm text-[#1a1e23]">
                   <li className="flex items-center gap-2.5">
-                    <span className="text-[#449127] font-bold">✓</span> 15 days free, then 10 review credits
+                    <span className="text-[#449127] font-bold">✓</span> 15 days free, first charge after the trial
                   </li>
                   <li className="flex items-center gap-2.5">
                     <span className="text-[#449127] font-bold">✓</span> Unlimited scans and completed flows
@@ -113,7 +113,7 @@ export default function PricingPage() {
                 </p>
                 <ul className="flex flex-col gap-3 text-sm text-[#1a1e23]">
                   <li className="flex items-center gap-2.5">
-                    <span className="text-[#449127] font-bold">✓</span> 15 days free, then 10 review credits
+                    <span className="text-[#449127] font-bold">✓</span> 15 days free, first charge after the trial
                   </li>
                   <li className="flex items-center gap-2.5">
                     <span className="text-[#449127] font-bold">✓</span> Unlimited scans and completed flows
@@ -148,9 +148,9 @@ export default function PricingPage() {
       <section className="max-w-[1024px] mx-auto px-4 pb-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="v2-sheet p-6 sm:p-8 border border-[#e8ecec]">
-            <h3 className="font-display text-xl text-[#1a1e23]">15 days free, then 10 review credits</h3>
+            <h3 className="font-display text-xl text-[#1a1e23]">15 days free, first charge after the trial</h3>
             <p className="mt-3 text-sm text-[#6e797b] leading-relaxed">
-              Your QR collects from the day your business is approved. After 15 days you get 10 more review credits — one is used each time a customer completes the flow and copies their draft. Then collection pauses until you subscribe, so you see your real numbers before paying anything more.
+              You set up UPI AutoPay or a card when you sign up, but nothing is charged until your 15-day trial ends, and the trial only starts once we verify your business. Cancel before then and you pay nothing. If that first payment doesn’t go through, your QR keeps working for 10 more customer reviews while you sort it out.
             </p>
           </div>
 

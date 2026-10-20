@@ -243,7 +243,7 @@ export function Header() {
                       Bags, boxes &amp; tables
                     </div>
                     <div className="text-xs text-[#6e797b] mt-0.5">
-                      Stickers, table cards and wall posters
+                      A counter sticker and handout cards
                     </div>
                   </Link>
                 </div>

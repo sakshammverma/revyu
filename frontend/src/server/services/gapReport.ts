@@ -90,7 +90,7 @@ async function fetchBusinesses(placeId: string): Promise<[Business, Business[]]>
   }
   const key = env.googlePlacesApiKey;
   try {
-    const det = await fetch(DETAILS_URL + placeId, {
+    const det = await fetch(DETAILS_URL + encodeURIComponent(placeId), {
       headers: {
         "X-Goog-Api-Key": key,
         "X-Goog-FieldMask": "id,displayName,rating,userRatingCount,location,primaryType",
@@ -160,6 +160,6 @@ export async function emailReport(db: DbLike, placeId: string, email: string): P
     business_name: report.business.name,
     headline: report.headline,
     competitor_lines: lines || "- (none found nearby)",
-    signup_url: `${getEnv().frontendBaseUrl.replace(/\/+$/, "")}/signup?place=${placeId}`,
+    signup_url: `${getEnv().frontendBaseUrl.replace(/\/+$/, "")}/signup?place=${encodeURIComponent(placeId)}&name=${encodeURIComponent(report.business.name)}`,
   });
 }

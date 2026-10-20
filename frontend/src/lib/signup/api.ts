@@ -93,8 +93,12 @@ export async function confirmSignup(
   return res.json();
 }
 
+/** The signup id doesn't exist (or isn't a valid id): polling it again won't help. */
+export class SignupNotFoundError extends Error {}
+
 export async function fetchSignupStatus(signupId: string) {
   const res = await fetch(`${API_BASE}/api/signup/${signupId}/status`, { cache: "no-store" });
+  if (res.status === 404 || res.status === 422) throw new SignupNotFoundError("signup not found");
   if (!res.ok) throw new Error("status fetch failed");
   return res.json() as Promise<{ state: string; submitted_at: string | null; message: string }>;
 }

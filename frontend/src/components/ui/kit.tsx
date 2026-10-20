@@ -146,13 +146,40 @@ export function Sheet({ open, title, onClose, children }: {
   children: React.ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  // Callers pass an inline onClose; reading it through a ref keeps the effect
+  // from re-running (and stealing focus from the input) on every keystroke.
+  const closeRef = useRef(onClose);
+  useEffect(() => {
+    closeRef.current = onClose;
+  });
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const opener = document.activeElement as HTMLElement | null;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return closeRef.current();
+      if (e.key !== "Tab" || !ref.current) return;
+      // Keep Tab inside the dialog.
+      const items = ref.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === ref.current)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
     document.addEventListener("keydown", onKey);
     ref.current?.focus();
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, onClose]);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      opener?.focus?.();
+    };
+  }, [open]);
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-label={title}>
@@ -195,7 +222,7 @@ export function useToasts() {
     setTimeout(() => setItems((cur) => cur.filter((t) => t.id !== id)), undo ? 6000 : 3500);
   }, []);
   const node = (
-    <div aria-live="polite" className="fixed bottom-20 sm:bottom-6 left-1/2 -translate-x-1/2 z-[60] flex flex-col gap-2 items-center w-[calc(100%-2rem)] max-w-sm pointer-events-none">
+    <div aria-live="polite" className="fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-[60] flex flex-col gap-2 items-center w-[calc(100%-2rem)] max-w-sm pointer-events-none">
       {items.map((t) => (
         <div key={t.id} role={t.kind === "error" ? "alert" : "status"} className={`pointer-events-auto w-full rounded-xl px-4 py-3 text-sm font-medium shadow-v2-elevated flex items-center justify-between gap-3 ${t.kind === "error" ? "bg-[#c62445] text-white" : "bg-[#1f2429] text-white"}`}>
           <span>{t.text}</span>

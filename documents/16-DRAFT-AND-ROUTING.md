@@ -179,7 +179,7 @@ private feedback entry point also present.
 │                                          │
 │  ┌────────────────────────────────────┐  │
 │  │ What went wrong?                   │  │
-│  │                                    │  │  ← focused, ready to type
+│  │                                    │  │  ← not auto-focused (see note)
 │  │                                    │  │
 │  └────────────────────────────────────┘  │
 │                                          │
@@ -195,6 +195,11 @@ private feedback entry point also present.
 │                                          │
 └──────────────────────────────────────────┘
 ```
+
+> **Note (2026-10-20):** the textarea is deliberately *not* auto-focused. On a
+> phone, focusing it opens the keyboard, which covers the Google button until
+> dismissed: that would make the public option harder to reach at exactly the
+> ratings where CR-3 matters most.
 
 **Both buttons are real, full-width, above the fold, and reachable with one
 thumb.** The difference is visual hierarchy — primary versus secondary styling —

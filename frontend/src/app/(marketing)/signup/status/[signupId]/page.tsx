@@ -7,6 +7,7 @@ import { SignupStatus } from "@/components/marketing/SignupStatus";
 
 export const metadata: Metadata = {
   title: "Verifying your details — Revyu",
+  robots: { index: false, follow: false },
 };
 
 interface Props {

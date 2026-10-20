@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useId, useState } from "react";
+import { useId, useState } from "react";
 
 import {
   activateOutlet,
@@ -13,37 +13,22 @@ import {
   type BulkImportRowResult,
   type OutletListItem,
 } from "@/lib/admin/api";
+import { useAsync } from "@/lib/useAsync";
 
 // Rendered inside <AdminTokenGate>, which guarantees a token is already set.
 export function OutletManager() {
-  const [outlets, setOutlets] = useState<OutletListItem[]>([]);
-  const [verticals, setVerticals] = useState<string[]>([]);
   const [stateFilter, setStateFilter] = useState("");
-  const [loading, setLoading] = useState(false);
   const [showCreate, setShowCreate] = useState(false);
   const [showBulk, setShowBulk] = useState(false);
-
-  async function load() {
-    setLoading(true);
-    try {
-      const [items, verts] = await Promise.all([
-        fetchOutlets({ state: stateFilter || undefined }),
-        fetchVerticals(),
-      ]);
-      setOutlets(items);
-      setVerticals(verts);
-    } catch {
-      // AdminTokenGate handles the auth-failure path; a transient fetch
-      // error here just leaves the list empty rather than crashing.
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stateFilter]);
+  const { data, error, loading, reload: load } = useAsync(
+    async () => {
+      const [items, verts] = await Promise.all([fetchOutlets({ state: stateFilter || undefined }), fetchVerticals()]);
+      return { outlets: items, verticals: verts };
+    },
+    [stateFilter],
+  );
+  const outlets: OutletListItem[] = data?.outlets ?? [];
+  const verticals: string[] = data?.verticals ?? [];
 
   return (
     <div className="max-w-5xl mx-auto flex flex-col gap-4 sm:gap-5">
@@ -86,8 +71,17 @@ export function OutletManager() {
       )}
       {showBulk && <BulkImportForm onDone={() => { setShowBulk(false); load(); }} />}
 
-      {loading && <p className="text-sm text-[#515a63]">Loading…</p>}
-      {!loading && outlets.length === 0 && (
+      {loading && <p className="text-sm text-text-2">Loading…</p>}
+      {!loading && error != null && (
+        <p role="alert" className="text-sm text-alert">
+          Couldn&rsquo;t load outlets. Check your connection and{" "}
+          <button type="button" onClick={load} className="font-semibold underline">
+            try again
+          </button>
+          .
+        </p>
+      )}
+      {!loading && error == null && outlets.length === 0 && (
         <p className="text-sm text-[#515a63]">No outlets match this filter.</p>
       )}
 
@@ -119,7 +113,7 @@ function OutletRow({ outlet, onDone }: { outlet: OutletListItem; onDone: () => v
   return (
     <div className="v2-sheet border border-[#e8ecec] px-4 py-3.5 sm:px-5 flex items-center justify-between gap-4">
       <div className="min-w-0">
-        <a href={`/admin/outlets/${outlet.outlet_id}/detail`} className="text-base font-semibold text-[#1a1e23] truncate hover:text-[#2f68db] hover:underline block">{outlet.business_name}</a>
+        <Link href={`/admin/outlets/${outlet.outlet_id}/detail`} className="text-base font-semibold text-[#1a1e23] truncate hover:text-[#2f68db] hover:underline block">{outlet.business_name}</Link>
         <p className="text-xs font-mono text-[#515a63] mt-0.5">
           {outlet.vertical} · {outlet.state} · {outlet.source}
         </p>
@@ -232,16 +226,19 @@ function BulkImportForm({ onDone }: { onDone: () => void }) {
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<{ created: number; failed: number; rows: BulkImportRowResult[] } | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
 
   async function handleImport() {
     if (!file) return;
     setBusy(true);
+    setImportError(null);
     try {
       const res = await bulkImportOutlets(file);
       setResult(res);
       if (res.failed === 0) setTimeout(onDone, 1500);
     } catch {
-      setResult({ created: 0, failed: 0, rows: [] });
+      setResult(null);
+      setImportError("The import didn't go through. Check the file is a valid CSV and try again.");
     } finally {
       setBusy(false);
     }
@@ -267,6 +264,12 @@ function BulkImportForm({ onDone }: { onDone: () => void }) {
       >
         {busy ? "Importing…" : "Import"}
       </button>
+
+      {importError && (
+        <p role="alert" className="text-sm text-alert">
+          {importError}
+        </p>
+      )}
 
       {result && (
         <div className="mt-1 p-3 rounded-lg bg-[#f7fafa] border border-[#e8ecec] text-sm text-[#1a1e23]">

@@ -35,7 +35,7 @@ export async function createSession(slug: string, sessionId: string, deviceHash:
 
 export async function submitFeedback(
   slug: string,
-  body: { session_id: string; rating: number | null; message: string; contact?: string }
+  body: { session_id: string; rating: number | null; message: string; contact?: string; feedback_id?: string }
 ): Promise<boolean> {
   try {
     const res = await fetch(`${API_BASE}/api/flow/${slug}/feedback`, {

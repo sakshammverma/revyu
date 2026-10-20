@@ -25,16 +25,27 @@ const email = z.email().transform((v) => {
   return v.slice(0, at + 1) + v.slice(at + 1).toLowerCase();
 });
 
+const name = z.string().trim().min(1).max(120);
+
 export const signupBody = z.object({
-  business_name: z.string(),
-  vertical: z.string(),
-  owner_name: z.string(),
-  owner_phone: z.string(),
-  owner_email: email,
-  place_id: z.string(),
-  plan: z.string(), // monthly | annual
+  business_name: name,
+  vertical: z.string().min(1).max(40),
+  owner_name: name,
+  // Digits with optional +, spaces, dashes, brackets; 7-15 digits (E.164 length).
+  owner_phone: z
+    .string()
+    .trim()
+    .max(25)
+    .regex(/^\+?[0-9\s()-]+$/)
+    .refine((v) => {
+      const digits = v.replace(/\D/g, "").length;
+      return digits >= 7 && digits <= 15;
+    }),
+  owner_email: email.pipe(z.string().max(254)),
+  place_id: z.string().regex(/^[A-Za-z0-9_-]{3,300}$/),
+  plan: z.string().max(20), // monthly | annual
   placement_acknowledged: z.boolean(),
-  referral_code: z.string().nullish(),
+  referral_code: z.string().max(40).nullish(),
 });
 export type SignupBody = z.infer<typeof signupBody>;
 

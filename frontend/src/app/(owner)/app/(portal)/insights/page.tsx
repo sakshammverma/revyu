@@ -6,9 +6,10 @@ import { HubInsightsPanel } from "@/components/dashboard/HubInsightsPanel";
 import { FunnelView } from "@/components/dashboard/FunnelView";
 import { RatingView } from "@/components/dashboard/RatingView";
 import { TagFrequencyView } from "@/components/dashboard/TagFrequencyView";
+import { LockedNotice } from "@/components/portal/LockedNotice";
 import { useOwner } from "@/components/portal/OwnerContext";
 import { ErrorState, Skeleton } from "@/components/ui";
-import { getFunnel, getRating, getTagFrequency } from "@/lib/dashboard/api";
+import { getFunnel, getRating, getTagFrequency, isDashboardLocked } from "@/lib/dashboard/api";
 import { useAsync } from "@/lib/useAsync";
 
 const RANGES = [
@@ -18,6 +19,22 @@ const RANGES = [
 ];
 
 export default function InsightsPage() {
+  const { outlet } = useOwner();
+  if (isDashboardLocked(outlet.state)) {
+    return (
+      <>
+        <h1 className="font-display text-2xl sm:text-3xl text-ink">Insights</h1>
+        <LockedNotice
+          headline="Your insights are ready"
+          body="See where customers drop off, which tags they pick most, and how your Google rating is moving. Unlock to see them."
+        />
+      </>
+    );
+  }
+  return <UnlockedInsights />;
+}
+
+function UnlockedInsights() {
   const { outlet } = useOwner();
   const [range, setRange] = useState("30d");
   const funnel = useAsync(() => getFunnel(outlet.outlet_id, range), [outlet.outlet_id, range]);
@@ -50,7 +67,9 @@ export default function InsightsPage() {
       {funnel.error ? (
         <ErrorState message="We couldn't load the funnel." onRetry={funnel.reload} />
       ) : funnel.data ? (
-        <FunnelView funnel={funnel.data} />
+        <div aria-busy={funnel.loading} className={`transition-opacity ${funnel.loading ? "opacity-60" : ""}`}>
+          <FunnelView funnel={funnel.data} />
+        </div>
       ) : (
         <Skeleton className="h-64" />
       )}
@@ -59,7 +78,9 @@ export default function InsightsPage() {
         {tags.error ? (
           <ErrorState message="We couldn't load tags." onRetry={tags.reload} />
         ) : tags.data ? (
-          <TagFrequencyView data={tags.data} />
+          <div aria-busy={tags.loading} className={`transition-opacity ${tags.loading ? "opacity-60" : ""}`}>
+            <TagFrequencyView data={tags.data} />
+          </div>
         ) : (
           <Skeleton className="h-56" />
         )}

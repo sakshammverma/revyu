@@ -16,9 +16,10 @@ class Plan(Base):
     __tablename__ = "plans"
     __table_args__ = (
         Index(
-            "ux_plans_code_country_active",
+            "ux_plans_code_tier_currency_active",
             "code",
-            "country_code",
+            "tier_code",
+            "currency_code",
             unique=True,
             postgresql_where=text("active"),
         ),
@@ -29,7 +30,9 @@ class Plan(Base):
     )
 
     code: Mapped[str] = mapped_column(String, nullable=False)  # monthly | annual
-    country_code: Mapped[str] = mapped_column(String, nullable=False)
+    country_code: Mapped[str | None] = mapped_column(String)  # legacy; pricing is per tier
+    tier_code: Mapped[str | None] = mapped_column(String)
+    provider_plan_id: Mapped[str | None] = mapped_column(String)
     currency_code: Mapped[str] = mapped_column(String, nullable=False)
     amount_minor: Mapped[int] = mapped_column(Integer, nullable=False)
     active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)

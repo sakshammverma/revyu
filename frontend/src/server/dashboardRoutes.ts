@@ -3,7 +3,7 @@ import { z } from "zod";
 import { requireOwner, type Account } from "@/server/auth/owner";
 import { getDb, type Db } from "@/server/db";
 import { HttpError, handler } from "@/server/http";
-import { getOwnOutletOr403, type Outlet } from "@/server/services/dashboard";
+import { getOwnOutletOr403, requireUnlocked, type Outlet } from "@/server/services/dashboard";
 
 export type OutletContext = { params: Promise<{ outletId: string }> };
 
@@ -13,14 +13,22 @@ export function requireUuid(value: string): string {
   return value;
 }
 
-/** Owner-authenticated GET scoped to /api/app/outlets/[outletId]/..., 403 unless the outlet is theirs (SRS-15.6). */
-export function outletGet<T>(build: (db: Db, outlet: Outlet, request: Request, owner: Account) => Promise<T>) {
+/**
+ * Owner-authenticated GET scoped to /api/app/outlets/[outletId]/..., 403 unless
+ * the outlet is theirs (SRS-15.6), 402 while the dashboard is locked.
+ */
+export function outletGet<T>(
+  build: (db: Db, outlet: Outlet, request: Request, owner: Account) => Promise<T>,
+  { lockable = true }: { lockable?: boolean } = {},
+) {
   return handler(async (request: Request, { params }: OutletContext) => {
     const { outletId } = await params;
     const db = getDb();
     const owner = await requireOwner(request, db);
     requireUuid(outletId);
     const outlet = await getOwnOutletOr403(db, owner.id, outletId);
+    // Detailed views are paywalled while locked; the overview opts out (lockable: false).
+    if (lockable) requireUnlocked(outlet);
     return Response.json(await build(db, outlet, request, owner));
   });
 }

@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import { useOwner } from "@/components/portal/OwnerContext";
-import { Button, Card, EmptyState, StatusPill, useToast } from "@/components/ui";
+import { Button, Card, EmptyState, ErrorState, StatusPill, useToast } from "@/components/ui";
 import { confirmBilling, createBillingCheckout, type BillingStatus } from "@/lib/dashboard/api";
 import { formatDate, formatMoney } from "@/lib/format";
 import { CheckoutCancelled, runCheckout } from "@/lib/signup/checkout";
@@ -18,7 +18,7 @@ export default function BillingPage() {
   if (!billing) {
     return (
       <Card title="Billing">
-        <EmptyState title="Billing isn't available right now" body="Please refresh in a moment. Your QR code keeps working." />
+        <ErrorState message="We couldn't load your billing details. Your QR code keeps working." onRetry={() => void refresh()} />
       </Card>
     );
   }
@@ -26,17 +26,26 @@ export default function BillingPage() {
   async function pay(plan: string) {
     if (!billing) return;
     setBusyPlan(plan);
+    let result;
     try {
       const { checkout } = await createBillingCheckout(plan);
-      const result = await runCheckout(checkout, outlet.business_name);
-      await confirmBilling(result);
-      await refresh();
-      toast("Payment received. You're all set.");
+      result = await runCheckout(checkout, outlet.business_name);
     } catch (e) {
       if (!(e instanceof CheckoutCancelled)) {
-        toast("We couldn't complete the payment. You haven't been charged twice. Please try again.", { tone: "error" });
+        toast("We couldn't start the payment. You haven't been charged. Please try again.", { tone: "error" });
       }
+      setBusyPlan(null);
+      return;
+    }
+    try {
+      await confirmBilling(result);
+      toast("Payment received. You're all set.");
+    } catch {
+      // Razorpay has the payment; its webhook activates the account even if this
+      // confirm call failed, so don't tell the owner to pay again.
+      toast("Payment received. Your account will update in a minute. Don't pay again.", { tone: "error" });
     } finally {
+      await refresh();
       setBusyPlan(null);
     }
   }

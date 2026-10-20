@@ -118,9 +118,9 @@ export function HardwareShowcase() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-[#f8fafc] rounded-2xl border border-[#e8ecec] p-6 sm:p-10">
           {/* Visual Showcase (Left 7 cols) */}
           <div className="lg:col-span-7 relative aspect-[16/10] rounded-xl overflow-hidden border border-[#e8ecec] bg-[#1a1e23] flex items-center justify-center">
-            {/* Background Cinematic Atmosphere */}
+            {/* Shop photo background */}
             <Image
-              src="/images/landscape-architectural-haven.jpg"
+              src="/images/shop-cloth-counter.jpg"
               alt=""
               fill
               className="object-cover opacity-60"

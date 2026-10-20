@@ -6,7 +6,7 @@
  * customer flow on a malformed batch. Unknown event types are silently dropped
  * rather than erroring the whole batch (05-DATA-MODEL.md section 5).
  */
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
 import { schema, type DbLike } from "@/server/db";
 import { notify } from "@/server/notifications";
@@ -44,7 +44,12 @@ export interface EventBatch {
   outletId: string;
   sessionId: string | null;
   events: EventIn[];
+  /** Caller's IP; caps how many trial credits one network can consume per outlet. */
+  clientIp?: string;
 }
+
+/** Credits one IP can consume per outlet per day. Undercounting only ever favours the outlet. */
+export const MAX_CREDITS_PER_IP_PER_DAY = 3;
 
 const MAX_PAYLOAD_STR = 64;
 
@@ -70,8 +75,9 @@ export function sanitizePayload(payload: Record<string, unknown> | null | undefi
 
 /**
  * A trial credit is only earned by a believable journey: the session must have
- * rated, and not be implausibly fresh. Stops a script from burning an outlet's
- * credits with a bare copy_tapped.
+ * rated in an earlier request (checked before the current batch is stored),
+ * and not be implausibly fresh. Stops a script from burning an outlet's
+ * credits with a bare copy_tapped, or with rating + copy in one batch.
  */
 export async function isPlausibleCompletion(
   db: DbLike,
@@ -85,6 +91,14 @@ export async function isPlausibleCompletion(
     .where(and(eq(events.sessionId, session.id), eq(events.type, "rating_selected")))
     .limit(1);
   return rated !== undefined;
+}
+
+async function ipMayConsumeCredit(db: DbLike, outletId: string, ip: string | undefined): Promise<boolean> {
+  if (!ip || ip === "unknown") return true;
+  const rows = await db.execute<{ ok: boolean }>(
+    sql`select hit_rate_limit(${`credit:${outletId}:${ip}`}, ${MAX_CREDITS_PER_IP_PER_DAY}, 86400) as ok`,
+  );
+  return rows[0]?.ok !== false;
 }
 
 export async function recordEvents(db: DbLike, batch: EventBatch): Promise<{ accepted: number }> {
@@ -109,27 +123,37 @@ export async function recordEvents(db: DbLike, batch: EventBatch): Promise<{ acc
     }
 
     let session: typeof sessions.$inferSelect | undefined;
+    let sessionId = batch.sessionId;
     if (batch.sessionId) {
       [session] = await tx.select().from(sessions).where(eq(sessions.id, batch.sessionId)).limit(1);
-      // A session from another outlet must never meter this one.
-      if (session && session.outletId !== outlet.id) session = undefined;
+      // A session from another outlet must never meter, or be linked to, this one.
+      if (session && session.outletId !== outlet.id) {
+        session = undefined;
+        sessionId = null;
+      }
     }
+
+    // Decided before this batch is stored, so its own rating_selected can't vouch for it.
+    const meter =
+      session !== undefined &&
+      !session.completed && // a repeat copy tap is never a second credit
+      session.deviceHash !== null && // real clients always send one; dedup needs it
+      valid.some((e) => e.type === "copy_tapped") &&
+      (await isPlausibleCompletion(tx, session));
 
     if (valid.length > 0) {
       await tx.insert(events).values(
         valid.map((e) => ({
           outletId: batch.outletId,
-          sessionId: batch.sessionId,
+          sessionId,
           type: e.type,
           payload: sanitizePayload(e.payload),
         })),
       );
     }
 
-    if (session && valid.some((e) => e.type === "copy_tapped")) {
-      if (await isPlausibleCompletion(tx, session)) {
-        await recordCompletedFlow(tx, outlet, session);
-      }
+    if (meter && session && (await ipMayConsumeCredit(tx, outlet.id, batch.clientIp))) {
+      await recordCompletedFlow(tx, outlet, session);
     }
 
     if (firstScan) {

@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ConnectView } from "@/components/connect/ConnectView";
 import { FlowFrame } from "@/components/flow/Frame";
 import { ModuleShell, NeutralNotice } from "@/components/hub/ModuleShell";
 import { loadConnect } from "@/server/pageData";
+
+export const metadata: Metadata = { title: "Contact & links" };
 
 export default async function ConnectPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

@@ -330,6 +330,8 @@ describe("staff routes", () => {
       const l = await lookup.json();
       expect(l.visits).toBe(2);
       expect(l.pending_rewards.map((g: { status: string }) => g.status)).toEqual(["available"]);
+      // A lookup by member id never reveals redeem codes: the customer reads theirs out.
+      expect(l.pending_rewards[0]).not.toHaveProperty("redeem_code");
       const missing = await getStaffMember(staffReq(outlet.slug, "member/ZZZZ", token, undefined, "GET"), routeCtx({ slug: outlet.slug, publicId: "ZZZZ" }));
       expect(missing.status).toBe(404);
       expect(await missing.json()).toEqual({ detail: { error: { code: "NOT_FOUND", message: "No such member." } } });

@@ -17,7 +17,7 @@ const TABS = [
     id: "counter",
     title: "Billing counter",
     desc: "Standee next to the till",
-    image: "/images/landscape-architectural-haven.jpg",
+    image: "/images/print-counter-standee.jpg",
     headline: "Happy customers rarely think to say so on Google. The QR at the till gives them a reason to.",
     subtext: `Default tags: ${TAG_LIST("general")}.`,
     features: [
@@ -30,7 +30,7 @@ const TABS = [
     id: "receipt",
     title: "Bill or receipt",
     desc: "QR printed on the bill",
-    image: "/images/landscape-dolomites-alpine.jpg",
+    image: "/images/print-receipt-footer.jpg",
     headline: "Every customer gets a bill. Put the QR on it and every customer gets asked the same way.",
     subtext: `Default tags: ${TAG_LIST("general")}.`,
     features: [
@@ -43,11 +43,11 @@ const TABS = [
     id: "table",
     title: "Table or shelf",
     desc: "Card on a table, shelf or wall",
-    image: "/images/nature-terrace-fields.jpg",
+    image: "/images/print-handout-card.jpg",
     headline: "Regulars are your best advertisement — if they write it down.",
     subtext: `Default tags: ${TAG_LIST("general")}.`,
     features: [
-      { title: "Table cards and wall posters", text: "Print-ready files for A4 posters, table tents and small cards." },
+      { title: "Sticker and handout cards", text: "Print-ready files: a counter sticker, handout cards, an A5 standee and a receipt footer." },
       { title: "No incentives, ever", text: "No discounts or freebies for reviews. That rule protects your Google profile." },
       { title: "See what customers pick", text: "Your dashboard shows which tags come up most — a simple read on what customers value." },
     ],
@@ -56,7 +56,7 @@ const TABS = [
     id: "packaging",
     title: "Packaging & delivery",
     desc: "Sticker on bags and boxes",
-    image: "/images/landscape-emerald-forest.jpg",
+    image: "/images/print-counter-sticker.jpg",
     headline: "Not every customer walks past the counter. A sticker on the bag reaches the rest.",
     subtext: `Default tags: ${TAG_LIST("general")}.`,
     features: [
@@ -69,7 +69,7 @@ const TABS = [
     id: "anywhere",
     title: "Any business",
     desc: "One flat price for everyone",
-    image: "/images/landscape-ocean-horizon.jpg",
+    image: "/images/print-kit-all.jpg",
     headline: "If customers visit you and search for you on Google, Revyu fits.",
     subtext: `Default tags: ${TAG_LIST("general")}.`,
     features: [
@@ -175,9 +175,10 @@ export function PlatformTabs() {
               >
                 <Image
                   src={tab.image}
-                  alt=""
+                  alt={`Revyu's ${tab.title.toLowerCase()} print file (example)`}
                   fill
-                  className="object-cover"
+                  // The printed piece sits right of centre; keep it in frame on narrow screens.
+                  className="object-cover object-[92%_center] sm:object-[80%_center]"
                 />
               </div>
             ))}

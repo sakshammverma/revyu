@@ -47,7 +47,12 @@ export function normalizeDatabaseUrl(raw: string): string {
 }
 
 export function loadEnv(source: Record<string, string | undefined> = process.env): Env {
-  const environment = source.ENVIRONMENT ?? "local";
+  // Fail closed: "local" turns on mock payments, fake Places data and default
+  // secrets, so it is only the default for a dev server. A production build
+  // (NODE_ENV=production, which Vercel always sets) or any Vercel deployment
+  // with no ENVIRONMENT runs with the full production checks.
+  const deployed = source.NODE_ENV === "production" || Boolean(source.VERCEL_ENV);
+  const environment = source.ENVIRONMENT || (deployed ? "production" : "local");
   const isLocal = environment === "local";
   const databaseUrl = normalizeDatabaseUrl(source.DATABASE_POOL_URL || source.DATABASE_URL || "");
 
@@ -95,6 +100,9 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
       "RAZORPAY_KEY_ID",
       "RAZORPAY_KEY_SECRET",
       "RAZORPAY_WEBHOOK_SECRET",
+      // Without these every signup fails with PAYMENT_UNAVAILABLE.
+      "RAZORPAY_PLAN_ID_MONTHLY",
+      "RAZORPAY_PLAN_ID_ANNUAL",
       "GOOGLE_PLACES_API_KEY",
       // Owner uploads go to Supabase Storage; a serverless disk is not durable.
       "SUPABASE_URL",

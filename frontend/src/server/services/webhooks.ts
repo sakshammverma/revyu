@@ -4,14 +4,14 @@
  * every billing state change: never a client redirect (SRS-12.8,
  * documents/06-API-SPEC.md section 5).
  */
-import { eq } from "drizzle-orm";
+import { and, eq, gt } from "drizzle-orm";
 
 import { schema, type DbLike } from "@/server/db";
 import { getEnv } from "@/server/env";
 import { notify } from "@/server/notifications";
 import { DAY_MS, markCheckoutComplete, periodDays, recordPayment, type Outlet, type Subscription } from "./billing";
 
-const { accounts, outlets, subscriptions } = schema;
+const { accounts, outlets, payments, subscriptions } = schema;
 
 export const GRACE_PERIOD_DAYS = 7; // SRS-12.5, OD-13
 
@@ -98,13 +98,16 @@ async function onSubscriptionCharged(db: DbLike, entity: unknown) {
   const sub = await subscriptionFromEntity(db, entity);
   if (!sub) return;
   await recordPaymentIdempotent(db, sub, dig(entity, "payment", "entity"), "captured");
+  // Razorpay's own period end, so a replayed or late delivery sets the same
+  // value instead of extending paid access again from "now".
+  const currentEnd = dig(entity, "subscription", "entity", "current_end");
+  const periodEnd =
+    typeof currentEnd === "number" && currentEnd > 0
+      ? new Date(currentEnd * 1000)
+      : new Date(Date.now() + periodDays(sub.plan) * DAY_MS);
   await db
     .update(subscriptions)
-    .set({
-      status: "active",
-      graceUntil: null,
-      currentPeriodEnd: new Date(Date.now() + periodDays(sub.plan) * DAY_MS),
-    })
+    .set({ status: "active", graceUntil: null, currentPeriodEnd: periodEnd })
     .where(eq(subscriptions.id, sub.id));
   await activateIfLive(db, await accountOutlet(db, sub.accountId));
 }
@@ -114,6 +117,7 @@ async function onPaymentFailed(db: DbLike, entity: unknown) {
   const providerSubId = str(dig(paymentEntity, "subscription_id"));
   const sub = providerSubId ? await findByProviderSubscriptionId(db, providerSubId) : null;
   if (!sub) return;
+  if (await isReplayOrStale(db, sub, paymentEntity)) return;
 
   await db
     .update(subscriptions)
@@ -140,6 +144,39 @@ async function onPaymentFailed(db: DbLike, entity: unknown) {
     }
   }
   await recordPaymentIdempotent(db, sub, paymentEntity, "failed");
+}
+
+/**
+ * A failure we've already processed (Razorpay retries deliveries), or one that
+ * happened before a later successful charge (out-of-order delivery), must not
+ * put a paid account back into past_due or email the owner again.
+ */
+async function isReplayOrStale(db: DbLike, sub: Subscription, paymentEntity: unknown): Promise<boolean> {
+  const providerPaymentId = str(dig(paymentEntity, "id"));
+  if (providerPaymentId) {
+    const [seen] = await db
+      .select({ id: payments.id })
+      .from(payments)
+      .where(eq(payments.providerPaymentId, providerPaymentId))
+      .limit(1);
+    if (seen) return true;
+  }
+  const createdAt = dig(paymentEntity, "created_at");
+  if (typeof createdAt === "number" && createdAt > 0) {
+    const [later] = await db
+      .select({ id: payments.id })
+      .from(payments)
+      .where(
+        and(
+          eq(payments.subscriptionId, sub.id),
+          eq(payments.status, "captured"),
+          gt(payments.createdAt, new Date(createdAt * 1000)),
+        ),
+      )
+      .limit(1);
+    if (later) return true;
+  }
+  return false;
 }
 
 async function onSubscriptionHalted(db: DbLike, entity: unknown) {

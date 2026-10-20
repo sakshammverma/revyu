@@ -26,7 +26,8 @@ export async function makeAccount(db: DbLike, tag = "a") {
     .insert(schema.accounts)
     .values({
       id: crypto.randomUUID(),
-      ownerPhone: `+91${n}${tag}`,
+      // Digits only: signup validates phone format, and tests reuse these.
+      ownerPhone: `+91${String(Math.floor(Math.random() * 1e10)).padStart(10, "9")}`,
       ownerEmail: `${tag}-${n}@example.com`,
       ownerName: `Owner ${tag}`,
       otpChannel: "email",

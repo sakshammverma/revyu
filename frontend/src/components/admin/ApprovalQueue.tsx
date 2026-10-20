@@ -1,73 +1,29 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useState } from "react";
+
+import { AdminTokenGate } from "@/components/admin/AdminTokenGate";
 import {
   approveOutlet,
   fetchApprovalQueue,
-  getAdminToken,
   rejectOutlet,
   requestInfo,
-  setAdminToken,
   type ApprovalQueueItem,
 } from "@/lib/admin/api";
+import { useAsync } from "@/lib/useAsync";
 
 export function ApprovalQueue() {
-  const [token, setToken] = useState<string | null>(null);
-  const [tokenInput, setTokenInput] = useState("");
-  const [items, setItems] = useState<ApprovalQueueItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  return (
+    <AdminTokenGate>
+      <Queue />
+    </AdminTokenGate>
+  );
+}
 
-  useEffect(() => {
-    setToken(getAdminToken());
-  }, []);
-
-  async function load() {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await fetchApprovalQueue();
-      setItems(data);
-    } catch {
-      setError("Failed to load queue. Check your admin token.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    if (token) load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
-
-  const tokenInputId = useId();
-
-  if (!token) {
-    return (
-      <div className="v2-sheet border border-[#e8ecec] p-6 sm:p-8 max-w-md mx-auto">
-        <label htmlFor={tokenInputId} className="block text-sm font-semibold text-[#1a1e23] mb-2">
-          Admin Secret Token
-        </label>
-        <input
-          id={tokenInputId}
-          type="password"
-          value={tokenInput}
-          onChange={(e) => setTokenInput(e.target.value)}
-          placeholder="Enter token to view queue"
-          className="w-full rounded-lg border border-[#d5dcdc] bg-white px-3.5 py-3 text-base text-[#1a1e23] outline-none focus:border-[#397dff] focus:ring-2 focus:ring-[#397dff]/25 transition-colors"
-        />
-        <button
-          className="btn-primary mt-4 w-full min-h-[44px]"
-          onClick={() => {
-            setAdminToken(tokenInput);
-            setToken(tokenInput);
-          }}
-        >
-          Access Queue →
-        </button>
-      </div>
-    );
-  }
+function Queue() {
+  const { data, error, loading, reload } = useAsync(fetchApprovalQueue);
+  const items: ApprovalQueueItem[] = data ?? [];
+  const load = reload;
 
   return (
     <div className="max-w-4xl mx-auto flex flex-col gap-4 sm:gap-5">
@@ -86,9 +42,9 @@ export function ApprovalQueue() {
         </button>
       </div>
 
-      {error && (
-        <div className="p-3.5 rounded-xl bg-[#fdf2f4] border border-[#c62445]/25 text-[#c62445] text-sm">
-          {error}
+      {error != null && (
+        <div role="alert" className="p-3.5 rounded-xl bg-[#fdf2f4] border border-[#c62445]/25 text-[#c62445] text-sm">
+          Failed to load queue. Check your connection and refresh.
         </div>
       )}
 
@@ -98,7 +54,7 @@ export function ApprovalQueue() {
         </div>
       )}
 
-      {!loading && items.length === 0 && (
+      {!loading && error == null && items.length === 0 && (
         <div className="v2-sheet border border-[#e8ecec] p-8 sm:p-10 text-center text-[#515a63] text-sm">
           ✓ Verification queue is empty. All outlets reviewed.
         </div>

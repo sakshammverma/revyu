@@ -1,18 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button, Field } from "@/components/ui";
 import { DashboardApiError, getMyOutlet, requestOtp, verifyOtp } from "@/lib/dashboard/api";
+import { safeNextPath } from "@/lib/ownerSession";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const RESEND_SECONDS = 30;
 
 // SRS-10.1: single email field -> code entry. No password.
 export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
+  );
+}
+
+function LoginForm() {
   const router = useRouter();
+  const next = safeNextPath(useSearchParams().get("next"));
 
   const [step, setStep] = useState<"email" | "code">("email");
   const [email, setEmail] = useState("");
@@ -24,10 +34,10 @@ export default function LoginPage() {
 
   // Already signed in? Skip straight to the dashboard.
   useEffect(() => {
-    getMyOutlet()
-      .then(() => router.replace("/app"))
+    getMyOutlet({ redirectOn401: false })
+      .then(() => router.replace(next))
       .catch(() => {});
-  }, [router]);
+  }, [router, next]);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -64,7 +74,7 @@ export default function LoginPage() {
     setCodeError(null);
     try {
       await verifyOtp(email.trim(), code);
-      router.push("/app");
+      router.replace(next);
     } catch (e) {
       const c = e instanceof DashboardApiError ? e.code : "";
       setCodeError(

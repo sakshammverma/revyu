@@ -94,7 +94,7 @@ const signupPayload = (over: Record<string, unknown> = {}) => {
     business_name: "Smile Dental",
     vertical: "dental",
     owner_name: "Dr Test",
-    owner_phone: `+91${n}`,
+    owner_phone: `+91${String(Math.floor(Math.random() * 1e10)).padStart(10, "9")}`,
     owner_email: `owner-${n}@Example.COM`,
     place_id: `ChIJ_${n}`,
     plan: "monthly",
@@ -521,6 +521,37 @@ describe("Razorpay webhook", () => {
       await webhook(subEvent("subscription.halted", sub.razorpaySubscriptionId!));
       expect((await tx.select().from(subscriptions).where(eq(subscriptions.id, sub.id)))[0].status).toBe("cancelled");
       expect((await tx.select().from(outlets).where(eq(outlets.id, outlet.id)))[0].state).toBe("suspended");
+    }));
+
+  it("replays can't extend access, and a stale payment.failed can't undo a later charge", () =>
+    inTx(async (tx) => {
+      const { acc, outlet, sub } = await fixture(tx, "active", { status: "active" });
+      const end = Math.floor(Date.now() / 1000) + 30 * 86_400;
+      const charged = {
+        event: "subscription.charged",
+        payload: {
+          subscription: { entity: { id: sub.razorpaySubscriptionId, current_end: end } },
+          payment: { entity: { id: `pay_${uid()}`, amount: 49900, currency: "INR" } },
+        },
+      };
+      await webhook(charged);
+      await webhook(charged);
+      const [s] = await tx.select().from(subscriptions).where(eq(subscriptions.id, sub.id));
+      expect(s.currentPeriodEnd!.getTime()).toBe(end * 1000);
+
+      // A failure from an hour before that charge, delivered late.
+      const stale = subEvent("payment.failed", "ignored", {
+        id: `pay_${uid()}`,
+        subscription_id: sub.razorpaySubscriptionId,
+        amount: 49900,
+        currency: "INR",
+        created_at: Math.floor(Date.now() / 1000) - 3600,
+      });
+      await webhook(stale);
+      expect((await tx.select().from(outlets).where(eq(outlets.id, outlet.id)))[0].state).toBe("active");
+      expect((await tx.select().from(subscriptions).where(eq(subscriptions.id, sub.id)))[0].status).toBe("active");
+      const mails = await tx.select().from(notifications).where(and(eq(notifications.accountId, acc.id), eq(notifications.template, "payment_failed")));
+      expect(mails).toHaveLength(0);
     }));
 
   it("events for unknown subscriptions are ignored; a charge without a payment id records no payment row", () =>

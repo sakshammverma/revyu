@@ -175,6 +175,13 @@ describe("activation guards, validate-url, tags", () => {
       const ctx = routeCtx({ outletId: outlet.id });
       const bad = await validateUrl(req("/x", "POST", { google_review_url: "https://example.com" }), ctx);
       expect(await bad.json()).toEqual({ valid: false, reason: "URL does not match the expected Google review-write format" });
+      for (const sneaky of [
+        "javascript:alert(1)//search.google.com/local/writereview?placeid=x",
+        "https://evil.example/search.google.com/local/writereview?placeid=x",
+        "http://search.google.com/local/writereview?placeid=x",
+      ]) {
+        expect((await (await validateUrl(req("/x", "POST", { google_review_url: sneaky }), ctx)).json()).valid).toBe(false);
+      }
       const url = "https://search.google.com/local/writereview?placeid=ABC";
       expect(await (await validateUrl(req("/x", "POST", { google_review_url: url }), ctx)).json()).toEqual({
         valid: true,

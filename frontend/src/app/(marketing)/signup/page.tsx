@@ -12,11 +12,16 @@ export const metadata: Metadata = {
 export default async function SignupPage({
   searchParams,
 }: {
-  searchParams: Promise<{ email?: string | string[]; ref?: string | string[] }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { email, ref } = await searchParams;
+  const { email, ref, place, name } = await searchParams;
   const initialEmail = typeof email === "string" ? email : "";
   const referralCode = typeof ref === "string" ? ref.slice(0, 16) : "";
+  // From the gap report: the place is already known, so preselect it.
+  const initialPlace =
+    typeof place === "string" && /^[A-Za-z0-9_-]{3,300}$/.test(place) && typeof name === "string" && name.trim()
+      ? { place_id: place, name: name.trim().slice(0, 120) }
+      : undefined;
 
   return (
     <MarketingPage>
@@ -38,7 +43,7 @@ export default async function SignupPage({
             A fellow business owner invited you. Thank you for trying Revyu.
           </p>
         )}
-        <SignupForm initialEmail={initialEmail} referralCode={referralCode} />
+        <SignupForm initialEmail={initialEmail} referralCode={referralCode} initialPlace={initialPlace} />
       </Section>
     </MarketingPage>
   );
