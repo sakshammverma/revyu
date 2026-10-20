@@ -1,5 +1,6 @@
 import { ThreeEngineLogo } from "./ThreeEngineLogo";
 import { CurlyCardConnectors } from "./CurlyCardConnectors";
+import { Price } from "@/lib/pricing";
 
 export function EngineStats() {
   return (
@@ -54,7 +55,7 @@ export function EngineStats() {
         {/* Stat 3 */}
         <div className="py-6 sm:py-0 px-4">
           <p className="font-display text-4xl sm:text-5xl lg:text-6xl text-[#449127] tracking-tight">
-            ₹499
+            <Price plan="monthly" />
           </p>
           <p className="text-sm font-medium text-[#515a63] mt-2">
             Per month, one flat price

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Price } from "@/lib/pricing";
 
 // Three short explainers that link to real pages on this site.
 // Images are decorative.
@@ -23,7 +24,11 @@ const ARTICLES = [
       "Nothing for your customer to install or learn. Nothing for you to remember once it is printed.",
   },
   {
-    title: "\u20B9499 a month. Less than one regular.",
+    title: (
+      <>
+        <Price plan="monthly" /> a month. Less than one regular.
+      </>
+    ),
     category: "Pricing",
     readTime: "One flat price",
     image: "/images/portrait-shopkeeper.jpg",

@@ -275,22 +275,33 @@ Pricing per market. **Never hardcode prices in application code** (FR-71).
 |---|---|---|
 | `id` | uuid PK | |
 | `code` | text, not null | `monthly` \| `annual` |
-| `country_code` | text, not null | Which market this price applies to |
+| `tier_code` | text, FK `pricing_tiers` | Purchasing-power tier this price belongs to |
+| `country_code` | text, nullable | Legacy (pre-tier); not read |
 | `currency_code` | text, not null | ISO 4217 |
 | `amount_minor` | integer, not null | Smallest unit |
+| `provider_plan_id` | text, nullable | Gateway recurring-plan id for this exact price |
 | `active` | boolean, not null, default true | |
 
-**Indexes:** unique on `(code, country_code, active)` where active.
+**Indexes:** unique on `(code, tier_code, currency_code)` where active.
 
-v1 seed:
+Two supporting tables map a country to what it pays:
 
-| code | country | currency | amount_minor | displays as |
-|---|---|---|---|---|
-| `monthly` | IN | INR | 49900 | ₹499 |
-| `annual` | IN | INR | 449900 | ₹4,499 |
+- `pricing_tiers (code PK, name)`: `tier1` high income, `tier2` middle income,
+  `tier3` value markets.
+- `country_pricing (country_code PK, tier_code, currency_code, locale, active)`:
+  one row per supported country (ISO alpha-2). Country `*` is the fallback for
+  unmapped countries. Each eurozone country has its own row, all `EUR`.
 
-> India pricing is unlikely to be right for other markets. A table makes
-> repricing per country a data change rather than a deploy.
+A business pays the price of **its own country's** tier and currency (country
+read from its Google listing at signup). The visitor's IP country only decides
+which prices the marketing pages display.
+
+v1 seed: India (tier3, INR) is real: monthly 49900 (₹499), annual 449900
+(₹4,499). All other seeded amounts are **placeholders** to be set from
+`/admin/pricing` before that market is opened.
+
+> A price change inserts a new row and deactivates the old one, so history is
+> kept and existing subscriptions are not repriced.
 
 ---
 

@@ -49,6 +49,13 @@ npm test             # Vitest for src/server/** against DATABASE_URL in .env.loc
 - The customer flow (`components/flow/CustomerFlow.tsx`) must keep the Google option and a private-feedback entry visible at every step after rating (sticky bar), using the neutral label "Post publicly on Google" (CR-3, SRS-17.1). Never add a rating-conditional way to hide it.
 - Data loading in client pages: `useAsync` (`src/lib/useAsync.ts`). Toasts via `useToast()` (wrap in `ToastProvider`).
 
+## Country-aware pricing (2026-10-21)
+
+- A business pays the price of its **own country's** tier and currency (`country_pricing` -> `pricing_tiers` -> `plans`, read in `src/server/services/pricing.ts`). Country comes from the Google listing (`placeCountry`), falling back to the IP header; `?country=` is display-only and never decides a charge.
+- Marketing pages read `GET /api/pricing` through `PricingProvider` / `<Price>` (`src/lib/pricing.tsx`). Do not hardcode a currency symbol or amount in UI copy.
+- Only India prices are real; other seeded prices are placeholders, set from `/admin/pricing`. Growth services and the delivered print kit are INR/India-only (`requireIndia` in `growth.ts`).
+- E2E: set `E2E_PORT` if another dev server already owns :3000.
+
 ## Product decisions recorded 2026-10-01
 
 - Referral: referrer gets 70% off their next invoice **only when the referred business actually pays** (first captured payment). Applied manually by the founder at v1 via `/admin/referrals`.

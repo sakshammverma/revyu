@@ -10,14 +10,13 @@ import { HttpError } from "@/server/http";
 import { listVerticals, verticalTags } from "@/server/verticals";
 import { latestSubscription, markCheckoutComplete, recordPayment } from "./billing";
 import { getProvider, getProviderByName, PaymentProviderUnavailableError } from "./payments";
-import { buildReviewUrl, PlacesUnavailableError, searchPlaces } from "./places";
+import { buildReviewUrl, placeCountry, PlacesUnavailableError, searchPlaces } from "./places";
+import { defaultTimezone, FALLBACK_COUNTRY, normalizeCountry, planFor } from "./pricing";
 import { pyIso } from "./pyDate";
 import { attachReferral } from "./referrals";
 import { TRIAL_DAYS } from "./trial";
 
-const { accounts, outlets, plans, subscriptions, tags } = schema;
-
-export const DEFAULT_COUNTRY = "IN"; // v1 launch market (OD-4)
+const { accounts, outlets, subscriptions, tags } = schema;
 
 /** pydantic's EmailStr normalises the domain to lower case; the local part is kept. */
 const email = z.email().transform((v) => {
@@ -44,6 +43,8 @@ export const signupBody = z.object({
   owner_email: email.pipe(z.string().max(254)),
   place_id: z.string().regex(/^[A-Za-z0-9_-]{3,300}$/),
   plan: z.string().max(20), // monthly | annual
+  /** Currency of the price the visitor was shown; a mismatch is a 409 PRICE_CHANGED. */
+  expected_currency: z.string().length(3).nullish(),
   placement_acknowledged: z.boolean(),
   referral_code: z.string().max(40).nullish(),
 });
@@ -156,7 +157,7 @@ const isUniqueViolation = (err: unknown): boolean => {
   return e?.code === "23505" || e?.cause?.code === "23505";
 };
 
-export async function createSignup(db: DbLike, body: SignupBody) {
+export async function createSignup(db: DbLike, body: SignupBody, opts: { visitorCountry?: string } = {}) {
   if (!body.placement_acknowledged) {
     // SRS-18.10: the CR-4 checkbox is mandatory, not a formality.
     throw new HttpError(400, "VALIDATION_FAILED", "placement_acknowledged required");
@@ -184,21 +185,28 @@ export async function createSignup(db: DbLike, body: SignupBody) {
   );
   if (!retryOutlet && (dupAccounts.length || dupOutlets.length)) throw new HttpError(409, "DUPLICATE_BUSINESS");
 
-  const [plan] = await db
-    .select()
-    .from(plans)
-    .where(and(eq(plans.code, body.plan), eq(plans.countryCode, DEFAULT_COUNTRY), eq(plans.active, true)))
-    .limit(1);
+  // The business's own country (from its Google listing) decides the market and
+  // so the price, not where the request came from. The visitor's country is only
+  // the fallback when Google can't say.
+  const detected = (await placeCountry(body.place_id)) ?? normalizeCountry(opts.visitorCountry);
+  const country = !detected || detected === FALLBACK_COUNTRY ? "US" : detected;
+  const { price, plan } = await planFor(db, country, body.plan);
   if (!plan) throw new HttpError(400, "VALIDATION_FAILED", "unknown plan");
+  if (body.expected_currency && body.expected_currency !== price.currency_code) {
+    // Shown a price for another market (e.g. a VPN or the country picker): tell the
+    // client the real one before any money moves.
+    throw new HttpError(409, "PRICE_CHANGED", JSON.stringify({ country_code: price.country_code, currency_code: price.currency_code, amount_minor: plan.amountMinor }));
+  }
 
   // SRS-18.6/FR-40b: payment is authorised at signup, before approval. The
   // first charge is deferred by the trial.
   let checkout;
   try {
-    checkout = await getProvider(DEFAULT_COUNTRY).createCheckout({
+    checkout = await getProvider(country).createCheckout({
       planCode: plan.code,
       amountMinor: plan.amountMinor,
       currencyCode: plan.currencyCode,
+      providerPlanId: plan.providerPlanId,
       customerEmail: body.owner_email,
       trialDays: TRIAL_DAYS,
     });
@@ -235,6 +243,9 @@ export async function createSignup(db: DbLike, body: SignupBody) {
             vertical: body.vertical,
             googlePlaceId: body.place_id,
             googleReviewUrl: buildReviewUrl(body.place_id),
+            countryCode: country,
+            locale: price.locale,
+            timezone: defaultTimezone(country),
             updatedAt: new Date(),
           })
           .where(eq(outlets.id, outletId));
@@ -251,7 +262,7 @@ export async function createSignup(db: DbLike, body: SignupBody) {
           ownerEmail: body.owner_email,
           ownerName: body.owner_name,
           otpChannel: "email",
-          currencyCode: "INR",
+          currencyCode: price.currency_code,
           paymentProvider: "razorpay",
         });
         await attachReferral(
@@ -265,9 +276,9 @@ export async function createSignup(db: DbLike, body: SignupBody) {
           slug: placeholderSlug(), // replaced with a real slug at approval (SRS-19.4)
           businessName: body.business_name,
           vertical: body.vertical,
-          countryCode: DEFAULT_COUNTRY,
-          locale: "en-IN",
-          timezone: "Asia/Kolkata",
+          countryCode: country,
+          locale: price.locale,
+          timezone: defaultTimezone(country),
           googlePlaceId: body.place_id,
           googleReviewUrl: buildReviewUrl(body.place_id),
           // Invisible until checkout completes (services/billing.ts).
@@ -373,18 +384,14 @@ export async function confirmSignup(db: DbLike, signupId: string, body: ConfirmB
     throw new HttpError(400, "PAYMENT_SIGNATURE_INVALID");
   }
 
-  const [plan] = await db
-    .select()
-    .from(plans)
-    .where(and(eq(plans.code, subscription.plan), eq(plans.countryCode, outlet.countryCode)))
-    .limit(1);
+  const { price, plan } = await planFor(db, outlet.countryCode, subscription.plan);
   // Money: the amount comes from our own plan row, never from the client. A
   // mandate is only authorised here (nothing charged yet); a one-time order is captured.
   await db.transaction(async (tx) => {
     await recordPayment(tx, subscription, {
       providerPaymentId: subscription.provider === "mock" ? null : body.razorpay_payment_id,
       amountMinor: plan && subscription.razorpayOrderId ? plan.amountMinor : 0,
-      currencyCode: plan?.currencyCode ?? "INR",
+      currencyCode: price.currency_code,
       status: subscription.razorpayOrderId ? "captured" : "authorized",
       webhookVerified: false,
     });

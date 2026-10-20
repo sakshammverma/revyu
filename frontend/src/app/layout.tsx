@@ -19,7 +19,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 
 const siteUrl = process.env.FRONTEND_BASE_URL || "http://localhost:3000";
 const description =
-  "For any local shop or business. Customers scan, tap what stood out, edit a draft and paste it on Google. Google link at every rating. ₹499/month, 15-day free trial.";
+  "For any local shop or business. Customers scan, tap what stood out, edit a draft and paste it on Google. Google link at every rating. Flat monthly price, 15-day free trial.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

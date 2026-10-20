@@ -162,8 +162,14 @@ export async function listServices(db: DbLike) {
 
 /* ------------------------------------------------------------- requests */
 
+/** Growth services and the delivered print kit are priced and fulfilled in INR, India only for now. */
+const requireIndia = (outlet: { countryCode: string }) => {
+  if (outlet.countryCode !== "IN") throw new HttpError(409, "NOT_AVAILABLE_IN_REGION", "This service is only available in India right now.");
+};
+
 export async function createRequest(db: DbLike, owner: Account, body: z.infer<typeof requestBody>) {
   const outlet = await myOutlet(db, owner);
+  requireIndia(outlet);
   const [svc] = await db
     .select()
     .from(serviceCatalog)
@@ -333,6 +339,7 @@ export async function printKitInfo(db: DbLike, owner: Pick<Account, "id">) {
 
 export async function orderPrintKit(db: DbLike, owner: Pick<Account, "id">, body: z.infer<typeof printKitBody>) {
   const outlet = await myOutlet(db, owner);
+  if (body.method === "deliver") requireIndia(outlet); // self-print is free everywhere
   const address = (body.address ?? "").trim();
   const phone = (body.phone ?? "").trim();
   if (body.method === "deliver" && !(address && phone)) {

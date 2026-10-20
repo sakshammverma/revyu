@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button, Card, ErrorState, Field, Skeleton } from "@/components/ui";
 import { emailGapReport, fetchGapReport, GapApiError, type GapBusiness, type GapReport } from "@/lib/gap/api";
 import { searchPlaces, type PlaceSearchResult } from "@/lib/signup/api";
+import { Price } from "@/lib/pricing";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -203,7 +204,7 @@ function EmailCapture({ placeId, businessName }: { placeId: string; businessName
         <div>
           <h2 className="font-display text-xl text-ink">Close the gap</h2>
           <p className="text-sm text-text-2 mt-1">
-            A QR on your receipt helps every happy customer write a Google review in their own words. ₹499/month, 15-day free trial.
+            A QR on your receipt helps every happy customer write a Google review in their own words. <Price plan="monthly" />/month, 15-day free trial.
           </p>
           <Link
             href={`/signup?place=${encodeURIComponent(placeId)}&name=${encodeURIComponent(businessName)}`}

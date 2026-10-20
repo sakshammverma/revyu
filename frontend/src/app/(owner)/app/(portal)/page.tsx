@@ -37,7 +37,7 @@ export default function OverviewPage() {
           feedbackCount={overview.data?.feedback_count ?? 0}
           creditsLeft={billing.credits_left}
           suspended={outlet.state === "suspended"}
-          price={monthly ? formatMoney(monthly.amount_minor, monthly.currency_code) : "₹499"}
+          price={monthly ? formatMoney(monthly.amount_minor, monthly.currency_code) : null}
         />
       )}
 
@@ -148,7 +148,7 @@ function UnlockCard({
   feedbackCount: number;
   creditsLeft: number | null;
   suspended: boolean;
-  price: string;
+  price: string | null;
 }) {
   return (
     <section className="v2-card-elevated border border-accent/20 p-5 sm:p-7 text-center">
@@ -172,7 +172,7 @@ function UnlockCard({
       </p>
       <div className="mt-5 flex flex-col items-center gap-2">
         <Button href="/app/billing" className="w-full sm:w-auto sm:min-w-[260px] bg-[#b45309] hover:bg-[#92400e] shadow-none">
-          Unlock for {price}/month
+          {price ? `Unlock for ${price}/month` : "Unlock"}
         </Button>
         <p className="text-xs text-text-2">Pay with UPI AutoPay · cancel anytime · same QR code</p>
       </div>

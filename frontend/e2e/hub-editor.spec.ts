@@ -27,7 +27,7 @@ async function openEditor(page: Page) {
 }
 
 test.beforeAll(async ({ playwright }) => {
-  const request = await playwright.request.newContext({ baseURL: "http://localhost:3000" });
+  const request = await playwright.request.newContext({ baseURL: `http://localhost:${process.env.E2E_PORT ?? 3000}` });
   outletId = (await (await request.get(`/api/flow/${SLUG}/config`)).json()).outlet.id;
   // Clear anything a previously interrupted run left behind.
   const hub = `/api/admin/outlets/${outletId}/hub`;

@@ -16,6 +16,8 @@ export interface SignupPayload {
   owner_email: string;
   place_id: string;
   plan: string;
+  /** Currency of the price shown to the visitor; the server answers 409 PRICE_CHANGED if the business's market differs. */
+  expected_currency?: string;
   placement_acknowledged: boolean;
   referral_code?: string;
 }

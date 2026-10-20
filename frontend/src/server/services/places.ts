@@ -203,3 +203,26 @@ export async function resolvePlaceId(input: string): Promise<string> {
   if (results.length > 1) throw new AmbiguousPlaceError(results);
   return results[0].place_id;
 }
+
+/**
+ * The ISO country of a Google place, from its address components. Decides which
+ * market (currency, tier) a business belongs to, so it is read server-side from
+ * Google, not taken from the signup form. Null when unknown or Google is
+ * unavailable: the caller falls back to the visitor's country.
+ */
+export async function placeCountry(placeId: string): Promise<string | null> {
+  const env = getEnv();
+  if (!env.googlePlacesApiKey) return null;
+  try {
+    const resp = await fetch(`https://places.googleapis.com/v1/places/${encodeURIComponent(placeId)}`, {
+      headers: { "X-Goog-Api-Key": env.googlePlacesApiKey, "X-Goog-FieldMask": "addressComponents" },
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!resp.ok) return null;
+    const data = (await resp.json()) as { addressComponents?: { shortText?: string; types?: string[] }[] };
+    const code = data.addressComponents?.find((c) => c.types?.includes("country"))?.shortText;
+    return code && /^[A-Za-z]{2}$/.test(code) ? code.toUpperCase() : null;
+  } catch {
+    return null;
+  }
+}

@@ -7,6 +7,9 @@ import { defineConfig, devices } from "@playwright/test";
 // There is no separate API process any more. Rate limits are disabled for the
 // dev server because they persist in the database.
 
+// E2E_PORT lets the suite run beside another dev server that already owns :3000.
+const port = process.env.E2E_PORT ?? "3000";
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
@@ -15,15 +18,15 @@ export default defineConfig({
   retries: 0,
   reporter: [["list"]],
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL: `http://localhost:${port}`,
     // The compliance boundary is measured on a small phone (SRS-17.1b).
     ...devices["Pixel 5"],
     viewport: { width: 360, height: 640 },
   },
   webServer: {
-    command: "npm run dev",
+    command: `npm run dev -- -p ${port}`,
     env: { DISABLE_RATE_LIMITS: "true" },
-    url: "http://localhost:3000",
+    url: `http://localhost:${port}`,
     reuseExistingServer: true,
     timeout: 120_000,
   },

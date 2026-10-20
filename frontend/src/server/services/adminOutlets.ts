@@ -18,6 +18,7 @@ import {
 import { pyIso } from "./pyDate";
 import { seedTags } from "./signup";
 import { generateUniqueSlug } from "./slug";
+import { countryPricingFor, defaultTimezone, normalizeCountry } from "./pricing";
 
 const { accounts, outlets, tags } = schema;
 
@@ -29,6 +30,8 @@ export const createOutletBody = z.object({
   owner_name: z.string().nullish(),
   google_maps_url: z.string().nullish(),
   place_id: z.string().nullish(),
+  /** ISO country of the business; defaults to India. Sets currency, locale and timezone. */
+  country_code: z.string().length(2).nullish(),
 });
 export type CreateOutletBody = z.infer<typeof createOutletBody>;
 
@@ -108,6 +111,8 @@ export async function resolvePlaceOr400(googleMapsUrl?: string | null, placeId?:
 
 export async function createOutlet(db: DbLike, body: CreateOutletBody) {
   const placeId = await resolvePlaceOr400(body.google_maps_url, body.place_id);
+  const country = normalizeCountry(body.country_code) ?? "IN";
+  const market = await countryPricingFor(db, country);
   try {
     return await db.transaction(async (tx) => {
       let [account] = await tx.select().from(accounts).where(eq(accounts.ownerPhone, body.owner_phone)).limit(1);
@@ -120,7 +125,7 @@ export async function createOutlet(db: DbLike, body: CreateOutletBody) {
             ownerEmail: body.owner_email,
             ownerName: body.owner_name ?? null,
             otpChannel: "email",
-            currencyCode: "INR",
+            currencyCode: market.currency_code,
             paymentProvider: "razorpay",
           })
           .returning();
@@ -134,9 +139,9 @@ export async function createOutlet(db: DbLike, body: CreateOutletBody) {
           slug,
           businessName: body.business_name,
           vertical: body.vertical,
-          countryCode: "IN",
-          locale: "en-IN",
-          timezone: "Asia/Kolkata",
+          countryCode: country,
+          locale: market.locale,
+          timezone: defaultTimezone(country),
           googlePlaceId: placeId,
           googleReviewUrl: buildReviewUrl(placeId),
           state: "draft",

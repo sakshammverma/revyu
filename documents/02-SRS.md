@@ -461,17 +461,22 @@ activated (FR-35).
 
 ### 3.6 Billing
 
-**SRS-12.1** Plans are read from the `plans` table by `(code, country_code)` —
-**never hardcoded** (FR-71). v1 seed: ₹499/month, ₹4,499/year for India, annual
-displayed against the monthly equivalent (FR-48, FR-49).
+**SRS-12.1** Plans are read from the `plans` table by `(code, tier, currency)`,
+where the tier and currency come from `country_pricing` for the business's own
+country — **never hardcoded** (FR-71). v1 India price: ₹499/month, ₹4,499/year,
+annual displayed against the monthly equivalent (FR-48, FR-49). Marketing pages
+show the visitor's market (IP country, `GET /api/pricing`); the amount charged
+follows the business country, and signup answers `409 PRICE_CHANGED` if the
+visitor was shown another market's currency.
 
 **SRS-12.1a** All monetary values are stored and transmitted as `amount_minor`
 (integer, smallest currency unit) plus `currency_code` (ISO 4217). Never floats,
 never currency-implicit (FR-70).
 
 **SRS-12.2** Payment is provided through a **`PaymentProvider` interface**
-selected by `outlets.country_code`. v1 implements Razorpay only (India, UPI
-AutoPay mandate). Provider-specific mandate semantics, webhook shapes, and
+selected by `outlets.country_code`. v1 implements Razorpay only (UPI AutoPay
+mandate in India; international cards for other currencies, recurring through a
+gateway plan id stored on the price row, else one-time payment). Provider-specific mandate semantics, webhook shapes, and
 refund flows live behind the interface (FR-72).
 
 **SRS-12.3** On mandate creation failure, offer a one-time payment for the

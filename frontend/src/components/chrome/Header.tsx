@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
 import Image from "next/image";
+import { Price } from "@/lib/pricing";
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -273,7 +274,7 @@ export function Header() {
                     className="flex items-center gap-2 p-2 rounded hover:bg-[#f2f7f7] hover:text-[#1a1e23] transition-colors"
                   >
                     <span className="text-[#397dff]">🏷️</span>
-                    <span>₹499/month, flat</span>
+                    <span><Price plan="monthly" />/month, flat</span>
                   </Link>
                   <Link
                     href="/signup"

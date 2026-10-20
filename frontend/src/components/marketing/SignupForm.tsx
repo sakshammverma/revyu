@@ -9,6 +9,9 @@ import {
   SignupApiError,
   type PlaceSearchResult,
 } from "@/lib/signup/api";
+import { CountryPicker } from "@/components/marketing/CountryPicker";
+import { formatMoney } from "@/lib/format";
+import { usePricing } from "@/lib/pricing";
 import { CheckoutCancelled, runCheckout } from "@/lib/signup/checkout";
 
 type Step = "details" | "place" | "placement" | "plan";
@@ -44,6 +47,7 @@ export function SignupForm({
   initialPlace?: { place_id: string; name: string };
 }) {
   const router = useRouter();
+  const pricing = usePricing();
   const [step, setStep] = useState<Step>("details");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -82,7 +86,7 @@ export function SignupForm({
   }
 
   async function handleSubmit() {
-    if (!selectedPlace || inFlight.current) return;
+    if (!selectedPlace || inFlight.current || !pricing.ready) return;
     inFlight.current = true;
     setSubmitting(true);
     setError(null);
@@ -95,6 +99,7 @@ export function SignupForm({
         owner_email: ownerEmail,
         place_id: selectedPlace.place_id,
         plan,
+        expected_currency: pricing.currency ?? undefined,
         placement_acknowledged: placementAck,
         referral_code: referralCode || undefined,
       });
@@ -106,6 +111,8 @@ export function SignupForm({
     } catch (e) {
       if (e instanceof CheckoutCancelled) {
         setError("Payment window closed. Nothing was charged — you can try again.");
+      } else if (e instanceof SignupApiError && e.code === "PRICE_CHANGED") {
+        setError(priceChangedMessage(e.message, pricing.setCountry));
       } else if (e instanceof SignupApiError) {
         setError(describeError(e.code));
       } else if (e instanceof Error && e.message === "PAYMENT_UNAVAILABLE") {
@@ -378,6 +385,7 @@ export function SignupForm({
             <p className="text-xs sm:text-sm text-ink-muted mt-1">
               15 days free · you authorise payment now, the first charge is after the trial
             </p>
+            <CountryPicker className="mt-2" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -385,7 +393,7 @@ export function SignupForm({
               selected={plan === "monthly"}
               onSelect={() => setPlan("monthly")}
               title="Monthly"
-              price="₹499"
+              price={pricing.monthly ?? "…"}
               period="/month"
               note="Pay as you go"
             />
@@ -393,10 +401,10 @@ export function SignupForm({
               selected={plan === "annual"}
               onSelect={() => setPlan("annual")}
               title="Annual"
-              price="₹4,499"
+              price={pricing.annual ?? "…"}
               period="/year"
-              badge="Save 25%"
-              note="About ₹375/mo"
+              badge={pricing.saving ? `Save ${pricing.saving}` : undefined}
+              note={pricing.annualPerMonth ? `About ${pricing.annualPerMonth}/mo` : undefined}
             />
           </div>
 
@@ -418,7 +426,7 @@ export function SignupForm({
             </button>
             <button
               type="button"
-              disabled={submitting}
+              disabled={submitting || !pricing.ready}
               onClick={handleSubmit}
               className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-cta hover:bg-cta-hover text-white font-semibold text-xs sm:text-sm tracking-tight transition-all duration-150 disabled:opacity-40 cursor-pointer shadow-md hover:shadow-lg hover:-translate-y-0.5"
             >
@@ -503,6 +511,21 @@ function PlanOption({
       {note && <p className="text-xs text-brand font-semibold mt-1">{note}</p>}
     </button>
   );
+}
+
+/**
+ * The server charges by the business's own market, which can differ from the
+ * market the visitor was shown. Switch the cards to the real price and ask them
+ * to review it before anything is charged.
+ */
+function priceChangedMessage(raw: string, setCountry: (code: string | null) => void): string {
+  try {
+    const p = JSON.parse(raw) as { country_code: string; currency_code: string; amount_minor: number };
+    setCountry(p.country_code);
+    return `Pricing for your business's country is ${formatMoney(p.amount_minor, p.currency_code)} for this plan. The plans above now show it. Review and continue when you're ready. Nothing has been charged.`;
+  } catch {
+    return "The price for your business's country is different from the one shown. Please review the plans and try again.";
+  }
 }
 
 function describeError(code: string): string {

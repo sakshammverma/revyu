@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { MarketingPage } from "@/components/chrome/MarketingPage";
+import { CountryPicker } from "@/components/marketing/CountryPicker";
+import { Price } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "Pricing — Revyu",
-  description: "Simple, flat pricing for single-outlet businesses. ₹499/month or ₹4,499/year. 15-day free trial.",
+  description: "Simple, flat pricing for single-outlet businesses, in your local currency. Monthly or annual, with a 15-day free trial.",
 };
 
 export default function PricingPage() {
@@ -24,6 +26,7 @@ export default function PricingPage() {
         <p className="mt-4 text-base sm:text-lg text-[#515a63] leading-relaxed max-w-xl mx-auto">
           No tiers and no add-ons. Every shop and local business gets the whole product from day one.
         </p>
+        <CountryPicker className="mt-5" />
       </section>
 
       {/* Pricing Cards Sheet */}
@@ -41,7 +44,7 @@ export default function PricingPage() {
                 </span>
               </div>
               <div className="mt-6 flex items-baseline gap-2">
-                <span className="font-display text-5xl sm:text-6xl text-[#1a1e23] tracking-tight">₹499</span>
+                <span className="font-display text-5xl sm:text-6xl text-[#1a1e23] tracking-tight"><Price plan="monthly" /></span>
                 <span className="text-sm text-[#6e797b] font-medium">/ month</span>
               </div>
               <p className="mt-2 text-xs sm:text-sm text-[#6e797b]">
@@ -87,7 +90,7 @@ export default function PricingPage() {
           <div className="v2-card-elevated p-8 sm:p-10 border-2 border-[#397dff] flex flex-col justify-between relative">
             <div className="absolute -top-3.5 right-6">
               <span className="bg-[#397dff] text-white text-xs px-3.5 py-1 rounded-full font-semibold shadow-sm">
-                Save 25% (2 months free)
+                Save <Price plan="saving" /> a year
               </span>
             </div>
             <div>
@@ -100,11 +103,11 @@ export default function PricingPage() {
                 </span>
               </div>
               <div className="mt-6 flex items-baseline gap-2">
-                <span className="font-display text-5xl sm:text-6xl text-[#1a1e23] tracking-tight">₹4,499</span>
+                <span className="font-display text-5xl sm:text-6xl text-[#1a1e23] tracking-tight"><Price plan="annual" /></span>
                 <span className="text-sm text-[#6e797b] font-medium">/ year</span>
               </div>
               <p className="mt-2 text-xs sm:text-sm text-[#6e797b]">
-                Works out to about ₹375/month — two months free versus monthly.
+                Works out to about <Price plan="annualPerMonth" />/month, versus <Price plan="monthly" /> paying monthly.
               </p>
 
               <div className="mt-8 pt-6 border-t border-[#e8ecec]">
@@ -157,7 +160,7 @@ export default function PricingPage() {
           <div className="v2-sheet p-6 sm:p-8 border border-[#e8ecec]">
             <h3 className="font-display text-xl text-[#1a1e23]">One new customer can cover a whole year</h3>
             <p className="mt-3 text-sm text-[#6e797b] leading-relaxed">
-              ₹4,499 a year is less than what many shops earn from a single new regular customer. We don’t promise reviews, ratings or rankings — we make sure every customer is asked.
+              <Price plan="annual" /> a year is less than what many shops earn from a single new regular customer. We don’t promise reviews, ratings or rankings — we make sure every customer is asked.
             </p>
           </div>
         </div>

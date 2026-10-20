@@ -60,13 +60,13 @@ let base = "";
 const phone = `98${Math.floor(10_000_000 + Math.random() * 89_999_999)}`;
 
 test.beforeAll(async ({ playwright }) => {
-  const request = await playwright.request.newContext({ baseURL: "http://localhost:3000" });
+  const request = await playwright.request.newContext({ baseURL: `http://localhost:${process.env.E2E_PORT ?? 3000}` });
   base = await configureHub(request);
   await request.dispose();
 });
 
 test.afterAll(async ({ playwright }) => {
-  const request = await playwright.request.newContext({ baseURL: "http://localhost:3000" });
+  const request = await playwright.request.newContext({ baseURL: `http://localhost:${process.env.E2E_PORT ?? 3000}` });
   if (base) await request.patch(base, { headers: H(), data: { hub_mode: "direct" } });
   await request.dispose();
 });

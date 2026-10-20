@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Price } from "@/lib/pricing";
 
 const FAQS = [
   {
@@ -22,11 +23,15 @@ const FAQS = [
   },
   {
     q: "Where do I put the code?",
-    a: "Anywhere printed. We email your QR and four print-ready files: a receipt footer, a handout card, an A5 counter standee and a counter sticker. Print them locally, or have a ready kit delivered to your shop for \u20B9199.",
+    a: "Anywhere printed. We email your QR and four print-ready files: a receipt footer, a handout card, an A5 counter standee and a counter sticker. Print them locally, or, in India, have a ready kit delivered to your shop for \u20B9199.",
   },
   {
     q: "What does it cost?",
-    a: "\u20B9499 a month or \u20B94,499 a year, one price for every kind of business. The first 15 days are free: you set up autopay at signup, the first charge comes after the trial, and if you cancel before then you pay nothing.",
+    a: (
+      <>
+        <Price plan="monthly" /> a month or <Price plan="annual" /> a year, one price for every kind of business. The first 15 days are free: you set up autopay at signup, the first charge comes after the trial, and if you cancel before then you pay nothing.
+      </>
+    ),
   },
   {
     q: "Will this fix my rating overnight?",
@@ -66,6 +71,8 @@ export function FAQSection() {
                 <button
                   type="button"
                   onClick={() => toggleFAQ(idx)}
+                  aria-expanded={isOpen}
+                  aria-controls={`faq-answer-${idx}`}
                   className="w-full flex items-center justify-between gap-4 text-left group cursor-pointer"
                 >
                   <span className="font-display text-lg sm:text-xl text-[#1a1e23] group-hover:text-[#397dff] transition-colors">
@@ -80,7 +87,7 @@ export function FAQSection() {
                   </span>
                 </button>
                 {isOpen && (
-                  <p className="mt-4 text-sm sm:text-base text-[#515a63] leading-relaxed pr-8 animate-[chatBubbleIn_0.25s_ease]">
+                  <p id={`faq-answer-${idx}`} className="mt-4 text-sm sm:text-base text-[#515a63] leading-relaxed pr-8 animate-[chatBubbleIn_0.25s_ease]">
                     {faq.a}
                   </p>
                 )}

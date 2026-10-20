@@ -59,6 +59,12 @@ async function activateIfLive(db: DbLike, outlet: Outlet | null): Promise<void> 
   }
 }
 
+async function accountCurrency(db: DbLike, accountId: string): Promise<string> {
+  const [row] = await db.select({ c: accounts.currencyCode }).from(accounts).where(eq(accounts.id, accountId));
+  if (!row) throw new Error(`webhook for unknown account ${accountId}`);
+  return row.c;
+}
+
 async function recordPaymentIdempotent(db: DbLike, sub: Subscription, paymentEntity: unknown, status: string) {
   const providerPaymentId = str(dig(paymentEntity, "id"));
   if (!providerPaymentId) return;
@@ -68,7 +74,8 @@ async function recordPaymentIdempotent(db: DbLike, sub: Subscription, paymentEnt
   await recordPayment(db, sub, {
     providerPaymentId,
     amountMinor: typeof amount === "number" && Number.isFinite(amount) ? Math.trunc(amount) : 0,
-    currencyCode: typeof currency === "string" && currency ? currency : "INR",
+    // Razorpay always sends it; if not, use the account's own currency, never a blanket INR.
+    currencyCode: typeof currency === "string" && currency ? currency : await accountCurrency(db, sub.accountId),
     status,
     webhookVerified: true,
   });

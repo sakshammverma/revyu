@@ -62,17 +62,20 @@ export async function planFor(db: DbLike, countryCode: string, planCode: string)
   return { price, plan: rows.find((p) => p.code === planCode) ?? null };
 }
 
-/**
- * Where the visitor is, for display only. Vercel sets x-vercel-ip-country.
- * Locally there is no such header, so ?country=XX can stand in; elsewhere it
- * is the visitor's own display choice (the picker), never used for charging.
- */
-export function visitorCountry(request: Request): string {
-  const picked = normalizeCountry(new URL(request.url).searchParams.get("country"));
-  if (picked) return picked;
+/** The caller's country from the platform's IP header only; cannot be set by a query string. */
+export function headerCountry(request: Request): string {
   const header = normalizeCountry(request.headers.get("x-vercel-ip-country"));
   if (header) return header;
   return getEnv().isLocal ? "IN" : FALLBACK_COUNTRY;
+}
+
+/**
+ * Where the visitor is, for display only. Vercel sets x-vercel-ip-country.
+ * ?country=XX is the visitor's own picker choice (and stands in for the header
+ * locally); it is never used for charging.
+ */
+export function visitorCountry(request: Request): string {
+  return normalizeCountry(new URL(request.url).searchParams.get("country")) ?? headerCountry(request);
 }
 
 /** Body of GET /api/pricing. */
@@ -88,3 +91,16 @@ export async function publicPricing(db: DbLike, countryCode: string) {
     annual_saving_minor: monthly && annual ? Math.max(0, monthly.amountMinor * 12 - annual.amountMinor) : 0,
   };
 }
+
+/** Default IANA timezone for a new outlet; the owner can change it later (FR-69). */
+const DEFAULT_TIMEZONE: Record<string, string> = {
+  IN: "Asia/Kolkata", US: "America/New_York", CA: "America/Toronto", GB: "Europe/London",
+  IE: "Europe/Dublin", DE: "Europe/Berlin", FR: "Europe/Paris", IT: "Europe/Rome",
+  ES: "Europe/Madrid", NL: "Europe/Amsterdam", BE: "Europe/Brussels", AT: "Europe/Vienna",
+  PT: "Europe/Lisbon", FI: "Europe/Helsinki", PL: "Europe/Warsaw", TR: "Europe/Istanbul",
+  AU: "Australia/Sydney", NZ: "Pacific/Auckland", SG: "Asia/Singapore", MY: "Asia/Kuala_Lumpur",
+  TH: "Asia/Bangkok", ID: "Asia/Jakarta", AE: "Asia/Dubai", SA: "Asia/Riyadh", QA: "Asia/Qatar",
+  BR: "America/Sao_Paulo", MX: "America/Mexico_City", ZA: "Africa/Johannesburg",
+};
+
+export const defaultTimezone = (countryCode: string): string => DEFAULT_TIMEZONE[countryCode] ?? "UTC";

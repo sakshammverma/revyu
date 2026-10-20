@@ -123,6 +123,13 @@ semantics, webhook shapes, refund flows — lives behind the interface.
 
 **v1 builds the interface and one implementation.** Not two.
 
+**Update 2026-10-21:** Razorpay's international payments are enabled on the
+account, so non-India markets also go through `RazorpayProvider` for now
+(amount and currency from the `plans` row; recurring via `plans.provider_plan_id`
+when the gateway accepts a plan in that currency, otherwise the existing
+mandate-to-one-time fallback). `StripeProvider` stays a later option behind the
+same interface. Pricing per country and tier: see 05-DATA-MODEL.md §3.9a.
+
 ---
 
 ## 3. Schema changes
@@ -238,7 +245,7 @@ Expansion order, gated on evidence rather than ambition.
 Against the cost of retrofitting after real customers exist: weeks, plus
 migrating live payment records.
 
-**Explicitly not built in v1:** Stripe, multi-currency display, translated UI,
+**Explicitly not built in v1:** Stripe, translated UI,
 non-English drafts, tax handling beyond GST, timezone-aware scheduling beyond
 storing the field.
 

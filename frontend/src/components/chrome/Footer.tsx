@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
 import { useRouter } from "next/navigation";
+import { Price } from "@/lib/pricing";
 
 export function Footer() {
   const router = useRouter();
@@ -58,7 +59,7 @@ export function Footer() {
                 </button>
               </form>
               <p className="text-[11px] text-[#9aa1a3] mt-2">
-                15 days free · then ₹499/month flat · cancel anytime
+                15 days free · then <Price plan="monthly" />/month flat · cancel anytime
               </p>
             </div>
           </div>

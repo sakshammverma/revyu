@@ -340,3 +340,41 @@ export async function overrideOutletState(id: string, state: string, reason: str
   });
   if (!res.ok) throw new Error(`override ${res.status}`);
 }
+
+// --- Pricing (per tier and currency, per country) ---
+
+export interface AdminPricing {
+  tiers: { code: string; name: string }[];
+  countries: { country_code: string; tier_code: string; currency_code: string; locale: string; active: boolean }[];
+  plans: { code: string; tier_code: string | null; currency_code: string; amount_minor: number; provider_plan_id: string | null }[];
+}
+
+export async function fetchAdminPricing(): Promise<AdminPricing> {
+  const res = await adminFetch("/api/admin/pricing");
+  if (!res.ok) throw new Error(`pricing ${res.status}`);
+  return res.json();
+}
+
+export async function saveAdminPlanPrice(body: {
+  code: string;
+  tier_code: string;
+  currency_code: string;
+  amount_minor: number;
+  provider_plan_id: string | null;
+}): Promise<AdminPricing> {
+  const res = await adminFetch("/api/admin/pricing/plans", { method: "PUT", body: JSON.stringify(body) });
+  if (!res.ok) throw new Error(`save price ${res.status}`);
+  return res.json();
+}
+
+export async function saveAdminCountry(body: {
+  country_code: string;
+  tier_code: string;
+  currency_code: string;
+  locale: string;
+  active: boolean;
+}): Promise<AdminPricing> {
+  const res = await adminFetch("/api/admin/pricing/countries", { method: "PUT", body: JSON.stringify(body) });
+  if (!res.ok) throw new Error(`save country ${res.status}`);
+  return res.json();
+}

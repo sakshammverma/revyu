@@ -79,12 +79,12 @@ async function seedPlans(db: DbLike) {
     const [have] = await db
       .select()
       .from(plans)
-      .where(and(eq(plans.code, code), eq(plans.countryCode, "IN"), eq(plans.active, true)));
+      .where(and(eq(plans.code, code), eq(plans.tierCode, "tier3"), eq(plans.currencyCode, "INR"), eq(plans.active, true)));
     if (!have) {
-      await db.insert(plans).values({ id: crypto.randomUUID(), code, countryCode: "IN", currencyCode: "INR", amountMinor: amount, active: true });
+      await db.insert(plans).values({ id: crypto.randomUUID(), code, tierCode: "tier3", currencyCode: "INR", amountMinor: amount, active: true });
     }
   }
-  const rows = await db.select().from(plans).where(and(eq(plans.countryCode, "IN"), eq(plans.active, true)));
+  const rows = await db.select().from(plans).where(and(eq(plans.tierCode, "tier3"), eq(plans.currencyCode, "INR"), eq(plans.active, true)));
   return Object.fromEntries(rows.map((p) => [p.code, p.amountMinor])) as Record<string, number>;
 }
 

@@ -11,6 +11,7 @@ const LINKS = [
   { href: "/admin/outlets", label: "Outlets" },
   { href: "/admin/services", label: "Services" },
   { href: "/admin/referrals", label: "Referrals" },
+  { href: "/admin/pricing", label: "Pricing" },
 ];
 
 // Shared admin chrome. Founder-only; every page still carries its own token gate.
