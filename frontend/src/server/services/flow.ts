@@ -38,6 +38,8 @@ export async function requireOutlet(db: DbLike, slug: string): Promise<Outlet> {
 export interface FlowConfig {
   collecting: boolean;
   preview: boolean;
+  /** The outlet's language: the page's lang attribute and the first choice for tag text. */
+  locale: string;
   outlet: {
     id: string;
     business_name: string;
@@ -48,11 +50,13 @@ export interface FlowConfig {
   tags: { id: string; label: string; phrases: string[]; sort_order: number }[];
 }
 
-function pickLocale<T>(values: Record<string, T> | null, empty: T): T {
+function pickLocale<T>(values: Record<string, T> | null, empty: T, locale: string = DEFAULT_LOCALE): T {
   if (!values) return empty;
-  const preferred = values[DEFAULT_LOCALE];
-  if (preferred !== undefined && !(Array.isArray(preferred) ? preferred.length === 0 : preferred === "")) {
-    return preferred;
+  for (const l of [locale, DEFAULT_LOCALE]) {
+    const preferred = values[l];
+    if (preferred !== undefined && !(Array.isArray(preferred) ? preferred.length === 0 : preferred === "")) {
+      return preferred;
+    }
   }
   const first = Object.values(values)[0];
   return first ?? empty;
@@ -79,8 +83,8 @@ export async function buildFlowConfig(
       .orderBy(asc(tags.sortOrder));
     tagConfigs = rows.map((tag) => ({
       id: tag.id,
-      label: pickLocale(tag.label as Record<string, string>, ""),
-      phrases: pickLocale(tag.phrases as Record<string, string[]>, []),
+      label: pickLocale(tag.label as Record<string, string>, "", outlet.locale.split("-")[0]),
+      phrases: pickLocale(tag.phrases as Record<string, string[]>, [], outlet.locale.split("-")[0]),
       sort_order: tag.sortOrder,
     }));
   }
@@ -88,6 +92,7 @@ export async function buildFlowConfig(
   return {
     collecting,
     preview,
+    locale: outlet.locale,
     outlet: {
       id: outlet.id,
       business_name: outlet.businessName,

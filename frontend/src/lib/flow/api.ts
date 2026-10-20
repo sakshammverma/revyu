@@ -19,6 +19,8 @@ export interface FlowConfig {
   collecting: boolean;
   /** Draft outlet or admin approval preview: full flow, nothing recorded. */
   preview?: boolean;
+  /** Outlet language (BCP 47 primary tag), used for the page's lang attribute. */
+  locale?: string;
   outlet: OutletConfig;
   tags: TagConfig[];
 }

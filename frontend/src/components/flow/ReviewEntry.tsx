@@ -23,7 +23,8 @@ export async function ReviewEntry({
   if (fireScan && !config.preview) recordScan(config.outlet.id);
 
   return (
-    <>
+    // lang matters for screen-reader pronunciation and for the browser's font fallback (e.g. Devanagari).
+    <div lang={config.locale || "en"}>
       {backToHub && (
         <Link
           href={`/r/${slug}`}
@@ -34,6 +35,6 @@ export async function ReviewEntry({
         </Link>
       )}
       <CustomerFlow slug={slug} config={config} />
-    </>
+    </div>
   );
 }

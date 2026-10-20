@@ -183,6 +183,21 @@ describe("submitFeedback", () => {
       expect(deferred).toHaveLength(1);
     }));
 
+  it("prefers tag text in the outlet's language, then English", () =>
+    inRolledBackTx(async (db) => {
+      const outlet = await makeOutlet(db, await makeAccount(db), { locale: "hi-IN" });
+      await db.insert(tags).values({
+        id: crypto.randomUUID(), outletId: outlet.id, label: { en: "friendly", hi: "मिलनसार" }, phrases: { en: ["was friendly"], hi: ["मिलनसार थे"] }, sortOrder: 0, active: true,
+      });
+      await db.insert(tags).values({
+        id: crypto.randomUUID(), outletId: outlet.id, label: { en: "clean" }, phrases: { en: ["was clean"] }, sortOrder: 1, active: true,
+      });
+      const cfg = await buildFlowConfig(db, outlet);
+      expect(cfg.locale).toBe("hi-IN");
+      // Hindi where it exists, English where the tag has no Hindi.
+      expect(cfg.tags.map((t) => t.label)).toEqual(["मिलनसार", "clean"]);
+    }));
+
   it("returns no instruction to hide the Google link (CR-3)", () =>
     inRolledBackTx(async (db) => {
       const outlet = await makeOutlet(db, await makeAccount(db));
