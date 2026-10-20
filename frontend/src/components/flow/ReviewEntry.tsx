@@ -27,7 +27,7 @@ export async function ReviewEntry({
       {backToHub && (
         <Link
           href={`/r/${slug}`}
-          className="inline-flex items-center gap-2 min-h-[44px] mb-2 text-sm font-semibold text-[#1a1e23]"
+          className="inline-flex items-center gap-2 min-h-[44px] mb-2 text-sm font-semibold text-ink"
         >
           <Icon name="back" className="w-5 h-5" />
           <span className="truncate max-w-[16rem]">{config.outlet.business_name}</span>

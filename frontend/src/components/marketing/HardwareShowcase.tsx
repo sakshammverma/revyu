@@ -78,16 +78,16 @@ export function HardwareShowcase() {
 
   return (
     <section id="kit" className="mx-2 sm:mx-3 my-12 sm:my-16">
-      <div className="v2-sheet max-w-[1296px] mx-auto border border-[#e8ecec] p-6 sm:p-12 lg:p-16">
+      <div className="v2-sheet max-w-[1296px] mx-auto border border-line p-6 sm:p-12 lg:p-16">
         {/* Section Heading */}
         <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-          <p className="vf-section-label uppercase tracking-wider mb-2 text-[#515a63] flex items-center justify-center gap-3">
+          <p className="vf-section-label uppercase tracking-wider mb-2 text-text-2 flex items-center justify-center gap-3">
             Your print kit <InteractiveTag />
           </p>
-          <h2 className="heading-h2 font-display text-[#1a1e23]">
+          <h2 className="heading-h2 font-display text-ink">
             Four print-ready files. Print them anywhere.
           </h2>
-          <p className="mt-3 text-sm sm:text-base text-[#6e797b] leading-relaxed">
+          <p className="mt-3 text-sm sm:text-base text-text-muted leading-relaxed">
             Once your business is verified, we email your QR code and four PDFs with your name on them. Print at your local shop or on your own receipt printer — no hardware to wait for.
           </p>
         </div>
@@ -98,7 +98,7 @@ export function HardwareShowcase() {
           ref={tabsRef}
           {...listProps}
           aria-label="Print kit items"
-          className="grid grid-cols-2 md:grid-cols-4 rounded-xl border border-[#e8ecec] bg-[#fcfcfc] overflow-hidden divide-x divide-y md:divide-y-0 divide-[#e8ecec]"
+          className="grid grid-cols-2 md:grid-cols-4 rounded-xl border border-line bg-[#fcfcfc] overflow-hidden divide-x divide-y md:divide-y-0 divide-line"
         >
           {KIT_ITEMS.map((item, idx) => {
             const isActive = activeItem === idx;
@@ -115,18 +115,18 @@ export function HardwareShowcase() {
                 <div className="flex items-center gap-2 mb-1">
                   <span
                     className={`w-2 h-2 rounded-full ${
-                      isActive ? "bg-[#397dff]" : "bg-[#d1d5db]"
+                      isActive ? "bg-accent" : "bg-[#d1d5db]"
                     }`}
                   />
                   <p
                     className={`text-sm sm:text-base font-semibold leading-tight ${
-                      isActive ? "text-[#1a1e23]" : "text-[#515a63]"
+                      isActive ? "text-ink" : "text-text-2"
                     }`}
                   >
                     {item.name}
                   </p>
                 </div>
-                <p className="text-xs text-[#6e797b] line-clamp-1">{item.tagline}</p>
+                <p className="text-xs text-text-muted line-clamp-1">{item.tagline}</p>
               </button>
             );
           })}
@@ -143,9 +143,9 @@ export function HardwareShowcase() {
         </div>
 
         {/* Print asset visual & specs */}
-        <div {...panelProps} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-[#f8fafc] rounded-2xl border border-[#e8ecec] p-6 sm:p-10">
+        <div {...panelProps} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-[#f8fafc] rounded-2xl border border-line p-6 sm:p-10">
           {/* Visual Showcase (Left 7 cols) */}
-          <div className="lg:col-span-7 relative aspect-[16/10] rounded-xl overflow-hidden border border-[#e8ecec] bg-[#1a1e23] flex items-center justify-center">
+          <div className="lg:col-span-7 relative aspect-[16/10] rounded-xl overflow-hidden border border-line bg-ink flex items-center justify-center">
             {/* Shop photo background */}
             <Image
               src="/images/shop-cloth-counter.jpg"
@@ -157,25 +157,25 @@ export function HardwareShowcase() {
 
             {/* Print asset card */}
             <div className="relative z-10 p-6 sm:p-8 max-w-sm w-full bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-white/80 text-center">
-              <div className="w-12 h-12 rounded-xl bg-[#e7f5fd] text-[#397dff] flex items-center justify-center text-xl font-bold mx-auto mb-3">
+              <div className="w-12 h-12 rounded-xl bg-accent-50 text-accent flex items-center justify-center text-xl font-bold mx-auto mb-3">
                 ▦
               </div>
-              <p className="font-display text-base sm:text-lg font-bold text-[#1a1e23]">
+              <p className="font-display text-base sm:text-lg font-bold text-ink">
                 {current.name}
               </p>
-              <p className="text-xs text-[#6e797b] mt-1 leading-snug">
+              <p className="text-xs text-text-muted mt-1 leading-snug">
                 QR opens your review flow, linked to the Google listing we verified with you
               </p>
 
               {/* Asset traits */}
-              <div className="mt-4 pt-4 border-t border-[#e8ecec] flex items-center justify-center gap-4 text-xs font-semibold text-[#515a63]">
+              <div className="mt-4 pt-4 border-t border-line flex items-center justify-center gap-4 text-xs font-semibold text-text-2">
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#16a34a]" />
                   Your name on it
                 </span>
                 <span>•</span>
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#397dff]" />
+                  <span className="w-2 h-2 rounded-full bg-accent" />
                   Neutral wording
                 </span>
               </div>
@@ -185,23 +185,23 @@ export function HardwareShowcase() {
           {/* Detailed Specs (Right 5 cols) */}
           <div className="lg:col-span-5 flex flex-col justify-between">
             <div>
-              <span className="inline-block text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded bg-[#397dff]/10 text-[#397dff] mb-2">
+              <span className="inline-block text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded bg-accent/10 text-accent mb-2">
                 Included with every plan
               </span>
-              <h3 className="font-display text-xl sm:text-2xl text-[#1a1e23] leading-snug mb-3">
+              <h3 className="font-display text-xl sm:text-2xl text-ink leading-snug mb-3">
                 {current.name}
               </h3>
-              <p className="text-xs sm:text-sm text-[#515a63] leading-relaxed mb-6">
+              <p className="text-xs sm:text-sm text-text-2 leading-relaxed mb-6">
                 {current.description}
               </p>
             </div>
 
             {/* Spec Table */}
-            <div className="rounded-xl border border-[#e8ecec] bg-white divide-y divide-[#e8ecec] overflow-hidden text-xs">
+            <div className="rounded-xl border border-line bg-white divide-y divide-line overflow-hidden text-xs">
               {current.specs.map((s, idx) => (
                 <div key={idx} className="p-3 flex items-center justify-between">
-                  <span className="text-[#6e797b] font-medium">{s.label}</span>
-                  <span className="text-[#1a1e23] font-semibold text-right max-w-[200px]">
+                  <span className="text-text-muted font-medium">{s.label}</span>
+                  <span className="text-ink font-semibold text-right max-w-[200px]">
                     {s.val}
                   </span>
                 </div>
@@ -212,7 +212,7 @@ export function HardwareShowcase() {
               <a href="/signup" className="btn-primary text-xs py-2 px-4">
                 <span>Start free trial →</span>
               </a>
-              <span className="text-xs text-[#6e797b]">Emailed when you&apos;re approved</span>
+              <span className="text-xs text-text-muted">Emailed when you&apos;re approved</span>
             </div>
           </div>
         </div>

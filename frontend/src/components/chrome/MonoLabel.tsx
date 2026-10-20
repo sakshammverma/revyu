@@ -15,8 +15,8 @@ export function MonoLabel({
     <div
       className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold tracking-wide border before:block before:w-1.5 before:h-1.5 before:rounded-full before:shrink-0 ${
         tone === "brand"
-          ? "bg-[#e7f5fd] text-[#2f68db] border-[#397dff]/20 before:bg-[#2f68db]"
-          : "bg-white text-[#515a63] border-[#e8ecec] shadow-v2-rest before:bg-[#397dff]"
+          ? "bg-accent-50 text-accent border-accent/20 before:bg-accent"
+          : "bg-white text-text-2 border-line shadow-v2-rest before:bg-accent"
       }`}
     >
       {index && (

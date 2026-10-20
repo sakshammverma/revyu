@@ -109,14 +109,14 @@ function Card({
   return (
     <div className="flex flex-col group">
       <div
-        className="relative rounded-2xl overflow-hidden shadow-v2-rest border border-[#e8ecec] py-6 flex flex-col items-center gap-4"
+        className="relative rounded-2xl overflow-hidden shadow-v2-rest border border-line py-6 flex flex-col items-center gap-4"
         onMouseEnter={() => pauseSet(true)}
         onMouseLeave={() => pauseSet(false)}
         onFocus={() => pauseSet(true)}
         onBlur={() => pauseSet(false)}
       >
         <Image src={photo} alt="" fill className="object-cover" />
-        <div className="absolute inset-0 bg-[#1a1e23]/45 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-ink/45 backdrop-blur-[2px]" />
         <div className="relative z-10">{phone}</div>
         <div className="relative z-10 flex flex-col items-center gap-2 px-4">
           <p className="text-center text-sm font-medium text-white min-h-[40px] max-w-[270px]" aria-live="polite">
@@ -142,13 +142,13 @@ function Card({
         </div>
       </div>
       <div className="pt-4 flex items-start gap-2.5">
-        <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-[#e8ecec] text-[#1a1e23] shrink-0 mt-0.5">{num}</span>
+        <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-line text-ink shrink-0 mt-0.5">{num}</span>
         <div>
-          <p className="text-xs sm:text-sm text-[#515a63] leading-relaxed">
-            <strong className="text-[#1a1e23] font-semibold">{title} </strong>
+          <p className="text-xs sm:text-sm text-text-2 leading-relaxed">
+            <strong className="text-ink font-semibold">{title} </strong>
             {body}
           </p>
-          <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[11px] text-[#397dff] font-medium">
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[11px] text-accent font-medium">
             {chips.map((c, i) => (
               <span key={c}>{i > 0 && <span className="mr-2">•</span>}✓ {c}</span>
             ))}
@@ -220,12 +220,12 @@ export function BuildCards() {
   return (
     <section id="build" className="max-w-[1296px] mx-auto px-4 sm:px-8 pt-16 sm:pt-24 pb-6 sm:pb-10">
       <div className="max-w-3xl mb-12">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#e7f5fd] border border-[#397dff]/20 text-[#397dff] text-xs font-semibold uppercase tracking-wider mb-3">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-50 border border-accent/20 text-accent text-xs font-semibold uppercase tracking-wider mb-3">
           <span>● The product, screen by screen</span>
         </div>
         <InteractiveTag className="ml-3 align-top" />
-        <h2 className="heading-h2 font-display text-[#1a1e23]">Three screens. Scan, tap, paste.</h2>
-        <p className="mt-3 text-base sm:text-lg text-[#6e797b] leading-relaxed">
+        <h2 className="heading-h2 font-display text-ink">Three screens. Scan, tap, paste.</h2>
+        <p className="mt-3 text-base sm:text-lg text-text-muted leading-relaxed">
           These are the real screens: what your customer sees on their own phone, what they paste into Google, and what you see
           afterwards. Tap the stars and chips. The draft is built from exactly what you select.
         </p>
@@ -262,7 +262,7 @@ export function BuildCards() {
                       <p className="mt-2 text-[11px] text-text-2">Scan with your camera</p>
                     </div>
                     <div className="absolute bottom-16 inset-x-0 flex justify-center">
-                      <span className="px-4 py-2 rounded-full bg-[#ffd60a] text-[#1a1e23] text-[14px] font-semibold shadow-lg">
+                      <span className="px-4 py-2 rounded-full bg-[#ffd60a] text-ink text-[14px] font-semibold shadow-lg">
                         revyu.in · Open {DEMO.exampleBusiness}
                       </span>
                     </div>
@@ -404,12 +404,12 @@ export function BuildCards() {
                 {c3.stage === 0 && (
                   <div className="h-full bg-gradient-to-b from-[#2b3a55] to-[#0e1113] px-4 pt-10">
                     <p className="text-center text-white/80 text-6xl font-light">9:41</p>
-                    <div className="mt-16 bg-white/90 rounded-2xl p-3.5 text-[#1a1e23] shadow-lg animate-[chatBubbleIn_0.4s_ease]">
-                      <div className="flex justify-between text-xs text-[#515a63]">
+                    <div className="mt-16 bg-white/90 rounded-2xl p-3.5 text-ink shadow-lg animate-[chatBubbleIn_0.4s_ease]">
+                      <div className="flex justify-between text-xs text-text-2">
                         <span className="font-semibold">Mail · Revyu</span><span>now</span>
                       </div>
                       <p className="text-[15px] font-semibold mt-1">New private feedback on Revyu</p>
-                      <p className="text-sm text-[#515a63] leading-snug">
+                      <p className="text-sm text-text-2 leading-snug">
                         A customer left private feedback for {DEMO.exampleBusiness}. Rating: 2. View it in your dashboard.
                       </p>
                     </div>
@@ -453,7 +453,7 @@ export function BuildCards() {
                       <Heading title="Feedback" sub="Answer quickly. It's the cheapest way to keep a customer." />
                       <div className="bg-white rounded-xl border border-line p-3.5 flex flex-col gap-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-[#b45309] bg-[#fef3c7] px-2 py-0.5 rounded-full">2★</span>
+                          <span className="text-xs font-bold text-warning bg-[#fef3c7] px-2 py-0.5 rounded-full">2★</span>
                           <span className="text-xs text-text-2">2h ago</span>
                         </div>
                         <p className="text-[15px] text-ink leading-snug">Billing took too long and nobody told me why. Sample message.</p>

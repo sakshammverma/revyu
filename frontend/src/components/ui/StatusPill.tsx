@@ -1,7 +1,7 @@
 type Tone = "success" | "warning" | "alert" | "info" | "neutral";
 
 const TONES: Record<Tone, string> = {
-  success: "bg-success-50 text-[#2f6b1a] border-success/25",
+  success: "bg-success-50 text-success-strong border-success/25",
   warning: "bg-warning-50 text-warning border-warning/25",
   alert: "bg-alert-50 text-alert border-alert/25",
   info: "bg-accent-50 text-accent-hover border-accent/25",

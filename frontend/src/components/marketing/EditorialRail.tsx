@@ -44,16 +44,16 @@ export function EditorialRail() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10 sm:mb-12">
         <div>
-          <p className="vf-section-label uppercase tracking-wider mb-2 text-[#515a63]">
+          <p className="vf-section-label uppercase tracking-wider mb-2 text-text-2">
             Before the shop next door does
           </p>
-          <h2 className="heading-h2 font-display text-[#1a1e23]">
+          <h2 className="heading-h2 font-display text-ink">
             Three places to start.
           </h2>
         </div>
         <Link
           href="/how-it-works"
-          className="text-sm font-semibold text-[#397dff] hover:text-[#2f68db] flex items-center gap-1 group self-start sm:self-end"
+          className="text-sm font-semibold text-accent hover:text-accent flex items-center gap-1 group self-start sm:self-end"
         >
           <span>How it works</span>
           <span className="group-hover:translate-x-0.5 transition-transform">→</span>
@@ -66,33 +66,33 @@ export function EditorialRail() {
           <Link
             key={idx}
             href={article.href}
-            className="v2-post-card flex flex-col justify-between border border-[#e8ecec] cursor-pointer group"
+            className="v2-post-card flex flex-col justify-between border border-line cursor-pointer group"
           >
             <div>
               {/* Media inset */}
-              <div className="relative aspect-[16/10] rounded-[10px] overflow-hidden mb-4 border border-[#e8ecec]">
+              <div className="relative aspect-[16/10] rounded-[10px] overflow-hidden mb-4 border border-line">
                 <Image
                   src={article.image}
                   alt=""
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute top-2.5 left-2.5 bg-white/90 backdrop-blur-md px-2.5 py-0.5 rounded text-[11px] font-semibold text-[#1a1e23]">
+                <div className="absolute top-2.5 left-2.5 bg-white/90 backdrop-blur-md px-2.5 py-0.5 rounded text-[11px] font-semibold text-ink">
                   {article.category}
                 </div>
               </div>
 
               {/* Title & Description */}
-              <p className="text-xs text-[#9aa1a3] mb-1.5">{article.readTime}</p>
-              <h3 className="font-display text-lg sm:text-xl text-[#1a1e23] leading-snug group-hover:text-[#397dff] transition-colors">
+              <p className="text-xs text-text-muted mb-1.5">{article.readTime}</p>
+              <h3 className="font-display text-lg sm:text-xl text-ink leading-snug group-hover:text-accent transition-colors">
                 {article.title}
               </h3>
-              <p className="mt-2 text-xs sm:text-sm text-[#6e797b] leading-relaxed line-clamp-3">
+              <p className="mt-2 text-xs sm:text-sm text-text-muted leading-relaxed line-clamp-3">
                 {article.summary}
               </p>
             </div>
 
-            <div className="mt-5 pt-3 border-t border-[#e8ecec] flex items-center text-xs font-semibold text-[#397dff]">
+            <div className="mt-5 pt-3 border-t border-line flex items-center text-xs font-semibold text-accent">
               <span>Read more</span>
               <span className="ml-1 group-hover:translate-x-1 transition-transform">→</span>
             </div>

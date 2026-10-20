@@ -65,7 +65,7 @@ export function TestimonialMarquee() {
   return (
     <div className="mx-2 sm:mx-3 my-12 sm:my-16">
       <section
-        className="relative rounded-2xl bg-[#e2e6e6] py-16 sm:py-24 overflow-hidden border border-[#d5dcdc]"
+        className="relative rounded-2xl bg-[#e2e6e6] py-16 sm:py-24 overflow-hidden border border-line-strong"
         style={{
           backgroundImage: "url('/assets/contour-lines.svg')",
           backgroundSize: "cover",
@@ -74,10 +74,10 @@ export function TestimonialMarquee() {
       >
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto px-4 mb-12 sm:mb-16">
-          <p className="vf-section-label uppercase tracking-wider mb-2 text-[#515a63]">
+          <p className="vf-section-label uppercase tracking-wider mb-2 text-text-2">
             Six kinds of business. One quiet problem.
           </p>
-          <h2 className="heading-h2 font-display text-[#1a1e23]">
+          <h2 className="heading-h2 font-display text-ink">
             Every day you don&rsquo;t ask, the shop next door pulls a little further ahead.
           </h2>
         </div>
@@ -102,9 +102,9 @@ export function TestimonialMarquee() {
 
         {/* Bottom line & Dark Pill CTA */}
         <div className="text-center px-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <p className="text-sm font-medium text-[#515a63]">
+          <p className="text-sm font-medium text-text-2">
             Shop, clinic, salon, gym or coaching centre —{" "}
-            <span className="font-semibold text-[#1a1e23]">one product, one price</span>.
+            <span className="font-semibold text-ink">one product, one price</span>.
           </p>
           <Link href="/signup" className="btn-pill-dark text-xs sm:text-sm py-2 px-5">
             <span>Start your 15-day trial</span>
@@ -118,23 +118,23 @@ export function TestimonialMarquee() {
 
 function MarqueeCard({ item }: { item: Card }) {
   return (
-    <div className="w-[360px] sm:w-[420px] bg-white rounded-xl p-6 shadow-v2-rest border border-[#e8ecec] flex flex-col justify-between shrink-0">
+    <div className="w-[360px] sm:w-[420px] bg-white rounded-xl p-6 shadow-v2-rest border border-line flex flex-col justify-between shrink-0">
       <div>
         <div className="flex items-center justify-between mb-3">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#397dff]">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-accent">
             {item.eyebrow}
           </span>
         </div>
-        <p className="font-display text-[#1a1e23] text-lg leading-snug">{item.title}</p>
+        <p className="font-display text-ink text-lg leading-snug">{item.title}</p>
         {item.body && (
-          <p className="mt-2 text-sm text-[#515a63] leading-relaxed">{item.body}</p>
+          <p className="mt-2 text-sm text-text-2 leading-relaxed">{item.body}</p>
         )}
         {item.chips && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {item.chips.map((chip) => (
               <span
                 key={chip}
-                className="px-2.5 py-1 rounded-full bg-[#f2f7f7] border border-[#e8ecec] text-[11px] font-medium text-[#515a63]"
+                className="px-2.5 py-1 rounded-full bg-bg border border-line text-[11px] font-medium text-text-2"
               >
                 {chip}
               </span>
@@ -143,8 +143,8 @@ function MarqueeCard({ item }: { item: Card }) {
         )}
       </div>
 
-      <div className="mt-5 pt-4 border-t border-[#e8ecec]">
-        <p className="text-[11px] text-[#6e797b]">{item.footer}</p>
+      <div className="mt-5 pt-4 border-t border-line">
+        <p className="text-[11px] text-text-muted">{item.footer}</p>
       </div>
     </div>
   );

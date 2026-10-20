@@ -67,27 +67,27 @@ export function SignupStatus({ signupId }: Props) {
   }
 
   return (
-    <div className="max-w-xl mx-auto v2-sheet border border-[#e8ecec] p-6 sm:p-10">
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-[#e8ecec]">
-        <span className="font-mono text-xs uppercase tracking-wider text-[#515a63]">
+    <div className="max-w-xl mx-auto v2-sheet border border-line p-6 sm:p-10">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-line">
+        <span className="font-mono text-xs uppercase tracking-wider text-text-2">
           Application #{signupId.slice(0, 8)}
         </span>
         <div
           className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${
             state === "trial"
-              ? "bg-[#f0f7ed] text-[#2f6b1a] border border-[#449127]/25"
+              ? "bg-[#f0f7ed] text-success-strong border border-[#449127]/25"
               : state === "rejected"
-              ? "bg-[#fdf2f4] text-[#c62445] border border-[#c62445]/20"
-              : "bg-[#e7f5fd] text-[#2f68db] border border-[#397dff]/20"
+              ? "bg-alert-50 text-alert border border-alert/20"
+              : "bg-accent-50 text-accent border border-accent/20"
           }`}
         >
           <span
             className={`w-2 h-2 rounded-full ${
               state === "trial"
-                ? "bg-[#449127] animate-pulse"
+                ? "bg-success animate-pulse"
                 : state === "rejected"
                 ? "bg-[#c62445]"
-                : "bg-[#397dff] animate-pulse"
+                : "bg-accent animate-pulse"
             }`}
           />
           <span>
@@ -109,12 +109,12 @@ export function SignupStatus({ signupId }: Props) {
       )}
 
       <div className="mt-6">
-        <h2 className="font-display text-2xl sm:text-[28px] leading-snug tracking-tight text-[#1a1e23]">{message}</h2>
+        <h2 className="font-display text-2xl sm:text-[28px] leading-snug tracking-tight text-ink">{message}</h2>
 
         {state === "pending_payment" && (
-          <div className="mt-4 p-4 rounded-xl bg-[#f7fafa] border border-[#e8ecec] text-sm text-[#515a63] leading-relaxed">
+          <div className="mt-4 p-4 rounded-xl bg-[#f7fafa] border border-line text-sm text-text-2 leading-relaxed">
             We haven&rsquo;t received your payment authorisation yet. Nothing has been charged.{" "}
-            <Link href="/signup" className="font-semibold text-[#2f68db] hover:underline">
+            <Link href="/signup" className="font-semibold text-accent hover:underline">
               Return to signup
             </Link>{" "}
             to try again — your details are kept.
@@ -122,15 +122,15 @@ export function SignupStatus({ signupId }: Props) {
         )}
 
         {state === "pending_approval" && (
-          <div className="mt-4 p-4 rounded-xl bg-[#f7fafa] border border-[#e8ecec] text-sm text-[#515a63] leading-relaxed">
+          <div className="mt-4 p-4 rounded-xl bg-[#f7fafa] border border-line text-sm text-text-2 leading-relaxed">
             This verification typically takes a few hours. We confirm your business details against the Google listing you picked so that customer reviews always land on your genuine profile.
           </div>
         )}
 
         {state === "trial" && (
-          <div className="mt-4 p-4 rounded-xl bg-[#f0f7ed] border border-[#449127]/25 text-sm text-[#1a1e23] leading-relaxed">
-            <p className="font-semibold text-[#2f6b1a]">Your outlet is active!</p>
-            <p className="mt-1 text-[#515a63]">
+          <div className="mt-4 p-4 rounded-xl bg-[#f0f7ed] border border-[#449127]/25 text-sm text-ink leading-relaxed">
+            <p className="font-semibold text-success-strong">Your outlet is active!</p>
+            <p className="mt-1 text-text-2">
               We&rsquo;ve emailed you. Log in with your email address to download your QR code and print files — receipt footer, handout card, counter standee and sticker.
             </p>
             <div className="mt-4">
@@ -143,9 +143,9 @@ export function SignupStatus({ signupId }: Props) {
         )}
 
         {state === "rejected" && (
-          <div className="mt-4 p-4 rounded-xl bg-[#fdf2f4] border border-[#c62445]/20 text-sm text-[#515a63] leading-relaxed">
+          <div className="mt-4 p-4 rounded-xl bg-alert-50 border border-alert/20 text-sm text-text-2 leading-relaxed">
             If you think this is a mistake, reply to our email or{" "}
-            <Link href="/contact" className="font-semibold text-[#2f68db] hover:underline">
+            <Link href="/contact" className="font-semibold text-accent hover:underline">
               contact us
             </Link>
             .

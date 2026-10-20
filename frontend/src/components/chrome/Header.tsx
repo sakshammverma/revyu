@@ -32,7 +32,7 @@ export function Header() {
       {/* Dim overlay when mega menu is open */}
       {megaMenuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-[#1a1e23]/30 backdrop-blur-xs transition-opacity duration-300"
+          className="fixed inset-0 z-40 bg-ink/30 backdrop-blur-xs transition-opacity duration-300"
           onClick={() => setMegaMenuOpen(false)}
         />
       )}
@@ -41,7 +41,7 @@ export function Header() {
         <div
           className={`pointer-events-auto mx-auto h-16 flex items-center justify-between transition-all duration-300 ${
             isScrolled
-              ? "max-w-[880px] px-4 sm:px-6 rounded-xl border border-[#e8ecec] bg-white/90 backdrop-blur-xl shadow-v2-rest mt-2"
+              ? "max-w-[880px] px-4 sm:px-6 rounded-xl border border-line bg-white/90 backdrop-blur-xl shadow-v2-rest mt-2"
               : "max-w-[1272px] px-6 sm:px-10 bg-transparent border-b border-[#f0f2f2]"
           }`}
         >
@@ -52,7 +52,7 @@ export function Header() {
             onClick={() => setMegaMenuOpen(false)}
           >
             <Logo
-              className="text-lg text-[#1a1e23]"
+              className="text-lg text-ink"
               markClassName="w-6 h-6 transition-transform group-hover:scale-105"
             />
           </Link>
@@ -61,21 +61,21 @@ export function Header() {
           <nav className={`hidden md:flex items-center ${isScrolled ? "gap-5 lg:gap-6" : "gap-7 lg:gap-9"}`}>
             <Link
               href="/how-it-works"
-              className="text-sm text-[#515a63] hover:text-[#1a1e23] transition-colors"
+              className="text-sm text-text-2 hover:text-ink transition-colors"
             >
               How it works
             </Link>
 
             <Link
               href="/#mechanism"
-              className={`text-sm text-[#515a63] hover:text-[#1a1e23] transition-colors ${secondary}`}
+              className={`text-sm text-text-2 hover:text-ink transition-colors ${secondary}`}
             >
               Demo
             </Link>
 
             <Link
               href="/compliance"
-              className={`text-sm text-[#515a63] hover:text-[#1a1e23] transition-colors ${secondary}`}
+              className={`text-sm text-text-2 hover:text-ink transition-colors ${secondary}`}
             >
               Compliance
             </Link>
@@ -86,13 +86,13 @@ export function Header() {
                 type="button"
                 onClick={() => setMegaMenuOpen(!megaMenuOpen)}
                 className={`text-sm transition-colors flex items-center gap-1 cursor-pointer ${
-                  megaMenuOpen ? "text-[#1a1e23] font-medium" : "text-[#515a63] hover:text-[#1a1e23]"
+                  megaMenuOpen ? "text-ink font-medium" : "text-text-2 hover:text-ink"
                 }`}
               >
                 <span>Resources</span>
                 <svg
                   className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                    megaMenuOpen ? "rotate-180 text-[#397dff]" : "text-[#6e797b]"
+                    megaMenuOpen ? "rotate-180 text-accent" : "text-text-muted"
                   }`}
                   fill="none"
                   viewBox="0 0 24 24"
@@ -105,21 +105,21 @@ export function Header() {
 
             <Link
               href="/#specialties"
-              className={`text-sm text-[#515a63] hover:text-[#1a1e23] transition-colors ${secondary}`}
+              className={`text-sm text-text-2 hover:text-ink transition-colors ${secondary}`}
             >
               Where it fits
             </Link>
 
             <Link
               href="/pricing"
-              className="text-sm text-[#515a63] hover:text-[#1a1e23] transition-colors"
+              className="text-sm text-text-2 hover:text-ink transition-colors"
             >
               Pricing
             </Link>
 
             <Link
               href="/gap-report"
-              className="text-sm font-semibold text-[#2558cc] hover:text-[#1a1e23] transition-colors"
+              className="text-sm font-semibold text-[#2558cc] hover:text-ink transition-colors"
             >
               Free gap report
             </Link>
@@ -129,7 +129,7 @@ export function Header() {
           <div className={`hidden md:flex items-center ${isScrolled ? "gap-4" : "gap-5"}`}>
             <Link
               href="/app"
-              className="text-sm text-[#515a63] hover:text-[#1a1e23] transition-colors"
+              className="text-sm text-text-2 hover:text-ink transition-colors"
             >
               Owner login
             </Link>
@@ -152,7 +152,7 @@ export function Header() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="w-9 h-9 rounded-lg bg-[#f2f7f7] border border-[#e8ecec] flex items-center justify-center text-[#1a1e23] hover:bg-[#e2e6e6] transition-colors"
+              className="w-9 h-9 rounded-lg bg-bg border border-line flex items-center justify-center text-ink hover:bg-[#e2e6e6] transition-colors"
               aria-label="Toggle navigation"
             >
               {mobileMenuOpen ? (
@@ -171,30 +171,30 @@ export function Header() {
         {/* Mega Menu Dropdown Panel */}
         {megaMenuOpen && (
           <div className="pointer-events-auto absolute top-full left-0 right-0 max-w-[1272px] mx-auto px-4 mt-2 transition-all duration-300">
-            <div className="bg-white rounded-2xl border border-[#e2e4e5] shadow-v2-elevated p-8 grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-[#e8ecec]">
+            <div className="bg-white rounded-2xl border border-[#e2e4e5] shadow-v2-elevated p-8 grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-line">
               {/* Column 1: Featured Case Study */}
               <div className="md:col-span-5 pr-0 md:pr-8 pb-6 md:pb-0">
-                <p className="vf-section-label mb-3 text-xs uppercase tracking-wider text-[#515a63]">
+                <p className="vf-section-label mb-3 text-xs uppercase tracking-wider text-text-2">
                   How it works
                 </p>
-                <div className="relative aspect-video rounded-xl overflow-hidden mb-3 border border-[#e8ecec]">
+                <div className="relative aspect-video rounded-xl overflow-hidden mb-3 border border-line">
                   <Image
                     src="/images/hero-stand-idle.jpg"
                     alt="A printed QR standee on a reception counter"
                     fill
                     className="object-cover"
                   />
-                  <div className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full text-xs font-semibold text-[#1a1e23] shadow-xs">
+                  <div className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full text-xs font-semibold text-ink shadow-xs">
                     Printed QR
                   </div>
                 </div>
-                <h4 className="font-display text-lg text-[#1a1e23] leading-snug">
+                <h4 className="font-display text-lg text-ink leading-snug">
                   Scan, tap what stood out, edit the draft, paste it on Google. See all five screens.
                 </h4>
                 <Link
                   href="/#mechanism"
                   onClick={() => setMegaMenuOpen(false)}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#397dff] hover:text-[#2f68db] mt-2 group"
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-accent hover:text-accent mt-2 group"
                 >
                   <span>Try the demo</span>
                   <span className="group-hover:translate-x-0.5 transition-transform">→</span>
@@ -203,43 +203,43 @@ export function Header() {
 
               {/* Column 2: Placements */}
               <div className="md:col-span-4 px-0 md:px-8 py-6 md:py-0">
-                <p className="vf-section-label mb-3 text-xs uppercase tracking-wider text-[#515a63]">
+                <p className="vf-section-label mb-3 text-xs uppercase tracking-wider text-text-2">
                   Where to put the QR
                 </p>
                 <div className="flex flex-col gap-3">
                   <Link
                     href="/#specialties"
                     onClick={() => setMegaMenuOpen(false)}
-                    className="group block p-2.5 rounded-lg hover:bg-[#f2f7f7] transition-colors"
+                    className="group block p-2.5 rounded-lg hover:bg-bg transition-colors"
                   >
-                    <div className="text-sm font-semibold text-[#1a1e23] group-hover:text-[#397dff] transition-colors">
+                    <div className="text-sm font-semibold text-ink group-hover:text-accent transition-colors">
                       Billing counter
                     </div>
-                    <div className="text-xs text-[#6e797b] mt-0.5">
+                    <div className="text-xs text-text-muted mt-0.5">
                       Standee or sticker next to the till
                     </div>
                   </Link>
                   <Link
                     href="/#specialties"
                     onClick={() => setMegaMenuOpen(false)}
-                    className="group block p-2.5 rounded-lg hover:bg-[#f2f7f7] transition-colors"
+                    className="group block p-2.5 rounded-lg hover:bg-bg transition-colors"
                   >
-                    <div className="text-sm font-semibold text-[#1a1e23] group-hover:text-[#397dff] transition-colors">
+                    <div className="text-sm font-semibold text-ink group-hover:text-accent transition-colors">
                       Bill or receipt
                     </div>
-                    <div className="text-xs text-[#6e797b] mt-0.5">
+                    <div className="text-xs text-text-muted mt-0.5">
                       Printed on every bill, scanned at home
                     </div>
                   </Link>
                   <Link
                     href="/#specialties"
                     onClick={() => setMegaMenuOpen(false)}
-                    className="group block p-2.5 rounded-lg hover:bg-[#f2f7f7] transition-colors"
+                    className="group block p-2.5 rounded-lg hover:bg-bg transition-colors"
                   >
-                    <div className="text-sm font-semibold text-[#1a1e23] group-hover:text-[#397dff] transition-colors">
+                    <div className="text-sm font-semibold text-ink group-hover:text-accent transition-colors">
                       Bags, boxes &amp; tables
                     </div>
-                    <div className="text-xs text-[#6e797b] mt-0.5">
+                    <div className="text-xs text-text-muted mt-0.5">
                       A counter sticker and handout cards
                     </div>
                   </Link>
@@ -248,38 +248,38 @@ export function Header() {
 
               {/* Column 3: Resources & Tools */}
               <div className="md:col-span-3 pl-0 md:pl-8 pt-6 md:pt-0">
-                <p className="vf-section-label mb-3 text-xs uppercase tracking-wider text-[#515a63]">
+                <p className="vf-section-label mb-3 text-xs uppercase tracking-wider text-text-2">
                   Resources
                 </p>
-                <div className="flex flex-col gap-2.5 text-xs text-[#515a63]">
+                <div className="flex flex-col gap-2.5 text-xs text-text-2">
                   <Link
                     href="/compliance"
                     onClick={() => setMegaMenuOpen(false)}
-                    className="flex items-center gap-2 p-2 rounded hover:bg-[#f2f7f7] hover:text-[#1a1e23] transition-colors"
+                    className="flex items-center gap-2 p-2 rounded hover:bg-bg hover:text-ink transition-colors"
                   >
-                    <span className="text-[#397dff]">🛡️</span>
+                    <span className="text-accent">🛡️</span>
                     <span>Our five compliance rules</span>
                   </Link>
                   <Link
                     href="/#mechanism"
                     onClick={() => setMegaMenuOpen(false)}
-                    className="flex items-center gap-2 p-2 rounded hover:bg-[#f2f7f7] hover:text-[#1a1e23] transition-colors"
+                    className="flex items-center gap-2 p-2 rounded hover:bg-bg hover:text-ink transition-colors"
                   >
-                    <span className="text-[#397dff]">📱</span>
+                    <span className="text-accent">📱</span>
                     <span>Interactive demo</span>
                   </Link>
                   <Link
                     href="/pricing"
                     onClick={() => setMegaMenuOpen(false)}
-                    className="flex items-center gap-2 p-2 rounded hover:bg-[#f2f7f7] hover:text-[#1a1e23] transition-colors"
+                    className="flex items-center gap-2 p-2 rounded hover:bg-bg hover:text-ink transition-colors"
                   >
-                    <span className="text-[#397dff]">🏷️</span>
+                    <span className="text-accent">🏷️</span>
                     <span><Price plan="monthly" suffix="/month, flat" fallback="One flat monthly price" /></span>
                   </Link>
                   <Link
                     href="/signup"
                     onClick={() => setMegaMenuOpen(false)}
-                    className="flex items-center gap-2 p-2 rounded bg-[#e7f5fd] text-[#397dff] font-semibold hover:bg-[#d6edfc] transition-colors mt-2"
+                    className="flex items-center gap-2 p-2 rounded bg-accent-50 text-accent font-semibold hover:bg-[#d6edfc] transition-colors mt-2"
                   >
                     <span>Start 15-day free trial →</span>
                   </Link>
@@ -291,46 +291,46 @@ export function Header() {
 
         {/* Mobile Flyout Drawer */}
         {mobileMenuOpen && (
-          <div className="pointer-events-auto md:hidden mt-2 mx-auto max-w-[360px] bg-[#1f2429] text-white rounded-2xl p-6 shadow-v2-elevated border border-[#2b3239] flex flex-col gap-4 text-right">
+          <div className="pointer-events-auto md:hidden mt-2 mx-auto max-w-[360px] bg-ink-dark text-white rounded-2xl p-6 shadow-v2-elevated border border-[#2b3239] flex flex-col gap-4 text-right">
             <Link
               href="/how-it-works"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-lg font-medium hover:text-[#397dff] transition-colors"
+              className="text-lg font-medium hover:text-accent transition-colors"
             >
               How it works
             </Link>
             <Link
               href="/#mechanism"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-lg font-medium hover:text-[#397dff] transition-colors"
+              className="text-lg font-medium hover:text-accent transition-colors"
             >
               Demo
             </Link>
             <Link
               href="/compliance"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-lg font-medium hover:text-[#397dff] transition-colors"
+              className="text-lg font-medium hover:text-accent transition-colors"
             >
               Compliance
             </Link>
             <Link
               href="/#specialties"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-lg font-medium hover:text-[#397dff] transition-colors"
+              className="text-lg font-medium hover:text-accent transition-colors"
             >
               Where it fits
             </Link>
             <Link
               href="/pricing"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-lg font-medium hover:text-[#397dff] transition-colors"
+              className="text-lg font-medium hover:text-accent transition-colors"
             >
               Pricing
             </Link>
             <Link
               href="/app"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-lg font-medium hover:text-[#397dff] transition-colors"
+              className="text-lg font-medium hover:text-accent transition-colors"
             >
               Owner login
             </Link>

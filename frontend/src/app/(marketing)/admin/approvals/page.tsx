@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function AdminApprovalsPage() {
   return (
-    <main className="flex-1 min-h-screen bg-[#f2f7f7] px-3 py-6 sm:px-8 sm:py-10">
+    <main className="flex-1 min-h-screen bg-bg px-3 py-6 sm:px-8 sm:py-10">
       <h1 className="heading-h3 max-w-4xl mx-auto mb-5 sm:mb-6">Approval queue</h1>
       <ApprovalQueue />
     </main>

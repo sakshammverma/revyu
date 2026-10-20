@@ -120,16 +120,16 @@ export function PlatformTabs() {
   return (
     <div id="specialties" className="mx-2 sm:mx-3 my-12 sm:my-16">
       <section
-        className="v2-sheet max-w-[1296px] mx-auto border border-[#e8ecec] p-6 sm:p-12 lg:p-16"
+        className="v2-sheet max-w-[1296px] mx-auto border border-line p-6 sm:p-12 lg:p-16"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
         {/* Section Heading */}
         <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-          <p className="vf-section-label uppercase tracking-wider mb-2 text-[#515a63] flex items-center justify-center gap-3">
+          <p className="vf-section-label uppercase tracking-wider mb-2 text-text-2 flex items-center justify-center gap-3">
             Built for every kind of shop <InteractiveTag />
           </p>
-          <h2 className="heading-h2 font-display text-[#1a1e23]">
+          <h2 className="heading-h2 font-display text-ink">
             Wherever customers pay, the QR fits.
           </h2>
         </div>
@@ -140,7 +140,7 @@ export function PlatformTabs() {
           ref={tabsRef}
           {...listProps}
           aria-label="Shop types"
-          className="grid grid-cols-2 lg:grid-cols-5 rounded-xl border border-[#e8ecec] bg-[#fcfcfc] overflow-hidden divide-x divide-y lg:divide-y-0 divide-[#e8ecec]"
+          className="grid grid-cols-2 lg:grid-cols-5 rounded-xl border border-line bg-[#fcfcfc] overflow-hidden divide-x divide-y lg:divide-y-0 divide-line"
         >
           {TABS.map((tab, idx) => {
             const isActive = activeTab === idx;
@@ -156,27 +156,27 @@ export function PlatformTabs() {
               >
                 <div className="flex items-center gap-2 mb-1">
                   {isActive && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#397dff] shrink-0" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0" />
                   )}
-                  <p className={`text-sm sm:text-base font-semibold leading-tight ${isActive ? "text-[#1a1e23]" : "text-[#515a63]"}`}>
+                  <p className={`text-sm sm:text-base font-semibold leading-tight ${isActive ? "text-ink" : "text-text-2"}`}>
                     {tab.title}
                   </p>
                 </div>
-                <p className="text-xs text-[#6e797b] line-clamp-1">
+                <p className="text-xs text-text-muted line-clamp-1">
                   {tab.desc}
                 </p>
 
                 {/* 3.3s Progress Underline */}
                 {isActive && !isPaused && autoplay && (
-                  <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#e8ecec] overflow-hidden">
+                  <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-line overflow-hidden">
                     <div
                       key={`tab-progress-${idx}-${cycleKey}`}
-                      className="h-full bg-[#397dff] animate-[tabFill_3.3s_linear]"
+                      className="h-full bg-accent animate-[tabFill_3.3s_linear]"
                     />
                   </div>
                 )}
                 {isActive && (isPaused || !autoplay) && (
-                  <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#397dff]" />
+                  <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-accent" />
                 )}
               </button>
             );
@@ -192,7 +192,7 @@ export function PlatformTabs() {
         </div>
 
         {/* Large Stage Frame (Product UI on top of Cinematic Landscape) */}
-        <div {...panelProps} className="mt-8 rounded-2xl overflow-hidden border border-[#e8ecec] bg-[#1a1e23] shadow-v2-rest relative">
+        <div {...panelProps} className="mt-8 rounded-2xl overflow-hidden border border-line bg-ink shadow-v2-rest relative">
           <div className="relative aspect-[16/9] sm:aspect-[21/9] min-h-[340px] sm:min-h-[440px] w-full">
             {TABS.map((tab, idx) => (
               <div
@@ -214,7 +214,7 @@ export function PlatformTabs() {
 
             {/* Overlaid UI Content */}
             <div className="absolute bottom-6 left-6 right-6 sm:bottom-10 sm:left-10 sm:right-10 text-white max-w-2xl z-30">
-              <span className="inline-block text-xs font-semibold uppercase tracking-wider px-2.5 py-1 rounded bg-[#397dff] text-white mb-3">
+              <span className="inline-block text-xs font-semibold uppercase tracking-wider px-2.5 py-1 rounded bg-accent text-white mb-3">
                 {current.title}
               </span>
               <h3 className="font-display text-xl sm:text-3xl text-white mb-2 leading-snug">
@@ -228,15 +228,15 @@ export function PlatformTabs() {
         </div>
 
         {/* 3-Column Feature Row Below Stage */}
-        <div className="mt-8 pt-8 border-t border-[#e8ecec] grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+        <div className="mt-8 pt-8 border-t border-line grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
           {current.features.map((feat, i) => (
             <div key={i} className="flex items-start gap-3">
-              <span className="w-5 h-5 rounded-full bg-[#e7f5fd] text-[#397dff] flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+              <span className="w-5 h-5 rounded-full bg-accent-50 text-accent flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
                 ✓
               </span>
               <div>
-                <p className="text-sm font-semibold text-[#1a1e23]">{feat.title}</p>
-                <p className="text-xs text-[#6e797b] mt-1 leading-relaxed">{feat.text}</p>
+                <p className="text-sm font-semibold text-ink">{feat.title}</p>
+                <p className="text-xs text-text-muted mt-1 leading-relaxed">{feat.text}</p>
               </div>
             </div>
           ))}

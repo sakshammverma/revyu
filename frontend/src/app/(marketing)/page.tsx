@@ -19,7 +19,7 @@ import { PlaygroundProvider, PlaygroundTracker } from "@/components/marketing/in
 export default function Home() {
   return (
     <PlaygroundProvider>
-    <div className="min-h-screen flex flex-col bg-[#f2f7f7] text-[#1a1e23] selection:bg-[#397dff]/15 selection:text-[#1a1e23]">
+    <div className="min-h-screen flex flex-col bg-bg text-ink selection:bg-accent/15 selection:text-ink">
       {/* 1. Top Announcement Bar */}
       <PromoBar />
 

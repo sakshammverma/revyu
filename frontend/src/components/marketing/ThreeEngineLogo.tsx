@@ -248,16 +248,16 @@ export function ThreeEngineLogo() {
 
       {/* Subtle Soft Ambient Glow */}
       <div
-        className={`absolute w-20 h-20 rounded-full bg-[#397dff]/12 blur-lg transition-all duration-700 pointer-events-none ${
+        className={`absolute w-20 h-20 rounded-full bg-accent/12 blur-lg transition-all duration-700 pointer-events-none ${
           isHovered ? "scale-115 opacity-60" : "scale-100 opacity-30"
         }`}
       />
 
       {/* Center Brand Emblem: EXACT NAVBAR LOGO IN BLACK COLOR (#1a1e23) */}
-      <div className="relative z-10 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white border border-[#e8ecec] shadow-[0_0_0_4px_rgba(255,255,255,0.96),0_4px_14px_rgba(15,30,97,0.08)] flex items-center justify-center group-hover:scale-105 group-hover:shadow-[0_0_0_5px_rgba(255,255,255,1),0_8px_20px_rgba(57,125,255,0.16)] transition-all duration-300">
+      <div className="relative z-10 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white border border-line shadow-[0_0_0_4px_rgba(255,255,255,0.96),0_4px_14px_rgba(15,30,97,0.08)] flex items-center justify-center group-hover:scale-105 group-hover:shadow-[0_0_0_5px_rgba(255,255,255,1),0_8px_20px_rgba(57,125,255,0.16)] transition-all duration-300">
         {/* Exact Revyu Spirograph Flower Logo from Navbar (BLACK COLOR #1a1e23) */}
         <svg
-          className="w-5.5 h-5.5 sm:w-6 sm:h-6 text-[#1a1e23] transition-transform duration-500 group-hover:rotate-90"
+          className="w-5.5 h-5.5 sm:w-6 sm:h-6 text-ink transition-transform duration-500 group-hover:rotate-90"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"

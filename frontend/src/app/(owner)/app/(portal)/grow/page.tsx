@@ -75,7 +75,7 @@ export default function GrowPage() {
               <li key={s.id}>
                 <Link
                   href={open ? `/app/grow/requests/${open.id}` : `/app/grow/${s.key}`}
-                  className="v2-sheet border border-line p-5 h-full flex flex-col gap-3 hover:border-line-strong transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#397dff]"
+                  className="v2-sheet border border-line p-5 h-full flex flex-col gap-3 hover:border-line-strong transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                 >
                   <span aria-hidden className="w-11 h-11 rounded-xl bg-accent-50 text-accent-hover flex items-center justify-center text-xl">{ICON[s.key] ?? "✦"}</span>
                   <span>

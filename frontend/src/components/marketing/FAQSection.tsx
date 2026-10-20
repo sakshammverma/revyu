@@ -48,22 +48,22 @@ export function FAQSection() {
 
   return (
     <div id="faq" className="mx-2 sm:mx-3 my-16 sm:my-24">
-      <section className="v2-sheet max-w-[1296px] mx-auto border border-[#e8ecec] p-6 sm:p-12 lg:p-16">
+      <section className="v2-sheet max-w-[1296px] mx-auto border border-line p-6 sm:p-12 lg:p-16">
         {/* Header */}
         <div className="max-w-3xl mb-12">
-          <p className="vf-section-label uppercase tracking-wider mb-2 text-[#515a63]">
+          <p className="vf-section-label uppercase tracking-wider mb-2 text-text-2">
             Questions
           </p>
-          <h2 className="heading-h2 font-display text-[#1a1e23]">
+          <h2 className="heading-h2 font-display text-ink">
             What owners say before they start.
           </h2>
-          <p className="mt-3 text-base sm:text-lg text-[#6e797b] leading-relaxed">
+          <p className="mt-3 text-base sm:text-lg text-text-muted leading-relaxed">
             Short answers. The longer you wait, the less they matter.
           </p>
         </div>
 
         {/* Accordion List */}
-        <div className="max-w-4xl divide-y divide-[#e8ecec] border-y border-[#e8ecec]">
+        <div className="max-w-4xl divide-y divide-line border-y border-line">
           {FAQS.map((faq, idx) => {
             const isOpen = openIndex === idx;
             return (
@@ -75,19 +75,19 @@ export function FAQSection() {
                   aria-controls={`faq-answer-${idx}`}
                   className="w-full flex items-center justify-between gap-4 text-left group cursor-pointer"
                 >
-                  <span className="font-display text-lg sm:text-xl text-[#1a1e23] group-hover:text-[#397dff] transition-colors">
+                  <span className="font-display text-lg sm:text-xl text-ink group-hover:text-accent transition-colors">
                     {faq.q}
                   </span>
                   <span
-                    className={`w-7 h-7 rounded-full bg-[#f2f7f7] border border-[#e8ecec] flex items-center justify-center text-sm font-semibold text-[#1a1e23] shrink-0 transition-transform duration-200 ${
-                      isOpen ? "rotate-45 bg-[#397dff] text-white border-[#397dff]" : ""
+                    className={`w-7 h-7 rounded-full bg-bg border border-line flex items-center justify-center text-sm font-semibold text-ink shrink-0 transition-transform duration-200 ${
+                      isOpen ? "rotate-45 bg-accent text-white border-accent" : ""
                     }`}
                   >
                     +
                   </span>
                 </button>
                 {isOpen && (
-                  <p id={`faq-answer-${idx}`} className="mt-4 text-sm sm:text-base text-[#515a63] leading-relaxed pr-8 animate-[chatBubbleIn_0.25s_ease]">
+                  <p id={`faq-answer-${idx}`} className="mt-4 text-sm sm:text-base text-text-2 leading-relaxed pr-8 animate-[chatBubbleIn_0.25s_ease]">
                     {faq.a}
                   </p>
                 )}
@@ -97,11 +97,11 @@ export function FAQSection() {
         </div>
 
         {/* Bottom Help Note */}
-        <div className="mt-10 flex items-center gap-3 text-xs text-[#515a63]">
+        <div className="mt-10 flex items-center gap-3 text-xs text-text-2">
           <span>Something we haven’t answered?</span>
           <Link
             href="/contact"
-            className="font-semibold text-[#397dff] hover:text-[#2f68db] underline"
+            className="font-semibold text-accent hover:text-accent underline"
           >
             Contact us →
           </Link>

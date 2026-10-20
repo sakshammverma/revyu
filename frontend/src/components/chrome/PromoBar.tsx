@@ -10,7 +10,7 @@ export function PromoBar() {
   if (dismissed) return null;
 
   return (
-    <div className="relative z-50 h-12 bg-[#1f2429] text-white flex items-center justify-between px-4 sm:px-8 overflow-hidden border-b border-[#2b3239]">
+    <div className="relative z-50 h-12 bg-ink-dark text-white flex items-center justify-between px-4 sm:px-8 overflow-hidden border-b border-[#2b3239]">
       {/* Background Animated Glow Art */}
       <div
         className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-60 animate-promo-glow"
@@ -22,8 +22,8 @@ export function PromoBar() {
       {/* Center Row Content */}
       <div className="relative z-10 mx-auto flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
         <span className="font-semibold text-white tracking-tight"><Price plan="monthly" suffix="/month, flat" fallback="One flat monthly price" /></span>
-        <span className="text-[#9aa1a3] hidden sm:inline">·</span>
-        <span className="text-[#9aa1a3] hidden sm:inline">
+        <span className="text-text-on-dark hidden sm:inline">·</span>
+        <span className="text-text-on-dark hidden sm:inline">
           Ask every customer before the shop next door does · 15 days free
         </span>
         <span className="text-[#2b3239] hidden md:inline">|</span>
@@ -40,7 +40,7 @@ export function PromoBar() {
       <button
         type="button"
         onClick={() => setDismissed(true)}
-        className="relative z-10 text-[#9aa1a3] hover:text-white p-1.5 rounded hover:bg-white/10 transition-colors ml-2 cursor-pointer"
+        className="relative z-10 text-text-on-dark hover:text-white p-1.5 rounded hover:bg-white/10 transition-colors ml-2 cursor-pointer"
         aria-label="Dismiss banner"
       >
         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

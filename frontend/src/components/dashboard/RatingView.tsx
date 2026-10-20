@@ -16,7 +16,7 @@ export function RatingView({ data }: { data: RatingInfo }) {
         <div className="flex items-start justify-between gap-3 mb-4">
           <h2 className="font-display text-xl text-ink">Google rating</h2>
           {newReviews > 0 ? (
-            <span className="text-xs text-[#2f6b1a] bg-success-50 border border-success/25 px-2.5 py-0.5 rounded-full font-semibold shrink-0">
+            <span className="text-xs text-success-strong bg-success-50 border border-success/25 px-2.5 py-0.5 rounded-full font-semibold shrink-0">
               +{newReviews} new {newReviews === 1 ? "review" : "reviews"}
             </span>
           ) : !checked ? (
@@ -34,7 +34,7 @@ export function RatingView({ data }: { data: RatingInfo }) {
             ★
           </span>
           {data.baseline_rating && data.current_rating && data.current_rating > data.baseline_rating && (
-            <span className="text-sm font-mono tabular-nums text-[#2f6b1a] font-semibold">(was {data.baseline_rating})</span>
+            <span className="text-sm font-mono tabular-nums text-success-strong font-semibold">(was {data.baseline_rating})</span>
           )}
         </div>
 

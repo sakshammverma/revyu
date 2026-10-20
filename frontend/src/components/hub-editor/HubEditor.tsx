@@ -89,7 +89,7 @@ export function HubEditor({ api, isAdmin = false, initialTab = "page" }: { api: 
   return (
     <div className="grid lg:grid-cols-[minmax(0,1fr)_320px] gap-5 items-start">
       <div className="flex flex-col gap-4 min-w-0">
-        <div role="tablist" aria-label="QR page sections" className="flex gap-1 p-1 rounded-xl bg-[#e8ecec] overflow-x-auto no-scrollbar">
+        <div role="tablist" aria-label="QR page sections" className="flex gap-1 p-1 rounded-xl bg-line overflow-x-auto no-scrollbar">
           {tabs.map((t, i) => (
             <button
               key={t.key}
@@ -100,12 +100,12 @@ export function HubEditor({ api, isAdmin = false, initialTab = "page" }: { api: 
               tabIndex={tab === t.key ? 0 : -1}
               onKeyDown={(e) => onTabKey(e, i)}
               onClick={() => setTab(t.key)}
-              className={`flex-1 min-h-[42px] px-4 rounded-lg text-sm font-semibold whitespace-nowrap inline-flex items-center justify-center gap-2 transition-colors ${tab === t.key ? "bg-white text-[#1a1e23] shadow-sm" : "text-[#515a63]"}`}
+              className={`flex-1 min-h-[42px] px-4 rounded-lg text-sm font-semibold whitespace-nowrap inline-flex items-center justify-center gap-2 transition-colors ${tab === t.key ? "bg-white text-ink shadow-sm" : "text-text-2"}`}
             >
               {t.label}
               {"on" in t && (
                 <>
-                  <span aria-hidden className={`w-2 h-2 rounded-full ${t.on ? "bg-[#449127]" : "bg-[#bfc8ca]"}`} />
+                  <span aria-hidden className={`w-2 h-2 rounded-full ${t.on ? "bg-success" : "bg-[#bfc8ca]"}`} />
                   <span className="sr-only">{t.on ? "(on)" : "(off)"}</span>
                 </>
               )}
@@ -145,7 +145,7 @@ export function HubEditor({ api, isAdmin = false, initialTab = "page" }: { api: 
       {desktop && (
       <aside className="sticky top-20">
         <p className="vf-section-label mb-2">Live preview</p>
-        <div className="rounded-[2rem] border-[6px] border-[#1f2429] overflow-hidden bg-[#f2f7f7] shadow-v2-phone">
+        <div className="rounded-[2rem] border-[6px] border-ink-dark overflow-hidden bg-bg shadow-v2-phone">
           <iframe key={previewNonce} title="Customer view preview" src={previewSrc} className="w-full h-[560px] border-0" />
         </div>
         <a href={`/r/${state.slug}`} target="_blank" rel="noreferrer" className="btn-pill-light w-full mt-3 min-h-[44px] inline-flex items-center justify-center">Open on your phone ↗</a>

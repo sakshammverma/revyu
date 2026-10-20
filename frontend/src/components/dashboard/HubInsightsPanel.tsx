@@ -37,7 +37,7 @@ function Bars({ data, labels }: { data: Record<string, number>; labels: Record<s
             <span className="font-semibold text-ink">{v}</span>
           </div>
           <div className="h-2 rounded-full bg-paper-subtle mt-1" aria-hidden="true">
-            <div className="h-2 rounded-full bg-[#2f68db]" style={{ width: `${(v / max) * 100}%` }} />
+            <div className="h-2 rounded-full bg-accent" style={{ width: `${(v / max) * 100}%` }} />
           </div>
         </li>
       ))}

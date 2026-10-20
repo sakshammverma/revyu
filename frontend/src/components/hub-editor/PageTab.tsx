@@ -136,25 +136,25 @@ export function PageTab({ api, state, reload, toast, isAdmin }: TabProps) {
             { value: "menu", label: "Show my page" },
           ]}
         />
-        <p className="text-xs text-[#59636a] mt-2">
+        <p className="text-xs text-text-2 mt-2">
           Your QR code never changes. {state.hub_mode === "menu" && enabledCount < 2 ? "Turn on at least two modules below for your page to appear." : ""}
         </p>
       </Card>
 
       <Card title="Modules" hint="Choose what customers can open, and in what order.">
-        <ul className="flex flex-col divide-y divide-[#e8ecec]">
+        <ul className="flex flex-col divide-y divide-line">
           {state.modules.map((m, i) => (
             <li key={m.key} className="py-3 flex items-center gap-3">
               <div className="flex flex-col">
-                <button type="button" aria-label={`Move ${m.label} up`} disabled={i === 0 || saving} onClick={() => move(i, -1)} className="w-11 h-11 -my-1.5 text-[#515a63] disabled:opacity-25">▲</button>
-                <button type="button" aria-label={`Move ${m.label} down`} disabled={i === state.modules.length - 1 || saving} onClick={() => move(i, 1)} className="w-11 h-11 -my-1.5 text-[#515a63] disabled:opacity-25">▼</button>
+                <button type="button" aria-label={`Move ${m.label} up`} disabled={i === 0 || saving} onClick={() => move(i, -1)} className="w-11 h-11 -my-1.5 text-text-2 disabled:opacity-25">▲</button>
+                <button type="button" aria-label={`Move ${m.label} down`} disabled={i === state.modules.length - 1 || saving} onClick={() => move(i, 1)} className="w-11 h-11 -my-1.5 text-text-2 disabled:opacity-25">▼</button>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-[#1a1e23]">{m.label}</p>
-                {!m.available && !isAdmin && <p className="text-xs text-[#59636a]">Not available for your page yet. Ask us to enable it.</p>}
-                {m.available && !m.enabled && m.blocked_reason && <p className="text-xs text-[#b45309]">{m.blocked_reason}</p>}
+                <p className="font-semibold text-ink">{m.label}</p>
+                {!m.available && !isAdmin && <p className="text-xs text-text-2">Not available for your page yet. Ask us to enable it.</p>}
+                {m.available && !m.enabled && m.blocked_reason && <p className="text-xs text-warning">{m.blocked_reason}</p>}
                 {isAdmin && (
-                  <label className="text-xs text-[#515a63] inline-flex items-center gap-2 mt-1">
+                  <label className="text-xs text-text-2 inline-flex items-center gap-2 mt-1">
                     <input
                       type="checkbox"
                       checked={m.available}
@@ -199,29 +199,29 @@ export function PageTab({ api, state, reload, toast, isAdmin }: TabProps) {
                 <input type="file" accept="image/*" className="sr-only" onChange={(e) => upload(e.target.files?.[0])} />
               </label>
               {profile.cover_image_url && (
-                <button type="button" className="text-sm text-[#515a63] underline" onClick={() => setProfile({ ...profile, cover_image_url: null })}>Remove</button>
+                <button type="button" className="text-sm text-text-2 underline" onClick={() => setProfile({ ...profile, cover_image_url: null })}>Remove</button>
               )}
             </div>
 
-            <fieldset className="border-t border-[#e8ecec] pt-3">
+            <fieldset className="border-t border-line pt-3">
               <legend className="sr-only">Opening hours</legend>
               <div className="flex items-center justify-between mb-2">
-                <p className="text-sm font-medium text-[#1a1e23]">Opening hours</p>
+                <p className="text-sm font-medium text-ink">Opening hours</p>
                 <Switch label="Show opening hours" checked={hoursSet} onChange={setHoursSet} />
               </div>
               {hoursSet && (
                 <ul className="flex flex-col gap-2">
                   {DAYS.map(([k, label]) => (
                     <li key={k} className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm">
-                      <span className="w-12 sm:w-20 text-[#515a63]">{label.slice(0, 3)}</span>
+                      <span className="w-12 sm:w-20 text-text-2">{label.slice(0, 3)}</span>
                       <label className="inline-flex items-center gap-1.5 w-20">
                         <input type="checkbox" checked={days[k].closed} onChange={(e) => setDays({ ...days, [k]: { ...days[k], closed: e.target.checked } })} /> Closed
                       </label>
                       {!days[k].closed && (
                         <>
-                          <input aria-label={`${label} opens`} type="time" value={days[k].open} onChange={(e) => setDays({ ...days, [k]: { ...days[k], open: e.target.value } })} className="rounded-lg border border-[#d5dcdc] px-2 py-1.5" />
+                          <input aria-label={`${label} opens`} type="time" value={days[k].open} onChange={(e) => setDays({ ...days, [k]: { ...days[k], open: e.target.value } })} className="rounded-lg border border-line-strong px-2 py-1.5" />
                           <span>–</span>
-                          <input aria-label={`${label} closes`} type="time" value={days[k].close} onChange={(e) => setDays({ ...days, [k]: { ...days[k], close: e.target.value } })} className="rounded-lg border border-[#d5dcdc] px-2 py-1.5" />
+                          <input aria-label={`${label} closes`} type="time" value={days[k].close} onChange={(e) => setDays({ ...days, [k]: { ...days[k], close: e.target.value } })} className="rounded-lg border border-line-strong px-2 py-1.5" />
                         </>
                       )}
                     </li>

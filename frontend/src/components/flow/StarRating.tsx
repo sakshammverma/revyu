@@ -50,7 +50,7 @@ export function StarRating({ value, onChange }: Props) {
             // Mouse only: on touch screens a hover state would stick after the tap.
             onPointerEnter={(e) => e.pointerType === "mouse" && setHovered(star)}
             onPointerLeave={(e) => e.pointerType === "mouse" && setHovered(null)}
-            className="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-xl hover:bg-white transition-colors duration-150 active:scale-90 cursor-pointer [-webkit-tap-highlight-color:transparent] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#397dff]"
+            className="min-h-[48px] min-w-[48px] flex items-center justify-center rounded-xl hover:bg-white transition-colors duration-150 active:scale-90 cursor-pointer [-webkit-tap-highlight-color:transparent] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
             <svg
               viewBox="0 0 24 24"

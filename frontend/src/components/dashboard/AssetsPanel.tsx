@@ -13,16 +13,16 @@ export function AssetsPanel({ outletId, state }: { outletId: string; state: stri
   const base = `/api/app/outlets/${outletId}`;
 
   return (
-    <div className="v2-sheet border border-[#e8ecec] p-4 sm:p-6">
-      <div className="pb-4 border-b border-[#e8ecec]">
-        <h2 className="font-display text-xl text-[#1a1e23]">Your QR &amp; print files</h2>
-        <p className="text-sm text-[#515a63] mt-0.5">
+    <div className="v2-sheet border border-line p-4 sm:p-6">
+      <div className="pb-4 border-b border-line">
+        <h2 className="font-display text-xl text-ink">Your QR &amp; print files</h2>
+        <p className="text-sm text-text-2 mt-0.5">
           Print these anywhere. Wording is always &ldquo;Scan to share your experience&rdquo;.
         </p>
       </div>
 
       {!ready ? (
-        <p className="mt-4 text-sm text-[#515a63]">
+        <p className="mt-4 text-sm text-text-2">
           Your files will appear here as soon as we&rsquo;ve verified your business.
         </p>
       ) : (
@@ -31,7 +31,7 @@ export function AssetsPanel({ outletId, state }: { outletId: string; state: stri
             <a href={`${base}/qr?format=png`} download="revyu-qr.png" className="btn-primary min-h-[40px]">
               QR code (PNG)
             </a>
-            <a href={`${base}/qr?format=svg`} download="revyu-qr.svg" className="btn-pill-light min-h-[40px] border border-[#e8ecec]">
+            <a href={`${base}/qr?format=svg`} download="revyu-qr.svg" className="btn-pill-light min-h-[40px] border border-line">
               QR code (SVG)
             </a>
           </div>
@@ -40,13 +40,13 @@ export function AssetsPanel({ outletId, state }: { outletId: string; state: stri
               <li key={a.key}>
                 <a
                   href={`${base}/print-assets/${a.key}`}
-                  className="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl border border-[#e8ecec] bg-white hover:border-[#397dff]/40 hover:bg-[#f7fafa] transition-colors"
+                  className="flex items-center justify-between gap-3 px-3.5 py-3 rounded-xl border border-line bg-white hover:border-accent/40 hover:bg-[#f7fafa] transition-colors"
                 >
                   <span className="min-w-0">
-                    <span className="block text-sm font-semibold text-[#1a1e23]">{a.label}</span>
-                    <span className="block text-xs text-[#515a63]">{a.note}</span>
+                    <span className="block text-sm font-semibold text-ink">{a.label}</span>
+                    <span className="block text-xs text-text-2">{a.note}</span>
                   </span>
-                  <span className="text-xs font-semibold text-[#2f68db] shrink-0">PDF ↓</span>
+                  <span className="text-xs font-semibold text-accent shrink-0">PDF ↓</span>
                 </a>
               </li>
             ))}

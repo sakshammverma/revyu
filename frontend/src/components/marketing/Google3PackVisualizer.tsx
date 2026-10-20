@@ -22,35 +22,35 @@ export function Google3PackVisualizer() {
 
   return (
     <section id="gap" className="mx-2 sm:mx-3 my-12 sm:my-16">
-      <div className="v2-sheet max-w-[1296px] mx-auto border border-[#e8ecec] p-6 sm:p-12 lg:p-16">
+      <div className="v2-sheet max-w-[1296px] mx-auto border border-line p-6 sm:p-12 lg:p-16">
         {/* Section Heading */}
         <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
-          <p className="vf-section-label uppercase tracking-wider mb-2 text-[#515a63]">
+          <p className="vf-section-label uppercase tracking-wider mb-2 text-text-2">
             The gap
           </p>
-          <h2 className="heading-h2 font-display text-[#1a1e23]">
+          <h2 className="heading-h2 font-display text-ink">
             {yours} reviews. The one nearby has {theirs}.
           </h2>
-          <p className="mt-3 text-sm sm:text-base text-[#6e797b] leading-relaxed">
+          <p className="mt-3 text-sm sm:text-base text-text-muted leading-relaxed">
             Same work. Same prices. They just ask every customer — you ask the ones you happen to remember.
           </p>
         </div>
 
         {/* 2-Column: inputs + search-result mockup */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-[#f8fafc] rounded-2xl border border-[#e8ecec] p-6 sm:p-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-[#f8fafc] rounded-2xl border border-line p-6 sm:p-10">
           {/* Left Column: owner's own numbers (5 cols) */}
           <div className="lg:col-span-5 flex flex-col justify-between">
             <div>
               <InteractiveTag className="mb-2" />
-              <h3 className="font-display text-xl sm:text-2xl text-[#1a1e23] leading-snug mb-2">
+              <h3 className="font-display text-xl sm:text-2xl text-ink leading-snug mb-2">
                 Where do you stand today?
               </h3>
-              <p className="text-xs sm:text-sm text-[#515a63] leading-relaxed mb-6">
+              <p className="text-xs sm:text-sm text-text-2 leading-relaxed mb-6">
                 Look yourself up on Google Maps, then the busiest competitor near you. Put both review counts in.
               </p>
             </div>
 
-            <div ref={fieldsRef} className="relative bg-white rounded-xl p-5 border border-[#e8ecec] shadow-2xs mb-3 grid grid-cols-2 gap-4">
+            <div ref={fieldsRef} className="relative bg-white rounded-xl p-5 border border-line shadow-2xs mb-3 grid grid-cols-2 gap-4">
               <NumberField label="Your Google reviews" value={yours} onChange={edit(setYours)} ring={!tried} />
               <NumberField label="Nearby competitor" value={theirs} onChange={edit(setTheirs)} />
               <GhostHand
@@ -64,19 +64,19 @@ export function Google3PackVisualizer() {
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-6">
-              <div className="p-3.5 rounded-xl bg-white border border-[#e8ecec] shadow-2xs">
-                <p className="text-[10px] text-[#6e797b] font-medium">The gap today</p>
-                <p className="text-lg font-bold text-[#1a1e23] mt-0.5">{gap} reviews</p>
-                <p className="text-[10px] text-[#6e797b] mt-0.5">What a searcher sees first</p>
+              <div className="p-3.5 rounded-xl bg-white border border-line shadow-2xs">
+                <p className="text-[10px] text-text-muted font-medium">The gap today</p>
+                <p className="text-lg font-bold text-ink mt-0.5">{gap} reviews</p>
+                <p className="text-[10px] text-text-muted mt-0.5">What a searcher sees first</p>
               </div>
-              <div className="p-3.5 rounded-xl bg-white border border-[#e8ecec] shadow-2xs">
-                <p className="text-[10px] text-[#6e797b] font-medium">Why it happens</p>
-                <p className="text-lg font-bold text-[#397dff] mt-0.5">Asking</p>
-                <p className="text-[10px] text-[#6e797b] mt-0.5">Not quality — consistency</p>
+              <div className="p-3.5 rounded-xl bg-white border border-line shadow-2xs">
+                <p className="text-[10px] text-text-muted font-medium">Why it happens</p>
+                <p className="text-lg font-bold text-accent mt-0.5">Asking</p>
+                <p className="text-[10px] text-text-muted mt-0.5">Not quality — consistency</p>
               </div>
             </div>
 
-            <p className="text-[11px] text-[#9aa1a3] mb-4">
+            <p className="text-[11px] text-text-muted mb-4">
               Nobody can promise you a number. What you can decide is whether every customer gets asked, or
               only the ones you happen to remember.
             </p>
@@ -123,14 +123,14 @@ function NumberField({
 }) {
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="text-xs font-semibold text-[#515a63]">{label}</span>
+      <span className="text-xs font-semibold text-text-2">{label}</span>
       <input
         type="number"
         min={0}
         max={99999}
         value={value}
         onChange={(e) => onChange(Math.max(0, Math.min(99999, Number(e.target.value) || 0)))}
-        className={`w-full px-3 py-2 rounded-lg border border-[#e8ecec] text-base font-bold text-[#1a1e23] focus:outline-none focus:border-[#397dff] ${ring ? "afford-ring" : ""}`}
+        className={`w-full px-3 py-2 rounded-lg border border-line text-base font-bold text-ink focus:outline-none focus:border-accent ${ring ? "afford-ring" : ""}`}
       />
     </label>
   );
@@ -155,7 +155,7 @@ function Listing({
     <div
       className={`p-3.5 rounded-lg transition-all ${
         highlight
-          ? "border-2 border-[#397dff] bg-[#f8fbff]"
+          ? "border-2 border-accent bg-[#f8fbff]"
           : `border border-[#dadce0] bg-white ${muted ? "opacity-50" : ""}`
       }`}
     >
@@ -169,7 +169,7 @@ function Listing({
           {note && <p className="text-[11px] text-[#5f6368] mt-1">{note}</p>}
         </div>
         {highlight && (
-          <span className="text-[10px] font-semibold text-[#397dff] bg-[#397dff]/10 px-2 py-0.5 rounded-full">
+          <span className="text-[10px] font-semibold text-accent bg-accent/10 px-2 py-0.5 rounded-full">
             You
           </span>
         )}

@@ -63,7 +63,7 @@ function Headline({ view }: { view: CompetitorsView }) {
 
 function Delta({ value }: { value: number | null }) {
   if (value === null) return <span className="text-text-muted text-xs">first check pending</span>;
-  const tone = value > 0 ? "text-[#2f6b1a]" : "text-text-2";
+  const tone = value > 0 ? "text-success-strong" : "text-text-2";
   return (
     <span className={`tabular-nums font-semibold ${tone}`}>
       {value > 0 ? "+" : ""}

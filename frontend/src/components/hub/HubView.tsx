@@ -19,7 +19,7 @@ export function HubView({ slug, hub, quiet = false }: { slug: string; hub: HubPa
 
   return (
     <main className="flex flex-col gap-4">
-      <header className="v2-sheet border border-[#e8ecec] overflow-hidden">
+      <header className="v2-sheet border border-line overflow-hidden">
         {profile?.cover_image_url && (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={profile.cover_image_url} alt="" className="w-full h-28 object-cover" loading="eager" />
@@ -27,15 +27,15 @@ export function HubView({ slug, hub, quiet = false }: { slug: string; hub: HubPa
         <div className="p-5 flex items-center gap-4">
           {outlet.logo_url && (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={outlet.logo_url} alt="" className="w-14 h-14 rounded-xl object-contain bg-[#f2f7f7] border border-[#e8ecec]" />
+            <img src={outlet.logo_url} alt="" className="w-14 h-14 rounded-xl object-contain bg-bg border border-line" />
           )}
           <div className="min-w-0">
-            <h1 className="font-display text-xl leading-tight text-[#1a1e23] truncate">{outlet.name}</h1>
+            <h1 className="font-display text-xl leading-tight text-ink truncate">{outlet.name}</h1>
             {(profile?.tagline || profile?.locality) && (
-              <p className="text-sm text-[#515a63] mt-0.5 line-clamp-2">{profile?.tagline || profile?.locality}</p>
+              <p className="text-sm text-text-2 mt-0.5 line-clamp-2">{profile?.tagline || profile?.locality}</p>
             )}
             {open_now && (
-              <p className={`text-xs font-semibold mt-1.5 ${open_now.open ? "text-[#2f7a16]" : "text-[#59636a]"}`}>
+              <p className={`text-xs font-semibold mt-1.5 ${open_now.open ? "text-[#2f7a16]" : "text-text-2"}`}>
                 {open_now.open ? `Open now${open_now.until ? ` · until ${open_now.until}` : ""}` : "Closed right now"}
               </p>
             )}
@@ -52,21 +52,21 @@ export function HubView({ slug, hub, quiet = false }: { slug: string; hub: HubPa
                 if (quiet) e.preventDefault();
                 else beacon(outlet.id, "module_selected", { module: m.key });
               }}
-              className="v2-sheet border border-[#e8ecec] min-h-[132px] h-full p-4 flex flex-col justify-between gap-4 transition-transform duration-150 active:scale-[0.98] hover:border-[#bfc8ca] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#397dff] motion-reduce:transition-none"
+              className="v2-sheet border border-line min-h-[132px] h-full p-4 flex flex-col justify-between gap-4 transition-transform duration-150 active:scale-[0.98] hover:border-[#bfc8ca] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent motion-reduce:transition-none"
             >
-              <span className="w-10 h-10 rounded-xl bg-[#e7f5fd] text-[#2f68db] flex items-center justify-center">
+              <span className="w-10 h-10 rounded-xl bg-accent-50 text-accent flex items-center justify-center">
                 <Icon name={m.icon} />
               </span>
               <span>
-                <span className="block font-semibold text-[#1a1e23] leading-snug">{m.label}</span>
-                <span className="block text-xs text-[#59636a] mt-0.5 leading-snug">{m.blurb}</span>
+                <span className="block font-semibold text-ink leading-snug">{m.label}</span>
+                <span className="block text-xs text-text-2 mt-0.5 leading-snug">{m.blurb}</span>
               </span>
             </Link>
           </li>
         ))}
       </ul>
 
-      <p className="text-center text-xs text-[#59636a] pt-2">Powered by Revyu</p>
+      <p className="text-center text-xs text-text-2 pt-2">Powered by Revyu</p>
     </main>
   );
 }

@@ -40,16 +40,16 @@ export function CompliancePage() {
     <MarketingPage>
       {/* Header */}
       <section className="pt-12 sm:pt-20 pb-10 text-center max-w-3xl mx-auto px-4">
-        <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full bg-white border border-[#e8ecec] shadow-v2-rest">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#397dff]" />
-          <span className="text-xs font-semibold text-[#515a63] tracking-wide">
+        <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full bg-white border border-line shadow-v2-rest">
+          <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+          <span className="text-xs font-semibold text-text-2 tracking-wide">
             Our five rules
           </span>
         </div>
-        <h1 className="heading-h1 font-display text-[#1a1e23] tracking-tight">
+        <h1 className="heading-h1 font-display text-ink tracking-tight">
           We never hide the Google link.
         </h1>
-        <p className="mt-4 text-base sm:text-lg text-[#515a63] leading-relaxed max-w-xl mx-auto">
+        <p className="mt-4 text-base sm:text-lg text-text-2 leading-relaxed max-w-xl mx-auto">
           The ultimate risk in review collection sits directly on <em>your</em> Google Business Profile. These five rules are why Revyu keeps your business permanently safe.
         </p>
       </section>
@@ -60,18 +60,18 @@ export function CompliancePage() {
           {RULES.map((rule) => (
             <div
               key={rule.id}
-              className="v2-sheet p-6 sm:p-8 border border-[#e8ecec] flex flex-col sm:flex-row sm:items-start gap-5 hover:border-[#397dff]/40 transition-colors"
+              className="v2-sheet p-6 sm:p-8 border border-line flex flex-col sm:flex-row sm:items-start gap-5 hover:border-accent/40 transition-colors"
             >
               <div className="shrink-0">
-                <span className="font-mono text-xs font-bold text-[#397dff] bg-[#e7f5fd] border border-[#397dff]/20 px-3.5 py-1.5 rounded-lg inline-block">
+                <span className="font-mono text-xs font-bold text-accent bg-accent-50 border border-accent/20 px-3.5 py-1.5 rounded-lg inline-block">
                   {rule.id}
                 </span>
               </div>
               <div className="flex-1">
-                <h2 className="font-display text-xl sm:text-2xl text-[#1a1e23]">
+                <h2 className="font-display text-xl sm:text-2xl text-ink">
                   {rule.title}
                 </h2>
-                <p className="mt-2 text-sm text-[#6e797b] leading-relaxed">
+                <p className="mt-2 text-sm text-text-muted leading-relaxed">
                   {rule.body}
                 </p>
               </div>
@@ -82,32 +82,32 @@ export function CompliancePage() {
 
       {/* What We Never Claim Card */}
       <section className="max-w-[1024px] mx-auto px-4 pb-20">
-        <div className="v2-card-elevated p-8 sm:p-10 border border-[#e8ecec] bg-white">
-          <h3 className="font-display text-2xl text-[#1a1e23]">What we never claim</h3>
-          <p className="text-sm text-[#6e797b] mt-2">
+        <div className="v2-card-elevated p-8 sm:p-10 border border-line bg-white">
+          <h3 className="font-display text-2xl text-ink">What we never claim</h3>
+          <p className="text-sm text-text-muted mt-2">
             Claims we will never make:
           </p>
-          <ul className="mt-6 flex flex-col gap-3 text-sm text-[#515a63]">
+          <ul className="mt-6 flex flex-col gap-3 text-sm text-text-2">
             <li className="flex items-center gap-3">
-              <span className="text-[#c62445] font-bold">—</span>
+              <span className="text-alert font-bold">—</span>
               <span>We never promise a number of reviews.</span>
             </li>
             <li className="flex items-center gap-3">
-              <span className="text-[#c62445] font-bold">—</span>
+              <span className="text-alert font-bold">—</span>
               <span>We never promise a better rating or search ranking.</span>
             </li>
             <li className="flex items-center gap-3">
-              <span className="text-[#c62445] font-bold">—</span>
+              <span className="text-alert font-bold">—</span>
               <span>We never post on a customer’s behalf or pre-fill Google’s review form.</span>
             </li>
             <li className="flex items-center gap-3">
-              <span className="text-[#c62445] font-bold">—</span>
+              <span className="text-alert font-bold">—</span>
               <span>We never offer private feedback instead of the Google link — only in addition to it.</span>
             </li>
           </ul>
 
-          <div className="mt-8 pt-6 border-t border-[#e8ecec] flex flex-col sm:flex-row items-center justify-between gap-4">
-            <span className="text-sm font-medium text-[#1a1e23]">
+          <div className="mt-8 pt-6 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4">
+            <span className="text-sm font-medium text-ink">
               Collect reviews the honest, compliant way.
             </span>
             <Link

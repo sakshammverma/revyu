@@ -47,7 +47,7 @@ export default function TermsPage() {
         New accounts get 15 free days, followed by 10 additional completed
         reviews before your QR pauses. Paid plans are billed monthly or
         annually as selected at signup. See our{" "}
-        <a href="/refund-policy" className="text-[#2f68db] underline underline-offset-2 hover:text-[#1a1e23]">
+        <a href="/refund-policy" className="text-accent underline underline-offset-2 hover:text-ink">
           refund policy
         </a>{" "}
         for cancellation and refund terms.

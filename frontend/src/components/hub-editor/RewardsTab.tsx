@@ -94,11 +94,11 @@ export function RewardsTab({ api, reload, toast }: TabProps) {
   if (!data.acknowledged)
     return (
       <Card title="Before you start">
-        <p className="text-sm text-[#1a1e23] leading-relaxed">
+        <p className="text-sm text-ink leading-relaxed">
           Rewards must never be offered for reviews. If you mention reviews alongside rewards in your own signage or
           staff scripts, that is outside our system and puts your Google profile at risk.
         </p>
-        <p className="text-sm text-[#515a63] leading-relaxed mt-3">
+        <p className="text-sm text-text-2 leading-relaxed mt-3">
           Badges here are earned only by visits that your staff confirm. You are responsible for honouring every reward you create.
         </p>
         <label className="flex items-start gap-3 mt-4 text-sm">
@@ -124,9 +124,9 @@ export function RewardsTab({ api, reload, toast }: TabProps) {
           ["Badges earned", s.badges_awarded],
           ["Rewards used", s.rewards_redeemed],
         ].map(([l, v]) => (
-          <div key={l} className="v2-sheet border border-[#e8ecec] p-3.5">
-            <p className="text-2xl font-bold text-[#1a1e23]">{v}</p>
-            <p className="text-xs text-[#59636a]">{l}</p>
+          <div key={l} className="v2-sheet border border-line p-3.5">
+            <p className="text-2xl font-bold text-ink">{v}</p>
+            <p className="text-xs text-text-2">{l}</p>
           </div>
         ))}
       </div>
@@ -142,11 +142,11 @@ export function RewardsTab({ api, reload, toast }: TabProps) {
           <ol className="flex flex-col gap-2">
             {data.badges.filter((b) => b.active).map((b) => (
               <li key={b.id}>
-                <button type="button" onClick={() => { setError(null); setDraft(b); }} className="w-full text-left rounded-xl border border-[#e8ecec] p-3.5 flex items-center gap-3 hover:border-[#bfc8ca]">
-                  <span className="w-10 h-10 rounded-xl bg-[#e7f5fd] text-[#2f68db] flex items-center justify-center shrink-0"><Icon name={b.icon} /></span>
+                <button type="button" onClick={() => { setError(null); setDraft(b); }} className="w-full text-left rounded-xl border border-line p-3.5 flex items-center gap-3 hover:border-[#bfc8ca]">
+                  <span className="w-10 h-10 rounded-xl bg-accent-50 text-accent flex items-center justify-center shrink-0"><Icon name={b.icon} /></span>
                   <span className="min-w-0 flex-1">
-                    <span className="block font-semibold text-[#1a1e23]">{b.name} <span className="font-normal text-[#59636a]">· {b.visits_required} visits</span></span>
-                    <span className="block text-sm text-[#515a63] truncate">{b.reward.title} ({rewardLabel(b)})</span>
+                    <span className="block font-semibold text-ink">{b.name} <span className="font-normal text-text-2">· {b.visits_required} visits</span></span>
+                    <span className="block text-sm text-text-2 truncate">{b.reward.title} ({rewardLabel(b)})</span>
                   </span>
                 </button>
               </li>
@@ -157,12 +157,12 @@ export function RewardsTab({ api, reload, toast }: TabProps) {
 
       <Card title="Staff counter" hint="Staff sign in with a PIN to record visits and redeem rewards. They never need your login.">
         <p className="text-sm mb-3">
-          Counter page: <a className="text-[#2f68db] font-semibold underline break-all" href={data.staff_url} target="_blank" rel="noreferrer">{data.staff_url}</a>
+          Counter page: <a className="text-accent font-semibold underline break-all" href={data.staff_url} target="_blank" rel="noreferrer">{data.staff_url}</a>
         </p>
-        <ul className="divide-y divide-[#e8ecec] mb-3">
+        <ul className="divide-y divide-line mb-3">
           {data.staff_pins.map((p) => (
             <li key={p.id} className="py-2.5 flex items-center justify-between">
-              <span className={p.active ? "font-medium" : "text-[#59636a] line-through"}>{p.label}</span>
+              <span className={p.active ? "font-medium" : "text-text-2 line-through"}>{p.label}</span>
               <Switch label={`${p.label} active`} checked={p.active} disabled={acting} onChange={(v) => act(async () => { await api.setPinActive(p.id, v); await load(); })} />
             </li>
           ))}
@@ -198,8 +198,8 @@ export function RewardsTab({ api, reload, toast }: TabProps) {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead><tr className="text-left text-[#59636a]"><th className="py-2 pr-3 font-medium">Name</th><th className="pr-3 font-medium">Phone</th><th className="pr-3 font-medium">Visits</th><th className="font-medium">Contact OK</th></tr></thead>
-              <tbody className="divide-y divide-[#e8ecec]">
+              <thead><tr className="text-left text-text-2"><th className="py-2 pr-3 font-medium">Name</th><th className="pr-3 font-medium">Phone</th><th className="pr-3 font-medium">Visits</th><th className="font-medium">Contact OK</th></tr></thead>
+              <tbody className="divide-y divide-line">
                 {members.map((m) => (
                   <tr key={m.id}><td className="py-2 pr-3 font-medium">{m.name}</td><td className="pr-3">{m.phone}</td><td className="pr-3">{m.visits}</td><td>{m.contact_consent ? "Yes" : "No"}</td></tr>
                 ))}
@@ -210,9 +210,9 @@ export function RewardsTab({ api, reload, toast }: TabProps) {
         {members && log.length > 0 && (
           <div className="mt-5">
             <h3 className="text-sm font-semibold mb-2">Redemption log</h3>
-            <ul className="text-sm divide-y divide-[#e8ecec]">
+            <ul className="text-sm divide-y divide-line">
               {log.map((r) => (
-                <li key={`${r.public_id}-${r.redeemed_at}`} className="py-2 flex justify-between gap-3"><span>{r.title} · {r.member}</span><span className="text-[#59636a] shrink-0">{formatDate(r.redeemed_at)}</span></li>
+                <li key={`${r.public_id}-${r.redeemed_at}`} className="py-2 flex justify-between gap-3"><span>{r.title} · {r.member}</span><span className="text-text-2 shrink-0">{formatDate(r.redeemed_at)}</span></li>
               ))}
             </ul>
           </div>
@@ -231,7 +231,7 @@ export function RewardsTab({ api, reload, toast }: TabProps) {
               <div className="flex flex-wrap gap-2">
                 {data.icons.map((ic) => (
                   <button key={ic} type="button" aria-label={ic} aria-pressed={draft.icon === ic} onClick={() => setDraft({ ...draft, icon: ic })}
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center border ${draft.icon === ic ? "bg-[#2f68db] text-white border-[#2f68db]" : "bg-white border-[#d5dcdc]"}`}><Icon name={ic} /></button>
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center border ${draft.icon === ic ? "bg-accent text-white border-accent" : "bg-white border-line-strong"}`}><Icon name={ic} /></button>
                 ))}
               </div>
             </div>
@@ -240,7 +240,7 @@ export function RewardsTab({ api, reload, toast }: TabProps) {
               <div className="flex flex-wrap gap-2">
                 {TYPES.map((t) => (
                   <button key={t.value} type="button" aria-pressed={draft.reward.type === t.value} onClick={() => setDraft({ ...draft, reward: { ...draft.reward, type: t.value } })}
-                    className={`min-h-[40px] px-4 rounded-full text-sm font-semibold border ${draft.reward.type === t.value ? "bg-[#1f2429] text-white border-[#1f2429]" : "bg-white border-[#d5dcdc]"}`}>{t.label}</button>
+                    className={`min-h-[40px] px-4 rounded-full text-sm font-semibold border ${draft.reward.type === t.value ? "bg-ink-dark text-white border-ink-dark" : "bg-white border-line-strong"}`}>{t.label}</button>
                 ))}
               </div>
             </div>
@@ -253,14 +253,14 @@ export function RewardsTab({ api, reload, toast }: TabProps) {
             <TextInput label="Reward title" required maxLength={120} placeholder="10% off your next visit" value={draft.reward.title} onChange={(e) => setDraft({ ...draft, reward: { ...draft.reward, title: e.target.value } })} />
             <TextArea label="Terms (optional)" maxLength={400} value={draft.reward.terms ?? ""} onChange={(e) => setDraft({ ...draft, reward: { ...draft.reward, terms: e.target.value || null } })} />
             <TextInput label="Valid for (days, optional)" type="number" min={1} max={730} value={draft.reward.expires_days ?? ""} onChange={(e) => setDraft({ ...draft, reward: { ...draft.reward, expires_days: parseInt(e.target.value, 10) || null } })} />
-            {error && <p className="text-sm text-[#c62445]" role="alert">{error}</p>}
+            {error && <p className="text-sm text-alert" role="alert">{error}</p>}
             <div className="flex gap-2 pt-1">
               <Btn type="submit" busy={busy} className="flex-1">Save badge</Btn>
               {draft.id && (
                 <Btn type="button" variant="danger" busy={acting} onClick={() => { if (window.confirm("Retire this badge? Badges customers already earned are kept.")) act(async () => { await api.retireBadge(draft.id!); setDraft(null); await load(); await reload(); toast("Badge retired"); }); }}>Retire</Btn>
               )}
             </div>
-            <p className="text-xs text-[#59636a]">Retiring hides a badge for new customers. Badges already earned are kept.</p>
+            <p className="text-xs text-text-2">Retiring hides a badge for new customers. Badges already earned are kept.</p>
           </form>
         )}
       </Sheet>

@@ -40,31 +40,31 @@ export function ROICalculatorSection() {
 
   return (
     <div id="calculator" className="mx-2 sm:mx-3 my-16 sm:my-24">
-      <section className="v2-sheet max-w-[1296px] mx-auto border border-[#e8ecec] p-6 sm:p-12 lg:p-16">
+      <section className="v2-sheet max-w-[1296px] mx-auto border border-line p-6 sm:p-12 lg:p-16">
         {/* Header */}
         <div className="max-w-3xl mb-12">
-          <p className="vf-section-label uppercase tracking-wider mb-2 text-[#515a63] flex items-center gap-3">
+          <p className="vf-section-label uppercase tracking-wider mb-2 text-text-2 flex items-center gap-3">
             The price, in customers <InteractiveTag />
           </p>
-          <h2 className="heading-h2 font-display text-[#1a1e23]">
+          <h2 className="heading-h2 font-display text-ink">
             One new customer can cover a whole year.
           </h2>
-          <p className="mt-3 text-base sm:text-lg text-[#6e797b] leading-relaxed">
+          <p className="mt-3 text-base sm:text-lg text-text-muted leading-relaxed">
             Slide to your average bill. This is only the arithmetic of our price — we don&apos;t guess how many
             reviews or customers you&apos;ll get.
           </p>
         </div>
 
         {/* Calculator Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-[#fcfcfc] rounded-2xl border border-[#e8ecec] p-6 sm:p-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-[#fcfcfc] rounded-2xl border border-line p-6 sm:p-10">
           {/* Left Column: slider */}
           <div ref={demoRef} className="lg:col-span-6 flex flex-col gap-6">
             <div>
               <div className="flex items-center justify-between mb-3">
-                <label htmlFor="avg-bill" className="text-sm font-semibold text-[#1a1e23]">
+                <label htmlFor="avg-bill" className="text-sm font-semibold text-ink">
                   Average bill per customer
                 </label>
-                <span className="font-display text-2xl font-bold text-[#397dff] px-3 py-1 rounded-lg bg-[#397dff]/10">
+                <span className="font-display text-2xl font-bold text-accent px-3 py-1 rounded-lg bg-accent/10">
                   {showMajor(shownBill)}
                 </span>
               </div>
@@ -95,7 +95,7 @@ export function ROICalculatorSection() {
               <div className="mt-2 flex justify-center">
                 <TryHint label="Drag to your average bill" done={tried} />
               </div>
-              <div className="flex justify-between text-[11px] text-[#9aa1a3] mt-2">
+              <div className="flex justify-between text-[11px] text-text-muted mt-2">
                 <span>{showMajor(scaled(200))}</span>
                 <span>{showMajor(scaled(2500))}</span>
                 <span>{showMajor(scaled(5000))}</span>
@@ -103,20 +103,20 @@ export function ROICalculatorSection() {
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-white border border-[#e8ecec] shadow-2xs flex flex-col gap-2">
-              <div className="flex items-center justify-between text-xs pb-2 border-b border-[#e8ecec]">
-                <span className="text-[#515a63]">Monthly plan · {show(monthlyMinor)} × 12</span>
-                <span className="font-bold text-[#1a1e23]">{show(monthlyMinor * 12)} / year</span>
+            <div className="p-4 rounded-xl bg-white border border-line shadow-2xs flex flex-col gap-2">
+              <div className="flex items-center justify-between text-xs pb-2 border-b border-line">
+                <span className="text-text-2">Monthly plan · {show(monthlyMinor)} × 12</span>
+                <span className="font-bold text-ink">{show(monthlyMinor * 12)} / year</span>
               </div>
               <div className="flex items-center justify-between text-xs pt-1">
-                <span className="font-semibold text-[#1a1e23] flex items-center gap-1.5">
-                  <span className="text-[#397dff]">✽</span> Annual plan
+                <span className="font-semibold text-ink flex items-center gap-1.5">
+                  <span className="text-accent">✽</span> Annual plan
                 </span>
                 <span className="font-bold text-[#16a34a] text-sm">{show(annualMinor)} / year</span>
               </div>
             </div>
 
-            <p className="text-xs text-[#6e797b] leading-relaxed">
+            <p className="text-xs text-text-muted leading-relaxed">
               Prices include every feature and every business type. No tiers, no setup fee.
             </p>
           </div>
@@ -140,8 +140,8 @@ export function ROICalculatorSection() {
         </div>
 
         {/* CTA Bar */}
-        <div className="mt-8 pt-6 border-t border-[#e8ecec] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-xs text-[#515a63]">
+        <div className="mt-8 pt-6 border-t border-line flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-2 text-xs text-text-2">
             <span className="w-2 h-2 rounded-full bg-[#16a34a]" />
             <span>Your numbers are in your dashboard before you decide anything</span>
           </div>
@@ -165,12 +165,12 @@ function Stat({
   note: string;
   tone?: "ink" | "green" | "blue";
 }) {
-  const color = tone === "green" ? "text-[#16a34a]" : tone === "blue" ? "text-[#397dff]" : "text-[#1a1e23]";
+  const color = tone === "green" ? "text-[#16a34a]" : tone === "blue" ? "text-accent" : "text-ink";
   return (
-    <div className="p-5 rounded-xl bg-white border border-[#e8ecec] shadow-2xs">
-      <p className="text-xs text-[#6e797b]">{label}</p>
+    <div className="p-5 rounded-xl bg-white border border-line shadow-2xs">
+      <p className="text-xs text-text-muted">{label}</p>
       <p className={`font-display text-3xl sm:text-4xl font-bold mt-1.5 ${color}`}>{value}</p>
-      <p className="text-[11px] text-[#515a63] mt-1">{note}</p>
+      <p className="text-[11px] text-text-2 mt-1">{note}</p>
     </div>
   );
 }

@@ -173,7 +173,7 @@ function UnlockCard({
             : "Your QR keeps collecting. Unlock to see every number."}
       </p>
       <div className="mt-5 flex flex-col items-center gap-2">
-        <Button href="/app/billing" className="w-full sm:w-auto sm:min-w-[260px] bg-[#b45309] hover:bg-[#92400e] shadow-none">
+        <Button href="/app/billing" className="w-full sm:w-auto sm:min-w-[260px] bg-warning hover:bg-[#92400e] shadow-none">
           {price ? `Unlock for ${price}/month` : "Unlock"}
         </Button>
         <p className="text-xs text-text-2">Pay with UPI AutoPay · cancel anytime · same QR code</p>

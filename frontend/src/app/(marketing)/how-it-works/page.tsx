@@ -33,16 +33,16 @@ export default function HowItWorksPage() {
     <MarketingPage>
       {/* Header */}
       <section className="pt-12 sm:pt-20 pb-10 text-center max-w-3xl mx-auto px-4">
-        <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full bg-white border border-[#e8ecec] shadow-v2-rest">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#397dff]" />
-          <span className="text-xs font-semibold text-[#515a63] tracking-wide">
+        <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 rounded-full bg-white border border-line shadow-v2-rest">
+          <span className="w-1.5 h-1.5 rounded-full bg-accent" />
+          <span className="text-xs font-semibold text-text-2 tracking-wide">
             How it works
           </span>
         </div>
-        <h1 className="heading-h1 font-display text-[#1a1e23] tracking-tight">
+        <h1 className="heading-h1 font-display text-ink tracking-tight">
           Three steps. Nothing hidden.
         </h1>
-        <p className="mt-4 text-base sm:text-lg text-[#515a63] leading-relaxed max-w-xl mx-auto">
+        <p className="mt-4 text-base sm:text-lg text-text-2 leading-relaxed max-w-xl mx-auto">
           What your customer does, start to finish — including the one step we can’t remove.
         </p>
       </section>
@@ -53,19 +53,19 @@ export default function HowItWorksPage() {
           {STEPS.map((step) => (
             <div
               key={step.index}
-              className="v2-sheet p-6 sm:p-8 border border-[#e8ecec] flex flex-col justify-between"
+              className="v2-sheet p-6 sm:p-8 border border-line flex flex-col justify-between"
             >
               <div>
                 <div className="flex items-center justify-between mb-5">
-                  <span className="w-10 h-10 rounded-xl bg-[#e7f5fd] text-[#397dff] font-mono font-bold text-sm flex items-center justify-center">
+                  <span className="w-10 h-10 rounded-xl bg-accent-50 text-accent font-mono font-bold text-sm flex items-center justify-center">
                     {step.index}
                   </span>
-                  <span className="text-xs text-[#449127] font-semibold px-2.5 py-1 rounded-full bg-[#449127]/10">
+                  <span className="text-xs text-[#449127] font-semibold px-2.5 py-1 rounded-full bg-success/10">
                     {step.highlight}
                   </span>
                 </div>
-                <h2 className="font-display text-xl text-[#1a1e23]">{step.title}</h2>
-                <p className="mt-3 text-sm text-[#6e797b] leading-relaxed">{step.body}</p>
+                <h2 className="font-display text-xl text-ink">{step.title}</h2>
+                <p className="mt-3 text-sm text-text-muted leading-relaxed">{step.body}</p>
               </div>
             </div>
           ))}
@@ -74,15 +74,15 @@ export default function HowItWorksPage() {
 
       {/* About the Paste Step */}
       <section className="max-w-[1024px] mx-auto px-4 pb-20">
-        <div className="v2-card-elevated p-8 sm:p-10 border border-[#e8ecec] bg-white">
+        <div className="v2-card-elevated p-8 sm:p-10 border border-line bg-white">
           <div className="flex items-center gap-2 mb-2">
-            <span className="h-2 w-2 rounded-full bg-[#397dff]" />
-            <span className="text-xs uppercase tracking-wider text-[#397dff] font-semibold">
+            <span className="h-2 w-2 rounded-full bg-accent" />
+            <span className="text-xs uppercase tracking-wider text-accent font-semibold">
               Policy Transparency
             </span>
           </div>
-          <h2 className="font-display text-2xl sm:text-3xl text-[#1a1e23]">About that paste step</h2>
-          <div className="mt-4 flex flex-col gap-3 text-sm text-[#6e797b] leading-relaxed">
+          <h2 className="font-display text-2xl sm:text-3xl text-ink">About that paste step</h2>
+          <div className="mt-4 flex flex-col gap-3 text-sm text-text-muted leading-relaxed">
             <p>
               Google&rsquo;s official review form accepts no prefilled rating or pre-populated text—there is no legitimate workaround, and we don&rsquo;t pretend otherwise. After copying, the customer is handed directly to Google and submits using their own Google account.
             </p>
@@ -91,8 +91,8 @@ export default function HowItWorksPage() {
             </p>
           </div>
 
-          <div className="mt-8 pt-6 border-t border-[#e8ecec] flex flex-col sm:flex-row items-center justify-between gap-4">
-            <span className="text-sm font-medium text-[#1a1e23]">
+          <div className="mt-8 pt-6 border-t border-line flex flex-col sm:flex-row items-center justify-between gap-4">
+            <span className="text-sm font-medium text-ink">
               Ready to test it for your business?
             </span>
             <Link

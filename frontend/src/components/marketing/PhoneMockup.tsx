@@ -20,7 +20,7 @@ export function PhoneMockup({
 }) {
   const outerW = SCREEN_W + BEZEL * 2;
   const outerH = SCREEN_H + BEZEL * 2;
-  const ink = dark ? "text-white" : "text-[#1a1e23]";
+  const ink = dark ? "text-white" : "text-ink";
   return (
     <div style={{ width: outerW * scale, height: outerH * scale }} className="relative shrink-0">
       <div
@@ -65,7 +65,7 @@ export function PhoneMockup({
 
             {chrome === "browser" && (
               <div className="shrink-0 bg-[#f2f2f4] border-t border-[#d9dadd] px-4 pt-2 pb-5">
-                <div className="h-9 rounded-xl bg-white border border-[#e1e2e5] flex items-center justify-center gap-1.5 text-[14px] text-[#1a1e23]">
+                <div className="h-9 rounded-xl bg-white border border-[#e1e2e5] flex items-center justify-center gap-1.5 text-[14px] text-ink">
                   <svg width="11" height="13" viewBox="0 0 11 13" fill="currentColor" aria-hidden>
                     <path d="M2 5V3.5a3.5 3.5 0 0 1 7 0V5h.5A1.5 1.5 0 0 1 11 6.5v5A1.5 1.5 0 0 1 9.5 13h-8A1.5 1.5 0 0 1 0 11.5v-5A1.5 1.5 0 0 1 1.5 5H2Zm1.5 0h4V3.5a2 2 0 0 0-4 0V5Z" />
                   </svg>
@@ -77,7 +77,7 @@ export function PhoneMockup({
             {/* home indicator */}
             <span
               aria-hidden
-              className={`absolute bottom-2 left-1/2 -translate-x-1/2 w-[130px] h-[5px] rounded-full z-20 ${dark ? "bg-white/70" : "bg-[#1a1e23]/80"}`}
+              className={`absolute bottom-2 left-1/2 -translate-x-1/2 w-[130px] h-[5px] rounded-full z-20 ${dark ? "bg-white/70" : "bg-ink/80"}`}
             />
           </div>
         </div>

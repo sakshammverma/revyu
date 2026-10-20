@@ -88,7 +88,7 @@ export default function RequestPage() {
           <ol className="grid grid-cols-5 gap-1" aria-label="Progress">
             {STEPS.map((s, i) => (
               <li key={s} aria-current={i === step ? "step" : undefined} className="text-center">
-                <span className={`block h-1.5 rounded-full ${i <= step ? "bg-[#2f68db]" : "bg-line"}`} />
+                <span className={`block h-1.5 rounded-full ${i <= step ? "bg-accent" : "bg-line"}`} />
                 <span className={`block mt-1.5 text-[11px] leading-tight ${i === step ? "font-bold text-ink" : "text-text-2"}`}>{LABEL[s]}</span>
               </li>
             ))}
@@ -137,7 +137,7 @@ export default function RequestPage() {
             e.kind === "status_changed" ? (
               <li key={e.id} className="text-xs text-text-2 text-center">{e.body} · {formatDate(e.created_at)}</li>
             ) : (
-              <li key={e.id} className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${e.actor === "owner" ? "self-end bg-[#2f68db] text-white" : "self-start bg-paper-subtle text-ink"}`}>
+              <li key={e.id} className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${e.actor === "owner" ? "self-end bg-accent text-white" : "self-start bg-paper-subtle text-ink"}`}>
                 {e.body}
               </li>
             )

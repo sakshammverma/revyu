@@ -15,8 +15,8 @@ export default function ContactPage() {
       <Section className="pt-12 sm:pt-20 pb-8 sm:pb-10">
         <div className="max-w-3xl mx-auto text-center">
           <MonoLabel tone="muted">Contact</MonoLabel>
-          <h1 className="heading-h1 font-display mt-4 text-[#1a1e23] tracking-tight">Talk to us.</h1>
-          <p className="mt-4 max-w-xl mx-auto text-base sm:text-lg text-[#515a63] leading-relaxed">
+          <h1 className="heading-h1 font-display mt-4 text-ink tracking-tight">Talk to us.</h1>
+          <p className="mt-4 max-w-xl mx-auto text-base sm:text-lg text-text-2 leading-relaxed">
             Questions about pricing, compliance, or getting set up — reach out
             directly. We reply the same day.
           </p>
@@ -24,14 +24,14 @@ export default function ContactPage() {
       </Section>
 
       <Section className="pb-20">
-        <div className="v2-sheet border border-[#e8ecec] p-6 sm:p-8 max-w-xl mx-auto">
+        <div className="v2-sheet border border-line p-6 sm:p-8 max-w-xl mx-auto">
           <div className="flex flex-col gap-4">
             <ContactRow label="Email" value="hello@revyu.in" href="mailto:hello@revyu.in" />
           </div>
         </div>
 
         <div className="mt-10 max-w-xl mx-auto text-center">
-          <p className="text-sm sm:text-base text-[#515a63] leading-relaxed">
+          <p className="text-sm sm:text-base text-text-2 leading-relaxed">
             Already a customer with a support question? Log in to your
             dashboard — private feedback and support requests are handled
             there.
@@ -49,9 +49,9 @@ export default function ContactPage() {
 
 function ContactRow({ label, value, href }: { label: string; value: string; href: string }) {
   return (
-    <div className="flex items-center justify-between gap-4 border-b border-[#e8ecec] pb-4 last:border-b-0 last:pb-0">
-      <p className="text-xs font-semibold uppercase tracking-wider text-[#515a63]">{label}</p>
-      <a href={href} className="font-display text-lg sm:text-xl text-[#2f68db] hover:text-[#1a1e23] transition-colors">
+    <div className="flex items-center justify-between gap-4 border-b border-line pb-4 last:border-b-0 last:pb-0">
+      <p className="text-xs font-semibold uppercase tracking-wider text-text-2">{label}</p>
+      <a href={href} className="font-display text-lg sm:text-xl text-accent hover:text-ink transition-colors">
         {value}
       </a>
     </div>

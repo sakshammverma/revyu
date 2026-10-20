@@ -90,22 +90,22 @@ function PinPad({ onSubmit, busy, error }: { onSubmit: (pin: string) => void; bu
   const [pin, setPin] = useState("");
   const press = (d: string) => setPin((p) => (p.length < 6 ? p + d : p));
   return (
-    <div className="v2-sheet border border-[#e8ecec] p-6 flex flex-col items-center gap-4">
-      <h1 className="font-display text-xl text-[#1a1e23]">Staff sign in</h1>
+    <div className="v2-sheet border border-line p-6 flex flex-col items-center gap-4">
+      <h1 className="font-display text-xl text-ink">Staff sign in</h1>
       <div className="flex gap-2 h-4" aria-label={`${pin.length} digits entered`}>
         {Array.from({ length: 6 }).map((_, i) => (
-          <span key={i} className={`w-3 h-3 rounded-full ${i < pin.length ? "bg-[#1a1e23]" : "bg-[#d5dcdc]"}`} />
+          <span key={i} className={`w-3 h-3 rounded-full ${i < pin.length ? "bg-ink" : "bg-[#d5dcdc]"}`} />
         ))}
       </div>
       <div className="grid grid-cols-3 gap-3 w-full max-w-[16rem]">
         {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
-          <button key={d} type="button" onClick={() => press(d)} className="min-h-[60px] rounded-xl border border-[#d5dcdc] bg-white text-2xl font-semibold active:bg-[#f2f7f7]">{d}</button>
+          <button key={d} type="button" onClick={() => press(d)} className="min-h-[60px] rounded-xl border border-line-strong bg-white text-2xl font-semibold active:bg-bg">{d}</button>
         ))}
-        <button type="button" onClick={() => setPin((p) => p.slice(0, -1))} aria-label="Delete" className="min-h-[60px] rounded-xl text-[#515a63]">⌫</button>
-        <button type="button" onClick={() => press("0")} className="min-h-[60px] rounded-xl border border-[#d5dcdc] bg-white text-2xl font-semibold active:bg-[#f2f7f7]">0</button>
-        <button type="button" disabled={pin.length < 4 || busy} onClick={() => onSubmit(pin)} className="min-h-[60px] rounded-xl bg-[#2f68db] text-white font-semibold disabled:opacity-40">Go</button>
+        <button type="button" onClick={() => setPin((p) => p.slice(0, -1))} aria-label="Delete" className="min-h-[60px] rounded-xl text-text-2">⌫</button>
+        <button type="button" onClick={() => press("0")} className="min-h-[60px] rounded-xl border border-line-strong bg-white text-2xl font-semibold active:bg-bg">0</button>
+        <button type="button" disabled={pin.length < 4 || busy} onClick={() => onSubmit(pin)} className="min-h-[60px] rounded-xl bg-accent text-white font-semibold disabled:opacity-40">Go</button>
       </div>
-      {error && <p className="text-sm text-[#c62445]" role="alert">{error}</p>}
+      {error && <p className="text-sm text-alert" role="alert">{error}</p>}
     </div>
   );
 }
@@ -211,12 +211,12 @@ export function StaffConsole({ slug }: { slug: string }) {
   return (
     <div className="flex flex-col gap-4">
       <header className="flex items-center justify-between">
-        <h1 className="font-display text-xl text-[#1a1e23]">Counter{label ? ` · ${label}` : ""}</h1>
-        <button type="button" onClick={() => { clearStaffToken(slug); setAuthed(false); }} className="text-sm text-[#515a63] underline min-h-[44px]">Sign out</button>
+        <h1 className="font-display text-xl text-ink">Counter{label ? ` · ${label}` : ""}</h1>
+        <button type="button" onClick={() => { clearStaffToken(slug); setAuthed(false); }} className="text-sm text-text-2 underline min-h-[44px]">Sign out</button>
       </header>
 
-      <div className="v2-sheet border border-[#e8ecec] p-4 flex flex-col gap-3">
-        <label className="text-sm font-medium text-[#1a1e23]" htmlFor="visit-code">Customer code</label>
+      <div className="v2-sheet border border-line p-4 flex flex-col gap-3">
+        <label className="text-sm font-medium text-ink" htmlFor="visit-code">Customer code</label>
         <input
           id="visit-code"
           value={code}
@@ -225,7 +225,7 @@ export function StaffConsole({ slug }: { slug: string }) {
           autoCapitalize="characters"
           autoComplete="off"
           maxLength={12}
-          className="w-full rounded-xl border border-[#d5dcdc] px-4 py-4 text-2xl font-mono tracking-widest text-center outline-none focus:border-[#397dff] focus:ring-2 focus:ring-[#397dff]/25"
+          className="w-full rounded-xl border border-line-strong px-4 py-4 text-2xl font-mono tracking-widest text-center outline-none focus:border-accent focus:ring-2 focus:ring-accent/25"
         />
         {hasScanner() && (
           <button type="button" onClick={() => setScanning(true)} className="btn-pill-light min-h-[48px]">Scan QR code</button>
@@ -234,20 +234,20 @@ export function StaffConsole({ slug }: { slug: string }) {
         <button type="button" disabled={busy || code.length < 4} onClick={find} className="btn-pill-light min-h-[44px] disabled:opacity-40">Look up member to redeem</button>
       </div>
 
-      {error && <p className="text-sm text-[#c62445] px-1" role="alert">{error}</p>}
+      {error && <p className="text-sm text-alert px-1" role="alert">{error}</p>}
       {redeemed && <p className="text-sm font-semibold text-[#2f7a16] px-1" role="status">✓ {redeemed}</p>}
 
       {scanning && <Scanner onCode={onScanned} onClose={() => setScanning(false)} />}
 
       {member && (
-        <section className="v2-sheet border border-[#e8ecec] p-5" aria-live="polite">
+        <section className="v2-sheet border border-line p-5" aria-live="polite">
           {result && <p className="text-3xl text-[#2f7a16]" aria-hidden="true">✓</p>}
-          <p className="font-semibold text-lg text-[#1a1e23]">{member.name} <span className="text-[#59636a] font-normal">· {member.public_id}</span></p>
-          <p className="text-sm text-[#515a63]">
+          <p className="font-semibold text-lg text-ink">{member.name} <span className="text-text-2 font-normal">· {member.public_id}</span></p>
+          <p className="text-sm text-text-2">
             {result ? `Visit recorded · ${result.visits} total` : `${lookup?.visits ?? 0} visits`}
           </p>
           {result && result.badges_earned.length > 0 && (
-            <p className="mt-2 text-sm font-semibold text-[#2f68db]">New badge: {result.badges_earned.join(", ")}</p>
+            <p className="mt-2 text-sm font-semibold text-accent">New badge: {result.badges_earned.join(", ")}</p>
           )}
           <button
             type="button"
@@ -257,7 +257,7 @@ export function StaffConsole({ slug }: { slug: string }) {
               setBusy(true);
               try { setTransfer(await staffTransferCode(slug, member.public_id)); } catch (e) { expire(e); } finally { setBusy(false); }
             }}
-            className="mt-3 text-sm text-[#515a63] underline min-h-[44px]"
+            className="mt-3 text-sm text-text-2 underline min-h-[44px]"
           >
             Customer changed phone? Get a transfer code
           </button>
@@ -269,9 +269,9 @@ export function StaffConsole({ slug }: { slug: string }) {
           {pending.length > 0 ? (
             <ul className="mt-3 flex flex-col gap-2">
               {pending.map((g) => (
-                <li key={g.id} className="rounded-xl border border-[#d5dcdc] p-3">
+                <li key={g.id} className="rounded-xl border border-line-strong p-3">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="min-w-0 text-sm"><span className="block font-semibold text-[#1a1e23]">{g.title}</span><span className="text-[#59636a]">{rewardLine(g)}</span></span>
+                    <span className="min-w-0 text-sm"><span className="block font-semibold text-ink">{g.title}</span><span className="text-text-2">{rewardLine(g)}</span></span>
                     {g.redeem_code && (
                       <button type="button" disabled={busy} onClick={() => redeem(g)} className="btn-primary min-h-[44px] px-4 shrink-0">Redeem</button>
                     )}
@@ -294,7 +294,7 @@ export function StaffConsole({ slug }: { slug: string }) {
                         autoComplete="off"
                         autoCapitalize="characters"
                         maxLength={12}
-                        className="min-w-0 flex-1 rounded-lg border border-[#d5dcdc] px-3 font-mono tracking-widest outline-none focus:border-[#397dff] focus:ring-2 focus:ring-[#397dff]/25"
+                        className="min-w-0 flex-1 rounded-lg border border-line-strong px-3 font-mono tracking-widest outline-none focus:border-accent focus:ring-2 focus:ring-accent/25"
                       />
                       <button type="submit" disabled={busy || !(typedCodes[g.id] ?? "").trim()} className="btn-primary min-h-[44px] px-4 shrink-0 disabled:opacity-40">Redeem</button>
                     </form>
@@ -303,7 +303,7 @@ export function StaffConsole({ slug }: { slug: string }) {
               ))}
             </ul>
           ) : (
-            <p className="mt-2 text-sm text-[#59636a]">No rewards waiting.</p>
+            <p className="mt-2 text-sm text-text-2">No rewards waiting.</p>
           )}
         </section>
       )}

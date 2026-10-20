@@ -69,11 +69,11 @@ export function Hero() {
   return (
     <div className="mx-2 sm:mx-3 my-0">
       {/* White Sheet on a Desk */}
-      <section className="v2-sheet max-w-[1296px] mx-auto border border-[#e8ecec] overflow-hidden relative">
+      <section className="v2-sheet max-w-[1296px] mx-auto border border-line overflow-hidden relative">
         {/* Top Fold: Centered Headline & Subtitle */}
         <div className="pt-14 sm:pt-20 lg:pt-24 pb-6 sm:pb-8 px-4 sm:px-8 text-center max-w-[1140px] mx-auto flex flex-col items-center">
           {/* Staggered Serif H1 (Strictly 2 lines, extended horizontally) */}
-          <h1 className="heading-h1 font-display w-full max-w-[1100px] text-center leading-[1.08] text-[#1a1e23]">
+          <h1 className="heading-h1 font-display w-full max-w-[1100px] text-center leading-[1.08] text-ink">
             <span className="block whitespace-normal sm:whitespace-nowrap mb-1">
               {WORDS_LINE_1.map((word, idx) => (
                 <span
@@ -100,7 +100,7 @@ export function Hero() {
 
           {/* Sub-copy */}
           <p
-            className="mt-6 text-base sm:text-lg text-[#515a63] leading-relaxed max-w-2xl animate-hero-pop text-center"
+            className="mt-6 text-base sm:text-lg text-text-2 leading-relaxed max-w-2xl animate-hero-pop text-center"
             style={{ animationDelay: "580ms" }}
           >
             Every happy customer who walks out unasked is a review the shop next door gets instead. One printed code on your counter asks all of them, in a few taps, on their own phone. No app. Nothing to remember.
@@ -145,14 +145,14 @@ export function Hero() {
                 e.preventDefault();
                 router.push(email.trim() ? `/signup?email=${encodeURIComponent(email.trim())}` : "/signup");
               }}
-              className="w-full max-w-[460px] flex items-center p-1.5 rounded-xl bg-white border border-[#e8ecec] shadow-v2-elevated focus-within:border-[#397dff] transition-all"
+              className="w-full max-w-[460px] flex items-center p-1.5 rounded-xl bg-white border border-line shadow-v2-elevated focus-within:border-accent transition-all"
             >
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Your business email"
-                className="flex-1 px-4 py-2.5 text-sm text-[#1a1e23] placeholder-[#9aa1a3] bg-transparent focus:outline-none"
+                className="flex-1 px-4 py-2.5 text-sm text-ink placeholder-[#9aa1a3] bg-transparent focus:outline-none"
               />
               <button
                 type="submit"
@@ -165,44 +165,44 @@ export function Hero() {
 
           {/* 3.3s Auto-Play Indicator Badge (Top right) */}
           <div className="absolute top-4 right-4 sm:right-8 z-30 hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md text-white/90 text-[11px] font-medium border border-white/20">
-            <span className={`w-2 h-2 rounded-full ${isPaused || !autoplay ? "bg-amber-400" : "bg-[#397dff] animate-ping"}`} />
+            <span className={`w-2 h-2 rounded-full ${isPaused || !autoplay ? "bg-amber-400" : "bg-accent animate-ping"}`} />
             <span>{manual ? "Paused · you're in control" : isPaused ? "Paused" : "Example flow"}</span>
           </div>
 
           {/* Floating example card: what the customer tapped -> the draft it builds */}
           <div className="absolute bottom-6 right-4 sm:bottom-10 sm:right-10 max-w-[340px] sm:max-w-[420px] bg-white/95 backdrop-blur-md rounded-2xl p-5 sm:p-6 shadow-v2-elevated border border-white/80 z-30 transition-all duration-500">
             <div className="flex items-center justify-between gap-2 mb-2.5">
-              <span className="text-[11px] font-semibold uppercase tracking-wider text-[#6e797b]">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-text-muted">
                 Example · {current.name}
               </span>
-              <span className="text-[11px] text-[#9aa1a3]">Customer tapped</span>
+              <span className="text-[11px] text-text-muted">Customer tapped</span>
             </div>
             <div className="flex flex-wrap gap-1.5 mb-3">
               {current.tags.map((t) => (
                 <span
                   key={t.id}
-                  className="px-2.5 py-1 rounded-full bg-[#e7f5fd] text-[#397dff] text-[11px] font-semibold"
+                  className="px-2.5 py-1 rounded-full bg-accent-50 text-accent text-[11px] font-semibold"
                 >
                   ✓ {t.label}
                 </span>
               ))}
             </div>
-            <p className="font-display text-[#1a1e23] text-sm sm:text-base leading-snug transition-all duration-300">
+            <p className="font-display text-ink text-sm sm:text-base leading-snug transition-all duration-300">
               &ldquo;{current.draft}&rdquo;
             </p>
-            <div className="mt-3.5 pt-3 border-t border-[#e8ecec] flex items-center justify-between gap-3">
+            <div className="mt-3.5 pt-3 border-t border-line flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs font-semibold text-[#1a1e23]">{current.business}</p>
-                <p className="text-[11px] text-[#6e797b]">{current.locality} · fictional example</p>
+                <p className="text-xs font-semibold text-ink">{current.business}</p>
+                <p className="text-[11px] text-text-muted">{current.locality} · fictional example</p>
               </div>
               <a
                 href="/how-it-works"
-                className="text-xs font-semibold text-[#397dff] hover:underline cursor-pointer flex items-center gap-0.5 shrink-0"
+                className="text-xs font-semibold text-accent hover:underline cursor-pointer flex items-center gap-0.5 shrink-0"
               >
                 <span>How it works →</span>
               </a>
             </div>
-            <p className="mt-2 text-[11px] text-[#9aa1a3]">
+            <p className="mt-2 text-[11px] text-text-muted">
               The customer can edit or clear this before copying it to Google.
             </p>
           </div>
@@ -212,11 +212,11 @@ export function Hero() {
         <div
           {...listProps}
           aria-label="Example businesses"
-          className="w-full border-t border-[#e8ecec] bg-[#ffffff] grid grid-cols-2 sm:grid-cols-6 divide-x divide-y sm:divide-y-0 divide-[#e8ecec] text-xs"
+          className="w-full border-t border-line bg-[#ffffff] grid grid-cols-2 sm:grid-cols-6 divide-x divide-y sm:divide-y-0 divide-line text-xs"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
-          <div className="p-3.5 sm:p-4 flex items-center justify-center font-semibold text-[#6e797b] bg-[#fcfcfc] col-span-2 sm:col-span-1">
+          <div className="p-3.5 sm:p-4 flex items-center justify-center font-semibold text-text-muted bg-[#fcfcfc] col-span-2 sm:col-span-1">
             Tap one ↓
           </div>
           {STORIES.map((s, idx) => {
@@ -232,26 +232,26 @@ export function Hero() {
                 }`}
               >
                 <div className="flex items-center gap-1.5 w-full">
-                  <span className={`font-semibold ${isActive ? "text-[#1a1e23]" : "text-[#6e797b]"}`}>
+                  <span className={`font-semibold ${isActive ? "text-ink" : "text-text-muted"}`}>
                     {s.name}
                   </span>
                   {isActive && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#397dff] shrink-0 ml-auto" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-accent shrink-0 ml-auto" />
                   )}
                 </div>
-                <span className="text-[11px] text-[#9aa1a3] mt-0.5">8 tags, set per business</span>
+                <span className="text-[11px] text-text-muted mt-0.5">8 tags, set per business</span>
 
                 {/* 3.3-second Progress underline for active story */}
                 {isActive && !isPaused && autoplay && (
-                  <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#e8ecec] overflow-hidden">
+                  <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-line overflow-hidden">
                     <div
                       key={`progress-${idx}-${timerKey}`}
-                      className="h-full bg-[#397dff] animate-[tabFill_3.3s_linear]"
+                      className="h-full bg-accent animate-[tabFill_3.3s_linear]"
                     />
                   </div>
                 )}
                 {isActive && (isPaused || !autoplay) && (
-                  <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#397dff]" />
+                  <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-accent" />
                 )}
               </button>
             );

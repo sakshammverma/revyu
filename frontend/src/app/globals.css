@@ -9,7 +9,7 @@
   --ink: #1a1e23;
   --ink-dark: #1f2429;
   --text-2: #515a63;
-  --text-muted: #6e797b;
+  --text-muted: #5f6a6d; /* AA on white and on --bg (the old #6e797b was 4.49:1) */
   --text-on-dark: #9aa1a3;
   --line: #e8ecec;
   --line-dark: #2b3239;
@@ -24,6 +24,7 @@
   --warning: #b45309;
   --warning-50: #fef6e7;
   --success-50: #f0f7ed;
+  --success-strong: #2f6b1a; /* success text on light backgrounds (AA) */
   --alert-50: #fdf0f3;
 
   /* Typography matching Voiceflow's Tiempos Headline & UCity Pro (Wide, balanced editorial serif) */
@@ -98,6 +99,7 @@
   --color-warning: var(--warning);
   --color-warning-50: var(--warning-50);
   --color-success-50: var(--success-50);
+  --color-success-strong: var(--success-strong);
   --color-alert-50: var(--alert-50);
 
   /* Legacy mappings */

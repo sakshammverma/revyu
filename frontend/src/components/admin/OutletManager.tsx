@@ -34,11 +34,11 @@ export function OutletManager() {
     <div className="max-w-5xl mx-auto flex flex-col gap-4 sm:gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-[#dfe5e5]">
         <div className="flex items-center gap-3">
-          <span className="text-sm font-semibold text-[#1a1e23]">Outlets</span>
+          <span className="text-sm font-semibold text-ink">Outlets</span>
           <select
             value={stateFilter}
             onChange={(e) => setStateFilter(e.target.value)}
-            className="rounded-lg border border-[#d5dcdc] bg-white px-3 py-1.5 text-sm text-[#1a1e23] outline-none focus:border-[#397dff] focus:ring-2 focus:ring-[#397dff]/25"
+            className="rounded-lg border border-line-strong bg-white px-3 py-1.5 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/25"
           >
             <option value="">All states</option>
             {["draft", "pending_approval", "trial", "locked", "active", "past_due", "suspended", "rejected", "deactivated"].map(
@@ -53,7 +53,7 @@ export function OutletManager() {
         <div className="flex gap-2">
           <button
             onClick={() => setShowBulk(!showBulk)}
-            className="btn-pill-light min-h-[38px] border border-[#e8ecec] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-pill-light min-h-[38px] border border-line disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Bulk import
           </button>
@@ -82,7 +82,7 @@ export function OutletManager() {
         </p>
       )}
       {!loading && error == null && outlets.length === 0 && (
-        <p className="text-sm text-[#515a63]">No outlets match this filter.</p>
+        <p className="text-sm text-text-2">No outlets match this filter.</p>
       )}
 
       <div className="flex flex-col gap-2">
@@ -111,13 +111,13 @@ function OutletRow({ outlet, onDone }: { outlet: OutletListItem; onDone: () => v
   }
 
   return (
-    <div className="v2-sheet border border-[#e8ecec] px-4 py-3.5 sm:px-5 flex items-center justify-between gap-4">
+    <div className="v2-sheet border border-line px-4 py-3.5 sm:px-5 flex items-center justify-between gap-4">
       <div className="min-w-0">
-        <Link href={`/admin/outlets/${outlet.outlet_id}/detail`} className="text-base font-semibold text-[#1a1e23] truncate hover:text-[#2f68db] hover:underline block">{outlet.business_name}</Link>
-        <p className="text-xs font-mono text-[#515a63] mt-0.5">
+        <Link href={`/admin/outlets/${outlet.outlet_id}/detail`} className="text-base font-semibold text-ink truncate hover:text-accent hover:underline block">{outlet.business_name}</Link>
+        <p className="text-xs font-mono text-text-2 mt-0.5">
           {outlet.vertical} · {outlet.state} · {outlet.source}
         </p>
-        {error && <p className="text-xs text-[#c62445] mt-1">{error}</p>}
+        {error && <p className="text-xs text-alert mt-1">{error}</p>}
       </div>
       <div className="flex items-center gap-2 shrink-0">
       <Link
@@ -179,18 +179,18 @@ function CreateOutletForm({ verticals, onDone }: { verticals: string[]; onDone: 
   }
 
   return (
-    <div className="v2-sheet border border-[#e8ecec] p-4 sm:p-6 flex flex-col gap-4">
-      <p className="font-display text-xl text-[#1a1e23]">New outlet</p>
-      {error && <p className="px-3 py-2 rounded-lg bg-[#fdf2f4] border border-[#c62445]/20 text-sm text-[#c62445]">{error}</p>}
+    <div className="v2-sheet border border-line p-4 sm:p-6 flex flex-col gap-4">
+      <p className="font-display text-xl text-ink">New outlet</p>
+      {error && <p className="px-3 py-2 rounded-lg bg-alert-50 border border-alert/20 text-sm text-alert">{error}</p>}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Field id={businessId} label="Business name" value={businessName} onChange={setBusinessName} />
         <div>
-          <label className="text-xs font-semibold text-[#515a63]">Vertical</label>
+          <label className="text-xs font-semibold text-text-2">Vertical</label>
           <select
             value={vertical}
             onChange={(e) => setVertical(e.target.value)}
-            className="mt-1.5 w-full rounded-lg border border-[#d5dcdc] bg-white px-3 py-2.5 text-sm text-[#1a1e23] outline-none focus:border-[#397dff] focus:ring-2 focus:ring-[#397dff]/25 transition-colors"
+            className="mt-1.5 w-full rounded-lg border border-line-strong bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/25 transition-colors"
           >
             {verticals.map((v) => (
               <option key={v} value={v}>
@@ -245,17 +245,17 @@ function BulkImportForm({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <div className="v2-sheet border border-[#e8ecec] p-4 sm:p-6 flex flex-col gap-4">
-      <p className="font-display text-xl text-[#1a1e23]">Bulk import (CSV)</p>
-      <p className="text-sm text-[#515a63] leading-relaxed">
+    <div className="v2-sheet border border-line p-4 sm:p-6 flex flex-col gap-4">
+      <p className="font-display text-xl text-ink">Bulk import (CSV)</p>
+      <p className="text-sm text-text-2 leading-relaxed">
         Columns: business_name, vertical, owner_phone, owner_email, google_maps_url. All rows
-        land in <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-[#f2f7f7] border border-[#e8ecec] text-[#1a1e23]">draft</span> — activate individually.
+        land in <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-bg border border-line text-ink">draft</span> — activate individually.
       </p>
       <input
         type="file"
         accept=".csv"
         onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-        className="text-sm text-[#515a63] file:mr-3 file:rounded-lg file:border file:border-[#e8ecec] file:bg-[#f2f7f7] file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-[#1a1e23] hover:file:bg-[#e5ecec] file:cursor-pointer"
+        className="text-sm text-text-2 file:mr-3 file:rounded-lg file:border file:border-line file:bg-bg file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-ink hover:file:bg-[#e5ecec] file:cursor-pointer"
       />
       <button
         disabled={busy || !file}
@@ -272,17 +272,17 @@ function BulkImportForm({ onDone }: { onDone: () => void }) {
       )}
 
       {result && (
-        <div className="mt-1 p-3 rounded-lg bg-[#f7fafa] border border-[#e8ecec] text-sm text-[#1a1e23]">
+        <div className="mt-1 p-3 rounded-lg bg-[#f7fafa] border border-line text-sm text-ink">
           <p>
-            Created: <span className="font-semibold tabular-nums text-[#2f6b1a]">{result.created}</span> · Failed:{" "}
-            <span className="font-semibold tabular-nums text-[#c62445]">{result.failed}</span>
+            Created: <span className="font-semibold tabular-nums text-success-strong">{result.created}</span> · Failed:{" "}
+            <span className="font-semibold tabular-nums text-alert">{result.failed}</span>
           </p>
           {result.rows.filter((r) => r.status === "error").length > 0 && (
             <ul className="mt-2 flex flex-col gap-1">
               {result.rows
                 .filter((r) => r.status === "error")
                 .map((r) => (
-                  <li key={r.row} className="text-[#c62445] font-mono text-xs">
+                  <li key={r.row} className="text-alert font-mono text-xs">
                     Row {r.row}: {r.error}
                   </li>
                 ))}
@@ -309,7 +309,7 @@ function Field({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="text-xs font-semibold text-[#515a63]">
+      <label htmlFor={id} className="text-xs font-semibold text-text-2">
         {label}
       </label>
       <input
@@ -317,7 +317,7 @@ function Field({
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1.5 w-full rounded-lg border border-[#d5dcdc] bg-white px-3 py-2.5 text-sm text-[#1a1e23] outline-none focus:border-[#397dff] focus:ring-2 focus:ring-[#397dff]/25 transition-colors"
+        className="mt-1.5 w-full rounded-lg border border-line-strong bg-white px-3 py-2.5 text-sm text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/25 transition-colors"
       />
     </div>
   );

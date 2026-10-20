@@ -124,16 +124,16 @@ export function ShowcaseDeck() {
 
   return (
     <div id="mechanism" className="mx-2 sm:mx-3 my-16 sm:my-24">
-      <section className="v2-sheet max-w-[1296px] mx-auto border border-[#e8ecec] p-6 sm:p-12 lg:p-16">
+      <section className="v2-sheet max-w-[1296px] mx-auto border border-line p-6 sm:p-12 lg:p-16">
         {/* Section Header */}
         <div className="max-w-3xl mb-10">
-          <p className="vf-section-label uppercase tracking-wider mb-2 text-[#515a63] flex items-center gap-3">
+          <p className="vf-section-label uppercase tracking-wider mb-2 text-text-2 flex items-center gap-3">
             How it works, step by step <InteractiveTag />
           </p>
-          <h2 className="heading-h2 font-display text-[#1a1e23]">
+          <h2 className="heading-h2 font-display text-ink">
             From a printed QR to a review they wrote themselves.
           </h2>
-          <p className="mt-3 text-base sm:text-lg text-[#6e797b] leading-relaxed">
+          <p className="mt-3 text-base sm:text-lg text-text-muted leading-relaxed">
             Click through the five screens your customer sees. The phones are interactive — tap stars and tags and watch the draft change.
           </p>
           <div className="mt-4">
@@ -152,20 +152,20 @@ export function ShowcaseDeck() {
                 onClick={() => go(step.id)}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-medium transition-all shrink-0 cursor-pointer ${
                   isActive
-                    ? "bg-[#1a1e23] text-white shadow-v2-elevated"
-                    : "bg-[#f2f7f7] text-[#515a63] hover:bg-[#e8ecec] hover:text-[#1a1e23]"
+                    ? "bg-ink text-white shadow-v2-elevated"
+                    : "bg-bg text-text-2 hover:bg-line hover:text-ink"
                 }`}
               >
                 <span
                   className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-mono ${
-                    isActive ? "bg-[#397dff] text-white" : "bg-black/10 text-[#515a63]"
+                    isActive ? "bg-accent text-white" : "bg-black/10 text-text-2"
                   }`}
                 >
                   {step.number}
                 </span>
                 <span>{step.shortTitle}</span>
                 {step.id === 2 && (
-                  <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.2 bg-[#397dff]/20 text-[#397dff] rounded font-semibold ml-1">
+                  <span className="text-[9px] uppercase tracking-wider px-1.5 py-0.2 bg-accent/20 text-accent rounded font-semibold ml-1">
                     Core
                   </span>
                 )}
@@ -175,12 +175,12 @@ export function ShowcaseDeck() {
         </div>
 
         {/* 5-Phone Fanned Deck Container */}
-        <div className="relative w-full py-8 sm:py-12 flex items-center justify-center overflow-hidden min-h-[640px] sm:min-h-[740px] bg-[#fcfcfc] rounded-2xl border border-[#e8ecec]">
+        <div className="relative w-full py-8 sm:py-12 flex items-center justify-center overflow-hidden min-h-[640px] sm:min-h-[740px] bg-[#fcfcfc] rounded-2xl border border-line">
           {/* Left 40px Round Arrow Button */}
           <button
             type="button"
             onClick={prevPhone}
-            className="absolute left-3 sm:left-8 z-40 w-11 h-11 rounded-full bg-white text-[#1a1e23] shadow-v2-elevated border border-[#e8ecec] flex items-center justify-center hover:bg-[#fcfcfc] hover:scale-105 transition-all cursor-pointer"
+            className="absolute left-3 sm:left-8 z-40 w-11 h-11 rounded-full bg-white text-ink shadow-v2-elevated border border-line flex items-center justify-center hover:bg-[#fcfcfc] hover:scale-105 transition-all cursor-pointer"
             aria-label="Previous workflow step"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -192,7 +192,7 @@ export function ShowcaseDeck() {
           <button
             type="button"
             onClick={nextPhone}
-            className="absolute right-3 sm:right-8 z-40 w-11 h-11 rounded-full bg-white text-[#1a1e23] shadow-v2-elevated border border-[#e8ecec] flex items-center justify-center hover:bg-[#fcfcfc] hover:scale-105 transition-all cursor-pointer"
+            className="absolute right-3 sm:right-8 z-40 w-11 h-11 rounded-full bg-white text-ink shadow-v2-elevated border border-line flex items-center justify-center hover:bg-[#fcfcfc] hover:scale-105 transition-all cursor-pointer"
             aria-label="Next workflow step"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -226,26 +226,26 @@ export function ShowcaseDeck() {
               <IPhoneFrame isCenter={activeCenter === 0}>
                 <div className="bg-white h-full flex flex-col justify-between p-4">
                   {/* Top Bar info */}
-                  <div className="text-center pt-1 border-b border-[#e8ecec] pb-3">
-                    <span className="inline-block px-2 py-0.5 rounded-full bg-[#f2f7f7] text-[9px] font-medium text-[#515a63] mb-1.5">
+                  <div className="text-center pt-1 border-b border-line pb-3">
+                    <span className="inline-block px-2 py-0.5 rounded-full bg-bg text-[9px] font-medium text-text-2 mb-1.5">
                       📍 Scanned from counter standee
                     </span>
                     <div className="flex items-center justify-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-[#449127]" />
-                      <h4 className="text-xs font-bold text-[#1a1e23]">{DEMO.exampleBusiness}</h4>
+                      <span className="w-2 h-2 rounded-full bg-success" />
+                      <h4 className="text-xs font-bold text-ink">{DEMO.exampleBusiness}</h4>
                     </div>
-                    <p className="text-[10px] text-[#6e797b]">{DEMO.exampleLocality} · example</p>
+                    <p className="text-[10px] text-text-muted">{DEMO.exampleLocality} · example</p>
                   </div>
 
                   {/* Main Question & Rating Box */}
                   <div className="my-auto py-2 text-center">
-                    <div className="w-12 h-12 rounded-2xl bg-[#397dff]/10 text-[#397dff] flex items-center justify-center text-xl font-display mx-auto mb-3 shadow-2xs">
+                    <div className="w-12 h-12 rounded-2xl bg-accent/10 text-accent flex items-center justify-center text-xl font-display mx-auto mb-3 shadow-2xs">
                       ✽
                     </div>
-                    <h3 className="text-base font-bold font-display text-[#1a1e23]">
+                    <h3 className="text-base font-bold font-display text-ink">
                       How was your visit today?
                     </h3>
-                    <p className="text-[11px] text-[#6e797b] mt-1">
+                    <p className="text-[11px] text-text-muted mt-1">
                       Tap your rating to start
                     </p>
 
@@ -276,20 +276,20 @@ export function ShowcaseDeck() {
                       <span>{selectedRating} of 5 selected</span>
                     </div>
 
-                    <p className="text-[9px] text-[#9aa1a3] mt-4">
+                    <p className="text-[9px] text-text-muted mt-4">
                       No app install · No login · Nothing stored about you
                     </p>
                   </div>
 
                   {/* Bottom Action */}
-                  <div className="pt-3 border-t border-[#e8ecec]">
+                  <div className="pt-3 border-t border-line">
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         go(1);
                       }}
-                      className="w-full py-2.5 bg-[#397dff] text-white rounded-lg text-xs font-semibold shadow-2xs hover:bg-[#2f68db] transition-colors"
+                      className="w-full py-2.5 bg-accent text-white rounded-lg text-xs font-semibold shadow-2xs hover:bg-accent transition-colors"
                     >
                       Continue →
                     </button>
@@ -311,19 +311,19 @@ export function ShowcaseDeck() {
               <IPhoneFrame isCenter={activeCenter === 1}>
                 <div className="bg-white h-full flex flex-col justify-between p-4">
                   {/* Top Bar */}
-                  <div className="flex items-center justify-between pb-2 border-b border-[#e8ecec]">
-                    <span className="text-[10px] font-semibold text-[#1a1e23]">{DEMO.exampleBusiness}</span>
-                    <span className="text-[9px] text-[#6e797b] bg-[#f2f7f7] px-2 py-0.5 rounded-full">
+                  <div className="flex items-center justify-between pb-2 border-b border-line">
+                    <span className="text-[10px] font-semibold text-ink">{DEMO.exampleBusiness}</span>
+                    <span className="text-[9px] text-text-muted bg-bg px-2 py-0.5 rounded-full">
                       Step 2 of 3
                     </span>
                   </div>
 
                   {/* Heading */}
                   <div className="pt-2 text-center">
-                    <h3 className="text-sm font-bold text-[#1a1e23]">
+                    <h3 className="text-sm font-bold text-ink">
                       What stood out?
                     </h3>
-                    <p className="text-[10px] text-[#6e797b] mt-0.5">
+                    <p className="text-[10px] text-text-muted mt-0.5">
                       Tap whatever applies — or skip
                     </p>
                   </div>
@@ -343,8 +343,8 @@ export function ShowcaseDeck() {
                           }}
                           className={`px-3 py-1.5 rounded-full text-[11px] font-medium transition-all cursor-pointer ${
                             isSelected
-                              ? "bg-[#397dff] text-white shadow-2xs scale-102"
-                              : "bg-[#f2f7f7] text-[#515a63] border border-[#e8ecec] hover:bg-white"
+                              ? "bg-accent text-white shadow-2xs scale-102"
+                              : "bg-bg text-text-2 border border-line hover:bg-white"
                           }`}
                         >
                           {isSelected ? `✓ ${tag.label}` : `+ ${tag.label}`}
@@ -355,21 +355,21 @@ export function ShowcaseDeck() {
 
                   {/* Live Assembly Indicator */}
                   <div className="p-2.5 rounded-xl bg-[#f8fafc] border border-[#e2e8f0] text-center">
-                    <div className="flex items-center justify-center gap-1.5 text-[10px] font-medium text-[#397dff]">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#397dff] animate-ping" />
+                    <div className="flex items-center justify-center gap-1.5 text-[10px] font-medium text-accent">
+                      <span className="w-1.5 h-1.5 rounded-full bg-accent animate-ping" />
                       <span>{selectedTags.length} selected · draft updates as you tap</span>
                     </div>
                   </div>
 
                   {/* Bottom Action */}
-                  <div className="pt-3 border-t border-[#e8ecec]">
+                  <div className="pt-3 border-t border-line">
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         go(2);
                       }}
-                      className="w-full py-2.5 bg-[#397dff] text-white rounded-lg text-xs font-semibold shadow-2xs hover:bg-[#2f68db] transition-colors"
+                      className="w-full py-2.5 bg-accent text-white rounded-lg text-xs font-semibold shadow-2xs hover:bg-accent transition-colors"
                     >
                       See my draft →
                     </button>
@@ -391,10 +391,10 @@ export function ShowcaseDeck() {
               <IPhoneFrame isCenter={activeCenter === 2}>
                 <div className="bg-white h-full flex flex-col justify-between p-4">
                   {/* Business header */}
-                  <div className="flex items-center justify-between pb-2 border-b border-[#e8ecec]">
+                  <div className="flex items-center justify-between pb-2 border-b border-line">
                     <div className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-[#449127]" />
-                      <span className="text-xs font-semibold text-[#1a1e23]">{DEMO.exampleBusiness}</span>
+                      <span className="w-2 h-2 rounded-full bg-success" />
+                      <span className="text-xs font-semibold text-ink">{DEMO.exampleBusiness}</span>
                     </div>
                     <span className="text-[10px] text-[#449127] font-semibold bg-[#ecfdf5] px-2 py-0.5 rounded-full">
                       {"★".repeat(selectedRating)}
@@ -403,10 +403,10 @@ export function ShowcaseDeck() {
 
                   {/* Required Disclosure Banner (documents/16-DRAFT-AND-ROUTING.md) */}
                   <div className="pt-2">
-                    <div className="p-2 rounded-lg bg-[#f2f7f7] border border-[#e8ecec] flex items-start gap-1.5">
-                      <span className="text-[#397dff] text-xs mt-0.5">✽</span>
-                      <p className="text-[10px] text-[#515a63] leading-snug">
-                        <strong className="text-[#1a1e23]">We&apos;ve written this from what you selected.</strong>{" "}
+                    <div className="p-2 rounded-lg bg-bg border border-line flex items-start gap-1.5">
+                      <span className="text-accent text-xs mt-0.5">✽</span>
+                      <p className="text-[10px] text-text-2 leading-snug">
+                        <strong className="text-ink">We&apos;ve written this from what you selected.</strong>{" "}
                         Edit anything — it&apos;s your review.
                       </p>
                     </div>
@@ -414,13 +414,13 @@ export function ShowcaseDeck() {
 
                   {/* Assembled Review Box */}
                   <div className="my-auto py-2">
-                    <div className="p-3 rounded-xl bg-white border-2 border-[#397dff]/20 shadow-2xs text-[11px] text-[#1a1e23] leading-relaxed relative">
-                      <p className="font-serif italic text-[#1a1e23]">
-                        {draft ? <>&ldquo;{draft}&rdquo;</> : <span className="not-italic text-[#9aa1a3]">No tags picked — this box is empty for them to write in.</span>}
+                    <div className="p-3 rounded-xl bg-white border-2 border-accent/20 shadow-2xs text-[11px] text-ink leading-relaxed relative">
+                      <p className="font-serif italic text-ink">
+                        {draft ? <>&ldquo;{draft}&rdquo;</> : <span className="not-italic text-text-muted">No tags picked — this box is empty for them to write in.</span>}
                       </p>
-                      <div className="mt-2.5 pt-2 border-t border-[#e8ecec] flex items-center justify-between text-[9px] text-[#6e797b]">
+                      <div className="mt-2.5 pt-2 border-t border-line flex items-center justify-between text-[9px] text-text-muted">
                         <span>{draft.length} characters</span>
-                        <span className="text-[#397dff] font-medium">Editable</span>
+                        <span className="text-accent font-medium">Editable</span>
                       </div>
                     </div>
 
@@ -433,19 +433,19 @@ export function ShowcaseDeck() {
                   </div>
 
                   {/* Primary 1-Tap Copy & Handoff CTA */}
-                  <div className="pt-3 border-t border-[#e8ecec] flex flex-col gap-2">
+                  <div className="pt-3 border-t border-line flex flex-col gap-2">
                     <button
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleCopySimulation();
                       }}
-                      className="w-full py-2.5 bg-[#397dff] hover:bg-[#2f68db] text-white rounded-lg text-xs font-semibold shadow-v2-btn flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-98"
+                      className="w-full py-2.5 bg-accent hover:bg-accent text-white rounded-lg text-xs font-semibold shadow-v2-btn flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-98"
                     >
                       <span>📋</span>
                       <span>{copiedToast ? "Copied — opening Google…" : "Copy & open Google"}</span>
                     </button>
-                    <p className="text-[9px] text-center text-[#9aa1a3]">
+                    <p className="text-[9px] text-center text-text-muted">
                       Next you&apos;ll see Google — paste in the review box there.
                     </p>
                   </div>
@@ -584,17 +584,17 @@ export function ShowcaseDeck() {
 
                   {ownerMode === "lowrating" ? (
                     /* Low-rating screen (CR-3): private is primary, Google is full width, same screen */
-                    <div className="p-3 my-auto flex flex-col gap-2 text-[10px] bg-white m-2 rounded-xl shadow-2xs border border-[#e8ecec]">
+                    <div className="p-3 my-auto flex flex-col gap-2 text-[10px] bg-white m-2 rounded-xl shadow-2xs border border-line">
                       <div className="text-center pb-1">
-                        <p className="text-[11px] font-bold text-[#1a1e23]">
+                        <p className="text-[11px] font-bold text-ink">
                           Sorry that didn&apos;t go well.
                         </p>
-                        <p className="text-[9px] text-[#6e797b] mt-0.5">
+                        <p className="text-[9px] text-text-muted mt-0.5">
                           Tell the owner directly — only they see this.
                         </p>
                       </div>
 
-                      <div className="p-2 bg-[#f8fafc] rounded-lg border border-[#e2e8f0] text-[9px] text-[#9aa1a3] h-14">
+                      <div className="p-2 bg-[#f8fafc] rounded-lg border border-[#e2e8f0] text-[9px] text-text-muted h-14">
                         What went wrong with your visit?
                       </div>
 
@@ -608,7 +608,7 @@ export function ShowcaseDeck() {
                             setOwnerMode("inbox");
                           }, 900);
                         }}
-                        className="w-full py-2.5 bg-[#1a1e23] hover:bg-black text-white rounded text-[10px] font-semibold transition-colors cursor-pointer"
+                        className="w-full py-2.5 bg-ink hover:bg-black text-white rounded text-[10px] font-semibold transition-colors cursor-pointer"
                       >
                         {sentFeedbackToast ? "Sent to owner ✓" : "Send privately to the owner"}
                       </button>
@@ -620,7 +620,7 @@ export function ShowcaseDeck() {
                           e.stopPropagation();
                           go(3);
                         }}
-                        className="w-full py-2.5 border border-[#1a1e23] bg-white hover:bg-[#f8fafc] text-[#1a1e23] rounded text-[10px] font-semibold transition-colors cursor-pointer"
+                        className="w-full py-2.5 border border-ink bg-white hover:bg-[#f8fafc] text-ink rounded text-[10px] font-semibold transition-colors cursor-pointer"
                       >
                         Post publicly on Google →
                       </button>
@@ -628,22 +628,22 @@ export function ShowcaseDeck() {
                   ) : (
                     /* Owner inbox: private feedback arrives in the dashboard */
                     <div className="p-3 my-auto flex flex-col gap-2 text-[10px]">
-                      <div className="self-stretch bg-white p-3 rounded-lg shadow-2xs leading-snug border-l-3 border-[#397dff]">
+                      <div className="self-stretch bg-white p-3 rounded-lg shadow-2xs leading-snug border-l-3 border-accent">
                         <div className="flex items-center justify-between mb-1">
-                          <p className="font-bold text-[#1a1e23] text-[11px]">2★ · private feedback</p>
-                          <span className="text-[9px] text-[#6e797b]">Today</span>
+                          <p className="font-bold text-ink text-[11px]">2★ · private feedback</p>
+                          <span className="text-[9px] text-text-muted">Today</span>
                         </div>
-                        <p className="text-[#515a63] mb-1.5">
+                        <p className="text-text-2 mb-1.5">
                           The message the customer typed appears here, with a contact only if they chose to leave one.
                         </p>
-                        <div className="pt-1.5 border-t border-[#e8ecec] flex items-center justify-between text-[9px] text-[#6e797b]">
+                        <div className="pt-1.5 border-t border-line flex items-center justify-between text-[9px] text-text-muted">
                           <span>Sample</span>
-                          <span className="text-[#397dff] font-bold">✓ Mark as resolved</span>
+                          <span className="text-accent font-bold">✓ Mark as resolved</span>
                         </div>
                       </div>
 
                       <div className="self-stretch bg-white p-2.5 rounded-lg shadow-2xs leading-snug">
-                        <p className="text-[10px] text-[#1a1e23]">
+                        <p className="text-[10px] text-ink">
                           Private feedback is offered at every rating — and never replaces the Google button.
                         </p>
                       </div>
@@ -661,17 +661,17 @@ export function ShowcaseDeck() {
         </div>
 
         {/* Dynamic Detail Card for Active Selected Step */}
-        <div className="mt-8 p-6 rounded-2xl bg-[#fcfcfc] border border-[#e8ecec] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="mt-8 p-6 rounded-2xl bg-[#fcfcfc] border border-line flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="max-w-2xl">
-            <div className="flex items-center gap-2 text-xs font-semibold text-[#397dff] uppercase tracking-wider mb-1">
+            <div className="flex items-center gap-2 text-xs font-semibold text-accent uppercase tracking-wider mb-1">
               <span>Step {currentStep.number}</span>
               <span>•</span>
               <span>{currentStep.shortTitle}</span>
             </div>
-            <h4 className="text-base sm:text-lg font-bold text-[#1a1e23]">
+            <h4 className="text-base sm:text-lg font-bold text-ink">
               {currentStep.title}
             </h4>
-            <p className="text-sm text-[#515a63] mt-1 leading-relaxed">
+            <p className="text-sm text-text-2 mt-1 leading-relaxed">
               {currentStep.desc}
             </p>
           </div>
@@ -680,14 +680,14 @@ export function ShowcaseDeck() {
             <button
               type="button"
               onClick={prevPhone}
-              className="px-4 py-2 rounded-lg border border-[#e8ecec] text-xs font-semibold text-[#1a1e23] bg-white hover:bg-[#f2f7f7] transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-lg border border-line text-xs font-semibold text-ink bg-white hover:bg-bg transition-colors cursor-pointer"
             >
               ← Previous
             </button>
             <button
               type="button"
               onClick={nextPhone}
-              className="px-4 py-2 rounded-lg bg-[#397dff] text-xs font-semibold text-white hover:bg-[#2f68db] shadow-2xs transition-colors cursor-pointer"
+              className="px-4 py-2 rounded-lg bg-accent text-xs font-semibold text-white hover:bg-accent shadow-2xs transition-colors cursor-pointer"
             >
               Next Step →
             </button>
@@ -707,15 +707,15 @@ function IPhoneFrame({
 }) {
   return (
     <div
-      className={`rounded-[38px] p-2.5 bg-[#1a1e23] border-[3px] border-[#38414a] shadow-v2-phone overflow-hidden transition-all duration-300 ${
+      className={`rounded-[38px] p-2.5 bg-ink border-[3px] border-[#38414a] shadow-v2-phone overflow-hidden transition-all duration-300 ${
         isCenter ? "w-[280px] sm:w-[310px] h-[520px] sm:h-[580px]" : "w-[260px] sm:w-[280px] h-[480px] sm:h-[530px]"
       }`}
     >
       <div className="relative w-full h-full rounded-[30px] overflow-hidden bg-white flex flex-col">
         {/* Dynamic Island Pill Notch & Speaker */}
-        <div className="w-full pt-2 pb-1 bg-transparent flex items-center justify-between px-5 text-[9px] font-semibold text-[#1a1e23] z-20 pointer-events-none">
+        <div className="w-full pt-2 pb-1 bg-transparent flex items-center justify-between px-5 text-[9px] font-semibold text-ink z-20 pointer-events-none">
           <span>9:41</span>
-          <div className="w-20 h-4 bg-[#1a1e23] rounded-full mx-auto" />
+          <div className="w-20 h-4 bg-ink rounded-full mx-auto" />
           <div className="flex items-center gap-1 text-[8px]">
             <span>●●●</span>
             <span>🔋</span>
@@ -727,7 +727,7 @@ function IPhoneFrame({
 
         {/* Bottom Home Indicator Bar */}
         <div className="w-full py-1.5 bg-transparent flex justify-center z-20 pointer-events-none">
-          <div className="w-28 h-1 bg-[#1a1e23]/30 rounded-full" />
+          <div className="w-28 h-1 bg-ink/30 rounded-full" />
         </div>
       </div>
     </div>

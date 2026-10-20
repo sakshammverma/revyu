@@ -13,9 +13,9 @@ const DIET: Record<string, { label: string; color: string }> = {
 
 export function PriceText({ item }: { item: MenuItemData }) {
   if (item.price_on_request || item.amount_minor === null)
-    return <span className="text-sm text-[#59636a]">Price on request</span>;
+    return <span className="text-sm text-text-2">Price on request</span>;
   return (
-    <span className="text-sm font-semibold text-[#1a1e23] whitespace-nowrap">
+    <span className="text-sm font-semibold text-ink whitespace-nowrap">
       {item.price_prefix ? `${item.price_prefix} ` : ""}
       {formatMoney(item.amount_minor, item.currency_code)}
     </span>
@@ -61,7 +61,7 @@ export function MenuView({ data }: { data: MenuPayload }) {
 
   if (!cats.length)
     return (
-      <p className="v2-sheet border border-[#e8ecec] p-6 text-sm text-[#515a63] text-center">Nothing listed yet.</p>
+      <p className="v2-sheet border border-line p-6 text-sm text-text-2 text-center">Nothing listed yet.</p>
     );
 
   return (
@@ -73,11 +73,11 @@ export function MenuView({ data }: { data: MenuPayload }) {
           onChange={(e) => setQuery(e.target.value)}
           placeholder={`Search ${data.label?.toLowerCase() ?? "items"}`}
           aria-label="Search"
-          className="w-full rounded-xl border border-[#d5dcdc] bg-white px-4 py-3 text-base outline-none focus:border-[#397dff] focus:ring-2 focus:ring-[#397dff]/25"
+          className="w-full rounded-xl border border-line-strong bg-white px-4 py-3 text-base outline-none focus:border-accent focus:ring-2 focus:ring-accent/25"
         />
       )}
       {!q && cats.length > 1 && (
-        <div className="sticky top-[52px] z-10 -mx-3 px-3 py-2 bg-[#f2f7f7]/95 backdrop-blur overflow-x-auto flex gap-2 no-scrollbar">
+        <div className="sticky top-[52px] z-10 -mx-3 px-3 py-2 bg-bg/95 backdrop-blur overflow-x-auto flex gap-2 no-scrollbar">
           {cats.map((c) => (
             <button
               key={c.id}
@@ -86,8 +86,8 @@ export function MenuView({ data }: { data: MenuPayload }) {
               aria-current={active === c.id}
               className={`shrink-0 min-h-[40px] px-4 rounded-full text-sm font-semibold border transition-colors ${
                 active === c.id
-                  ? "bg-[#1f2429] text-white border-[#1f2429]"
-                  : "bg-white text-[#1a1e23] border-[#d5dcdc]"
+                  ? "bg-ink-dark text-white border-ink-dark"
+                  : "bg-white text-ink border-line-strong"
               }`}
             >
               {c.name}
@@ -106,7 +106,7 @@ export function MenuView({ data }: { data: MenuPayload }) {
           className="scroll-mt-28"
         >
           <h2 className="vf-section-label mb-2">{c.name}</h2>
-          <ul className="v2-sheet border border-[#e8ecec] divide-y divide-[#e8ecec]">
+          <ul className="v2-sheet border border-line divide-y divide-line">
             {c.items.map((i) => (
               <li key={i.id}>
                 <button
@@ -116,7 +116,7 @@ export function MenuView({ data }: { data: MenuPayload }) {
                 >
                   <span className="flex-1 min-w-0">
                     <span className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-[#1a1e23]">{i.name}</span>
+                      <span className="font-semibold text-ink">{i.name}</span>
                       {i.dietary.map((d) => (
                         <span
                           key={d}
@@ -127,12 +127,12 @@ export function MenuView({ data }: { data: MenuPayload }) {
                       ))}
                     </span>
                     {i.description && (
-                      <span className="block text-sm text-[#515a63] mt-0.5 line-clamp-2">{i.description}</span>
+                      <span className="block text-sm text-text-2 mt-0.5 line-clamp-2">{i.description}</span>
                     )}
                     <span className="flex items-center gap-2 mt-1.5">
                       <PriceText item={i} />
-                      {i.duration_min && <span className="text-xs text-[#59636a]">· {i.duration_min} min</span>}
-                      {!i.available && <span className="text-xs font-semibold text-[#59636a]">· Unavailable</span>}
+                      {i.duration_min && <span className="text-xs text-text-2">· {i.duration_min} min</span>}
+                      {!i.available && <span className="text-xs font-semibold text-text-2">· Unavailable</span>}
                     </span>
                   </span>
                   {i.photo_url && (
@@ -143,7 +143,7 @@ export function MenuView({ data }: { data: MenuPayload }) {
                       loading="lazy"
                       width={72}
                       height={72}
-                      className="w-[72px] h-[72px] rounded-lg object-cover shrink-0 bg-[#f2f7f7]"
+                      className="w-[72px] h-[72px] rounded-lg object-cover shrink-0 bg-bg"
                     />
                   )}
                 </button>
@@ -152,7 +152,7 @@ export function MenuView({ data }: { data: MenuPayload }) {
           </ul>
         </section>
       ))}
-      {q && !shown.length && <p className="text-sm text-[#515a63] text-center py-6">No matches.</p>}
+      {q && !shown.length && <p className="text-sm text-text-2 text-center py-6">No matches.</p>}
 
       {open && (
         <div
@@ -167,11 +167,11 @@ export function MenuView({ data }: { data: MenuPayload }) {
               // eslint-disable-next-line @next/next/no-img-element
               <img src={open.photo_url} alt="" className="w-full h-52 object-cover rounded-xl mb-4" />
             )}
-            <h3 className="font-display text-xl text-[#1a1e23]">{open.name}</h3>
+            <h3 className="font-display text-xl text-ink">{open.name}</h3>
             <div className="mt-1">
               <PriceText item={open} />
             </div>
-            {open.description && <p className="text-sm text-[#515a63] mt-3 leading-relaxed">{open.description}</p>}
+            {open.description && <p className="text-sm text-text-2 mt-3 leading-relaxed">{open.description}</p>}
             <button type="button" onClick={() => setOpen(null)} className="btn-pill-light w-full min-h-[48px] mt-5">
               Close
             </button>

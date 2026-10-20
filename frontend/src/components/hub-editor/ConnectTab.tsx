@@ -88,13 +88,13 @@ export function ConnectTab({ api, state, reload, toast }: TabProps) {
             {links.map((l, i) => {
               const k = KINDS.find((x) => x.value === l.kind);
               return (
-                <li key={keys[i] ?? i} className="rounded-xl border border-[#e8ecec] p-3 flex flex-col gap-2">
+                <li key={keys[i] ?? i} className="rounded-xl border border-line p-3 flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                     <select
                       aria-label="Link type"
                       value={l.kind}
                       onChange={(e) => update(i, { kind: e.target.value })}
-                      className="rounded-lg border border-[#d5dcdc] bg-white px-3 py-2.5 text-sm font-medium flex-1 min-w-0"
+                      className="rounded-lg border border-line-strong bg-white px-3 py-2.5 text-sm font-medium flex-1 min-w-0"
                     >
                       {KINDS.map((x) => <option key={x.value} value={x.value}>{x.label}</option>)}
                     </select>
@@ -105,7 +105,7 @@ export function ConnectTab({ api, state, reload, toast }: TabProps) {
                     value={l.url}
                     onChange={(e) => update(i, { url: e.target.value })}
                     placeholder={k?.placeholder}
-                    className="w-full rounded-lg border border-[#d5dcdc] px-3.5 py-2.5 text-base outline-none focus:border-[#397dff] focus:ring-2 focus:ring-[#397dff]/25"
+                    className="w-full rounded-lg border border-line-strong px-3.5 py-2.5 text-base outline-none focus:border-accent focus:ring-2 focus:ring-accent/25"
                   />
                   {(l.kind === "custom" || l.kind === "website") && (
                     <input
@@ -114,20 +114,20 @@ export function ConnectTab({ api, state, reload, toast }: TabProps) {
                       onChange={(e) => update(i, { label: e.target.value })}
                       placeholder="Button label (optional)"
                       maxLength={60}
-                      className="w-full rounded-lg border border-[#d5dcdc] px-3.5 py-2 text-sm"
+                      className="w-full rounded-lg border border-line-strong px-3.5 py-2 text-sm"
                     />
                   )}
                   <div className="flex gap-2 text-sm">
-                    <button type="button" disabled={i === 0} onClick={() => move(i, -1)} className="px-3 min-h-[44px] text-[#515a63] disabled:opacity-30">↑ Up</button>
-                    <button type="button" disabled={i === links.length - 1} onClick={() => move(i, 1)} className="px-3 min-h-[44px] text-[#515a63] disabled:opacity-30">↓ Down</button>
-                    <button type="button" onClick={() => remove(i)} className="px-3 min-h-[44px] text-[#c62445] ml-auto">Remove</button>
+                    <button type="button" disabled={i === 0} onClick={() => move(i, -1)} className="px-3 min-h-[44px] text-text-2 disabled:opacity-30">↑ Up</button>
+                    <button type="button" disabled={i === links.length - 1} onClick={() => move(i, 1)} className="px-3 min-h-[44px] text-text-2 disabled:opacity-30">↓ Down</button>
+                    <button type="button" onClick={() => remove(i)} className="px-3 min-h-[44px] text-alert ml-auto">Remove</button>
                   </div>
                 </li>
               );
             })}
           </ul>
         )}
-        {error && <p className="text-sm text-[#c62445] mt-3" role="alert">{error}</p>}
+        {error && <p className="text-sm text-alert mt-3" role="alert">{error}</p>}
         <div className="flex gap-2 mt-4">
           <Btn variant="light" onClick={() => { setLinks([...links, { kind: "instagram", label: null, url: "", enabled: true }]); setKeys([...keys, crypto.randomUUID()]); }}>+ Add link</Btn>
           <Btn onClick={save} busy={busy} disabled={!dirty}>Save links</Btn>

@@ -86,8 +86,8 @@ function CounterCode({ slug, onClose }: { slug: string; onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 bg-white flex flex-col items-center justify-center p-6 text-center" role="dialog" aria-modal="true" aria-label="Your visit code">
-      <p className="text-sm text-[#515a63]">Show this to the staff</p>
-      <p className="mt-4 font-mono text-4xl sm:text-5xl font-bold tracking-wider text-[#1a1e23] select-all" aria-live="polite">
+      <p className="text-sm text-text-2">Show this to the staff</p>
+      <p className="mt-4 font-mono text-4xl sm:text-5xl font-bold tracking-wider text-ink select-all" aria-live="polite">
         {code ?? "······"}
       </p>
       {qr && (
@@ -99,14 +99,14 @@ function CounterCode({ slug, onClose }: { slug: string; onClose: () => void }) {
           dangerouslySetInnerHTML={{ __html: qr }}
         />
       )}
-      <div className="mt-6 w-56 h-1.5 bg-[#e8ecec] rounded-full overflow-hidden">
-        <div className="h-full bg-[#2f68db] transition-[width] duration-1000 ease-linear motion-reduce:transition-none" style={{ width: `${(left / 60) * 100}%` }} />
+      <div className="mt-6 w-56 h-1.5 bg-line rounded-full overflow-hidden">
+        <div className="h-full bg-accent transition-[width] duration-1000 ease-linear motion-reduce:transition-none" style={{ width: `${(left / 60) * 100}%` }} />
       </div>
-      <p className="mt-2 text-xs text-[#59636a]">Refreshes automatically · turn your screen brightness up</p>
+      <p className="mt-2 text-xs text-text-2">Refreshes automatically · turn your screen brightness up</p>
       {err && (
         <div className="mt-4" role="alert">
-          <p className="text-sm text-[#c62445]">{err}</p>
-          <button type="button" onClick={load} className="mt-2 min-h-[44px] px-4 text-sm font-semibold underline underline-offset-2 text-[#1a1e23]">
+          <p className="text-sm text-alert">{err}</p>
+          <button type="button" onClick={load} className="mt-2 min-h-[44px] px-4 text-sm font-semibold underline underline-offset-2 text-ink">
             Try again
           </button>
         </div>
@@ -183,16 +183,16 @@ export function RewardsView({ slug, info }: { slug: string; info: RewardsInfo })
   }
 
   if (info.enabled === false)
-    return <p className="v2-sheet border border-[#e8ecec] p-6 text-sm text-[#515a63] text-center">Rewards aren&apos;t available here right now.</p>;
+    return <p className="v2-sheet border border-line p-6 text-sm text-text-2 text-center">Rewards aren&apos;t available here right now.</p>;
 
   const ladder = (
     <ul className="flex flex-col gap-2">
       {(info.badges ?? []).map((b) => (
-        <li key={b.name} className="v2-sheet border border-[#e8ecec] p-3.5 flex items-center gap-3">
-          <span className="w-10 h-10 rounded-xl bg-[#e7f5fd] text-[#2f68db] flex items-center justify-center shrink-0"><Icon name={b.icon} /></span>
+        <li key={b.name} className="v2-sheet border border-line p-3.5 flex items-center gap-3">
+          <span className="w-10 h-10 rounded-xl bg-accent-50 text-accent flex items-center justify-center shrink-0"><Icon name={b.icon} /></span>
           <span className="min-w-0">
-            <span className="block font-semibold text-[#1a1e23]">{b.name} <span className="font-normal text-[#59636a]">· {b.visits_required} visits</span></span>
-            {b.reward_title && <span className="block text-sm text-[#515a63]">{b.reward_title}</span>}
+            <span className="block font-semibold text-ink">{b.name} <span className="font-normal text-text-2">· {b.visits_required} visits</span></span>
+            {b.reward_title && <span className="block text-sm text-text-2">{b.reward_title}</span>}
           </span>
         </li>
       ))}
@@ -204,42 +204,42 @@ export function RewardsView({ slug, info }: { slug: string; info: RewardsInfo })
   if (!wallet)
     return (
       <div className="flex flex-col gap-4">
-        <p className="text-[#515a63] text-sm leading-relaxed">Visit often, collect badges and unlock rewards from {info.outlet.name}.</p>
+        <p className="text-text-2 text-sm leading-relaxed">Visit often, collect badges and unlock rewards from {info.outlet.name}.</p>
         {!recovering && ladder}
-        {!recovering && <form onSubmit={submit} className="v2-sheet border border-[#e8ecec] p-4 flex flex-col gap-3">
-          <h2 className="font-semibold text-[#1a1e23]">Start your wallet</h2>
-          <label className="text-sm font-medium text-[#1a1e23]">
+        {!recovering && <form onSubmit={submit} className="v2-sheet border border-line p-4 flex flex-col gap-3">
+          <h2 className="font-semibold text-ink">Start your wallet</h2>
+          <label className="text-sm font-medium text-ink">
             Your name
-            <input required maxLength={80} value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" className="mt-1 w-full rounded-lg border border-[#d5dcdc] px-3.5 py-3 text-base outline-none focus:border-[#397dff] focus:ring-2 focus:ring-[#397dff]/25" />
+            <input required maxLength={80} value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" className="mt-1 w-full rounded-lg border border-line-strong px-3.5 py-3 text-base outline-none focus:border-accent focus:ring-2 focus:ring-accent/25" />
           </label>
-          <label className="text-sm font-medium text-[#1a1e23]">
+          <label className="text-sm font-medium text-ink">
             Mobile number
-            <input required inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-1 w-full rounded-lg border border-[#d5dcdc] px-3.5 py-3 text-base outline-none focus:border-[#397dff] focus:ring-2 focus:ring-[#397dff]/25" />
+            <input required inputMode="tel" autoComplete="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="mt-1 w-full rounded-lg border border-line-strong px-3.5 py-3 text-base outline-none focus:border-accent focus:ring-2 focus:ring-accent/25" />
           </label>
-          <label className="flex items-start gap-3 text-sm text-[#515a63]">
+          <label className="flex items-start gap-3 text-sm text-text-2">
             <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-1 w-5 h-5 accent-[#2f68db]" />
             <span>{info.outlet.name} may contact me about my rewards.</span>
           </label>
-          <p className="text-xs text-[#59636a] leading-relaxed">
+          <p className="text-xs text-text-2 leading-relaxed">
             Your name and number are shared with {info.outlet.name} so they can recognise you and record your visits. You can delete your wallet any time.
           </p>
-          {error && <p className="text-sm text-[#c62445]" role="alert">{error}</p>}
+          {error && <p className="text-sm text-alert" role="alert">{error}</p>}
           <button type="submit" disabled={busy} className="btn-primary min-h-[48px] disabled:opacity-50">{busy ? "Creating…" : "Create my wallet"}</button>
         </form>}
-        {!recovering && info.terms && <p className="text-xs text-[#59636a] leading-relaxed">{info.terms}</p>}
+        {!recovering && info.terms && <p className="text-xs text-text-2 leading-relaxed">{info.terms}</p>}
         <div className="text-center">
           {recovering ? (
-            <form onSubmit={claim} className="v2-sheet border border-[#e8ecec] p-4 flex flex-col gap-3 text-left">
-              <h2 className="font-semibold text-[#1a1e23]">Move your wallet to this phone</h2>
-              <p className="text-sm text-[#515a63]">Ask the staff for a transfer code, then enter it with your mobile number.</p>
-              <input aria-label="Mobile number" required inputMode="tel" autoComplete="tel" placeholder="Mobile number" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full rounded-lg border border-[#d5dcdc] px-3.5 py-3 text-base outline-none focus:border-[#397dff] focus:ring-2 focus:ring-[#397dff]/25" />
-              <input aria-label="Transfer code" required inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="6-digit code" value={tcode} onChange={(e) => setTcode(e.target.value.replace(/\D/g, ""))} className="w-full rounded-lg border border-[#d5dcdc] px-3.5 py-3 text-base tracking-widest outline-none focus:border-[#397dff] focus:ring-2 focus:ring-[#397dff]/25" />
-              {error && <p className="text-sm text-[#c62445]" role="alert">{error}</p>}
+            <form onSubmit={claim} className="v2-sheet border border-line p-4 flex flex-col gap-3 text-left">
+              <h2 className="font-semibold text-ink">Move your wallet to this phone</h2>
+              <p className="text-sm text-text-2">Ask the staff for a transfer code, then enter it with your mobile number.</p>
+              <input aria-label="Mobile number" required inputMode="tel" autoComplete="tel" placeholder="Mobile number" value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full rounded-lg border border-line-strong px-3.5 py-3 text-base outline-none focus:border-accent focus:ring-2 focus:ring-accent/25" />
+              <input aria-label="Transfer code" required inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="6-digit code" value={tcode} onChange={(e) => setTcode(e.target.value.replace(/\D/g, ""))} className="w-full rounded-lg border border-line-strong px-3.5 py-3 text-base tracking-widest outline-none focus:border-accent focus:ring-2 focus:ring-accent/25" />
+              {error && <p className="text-sm text-alert" role="alert">{error}</p>}
               <button type="submit" disabled={busy || tcode.length !== 6} className="btn-primary min-h-[48px] disabled:opacity-50">{busy ? "Moving…" : "Move my wallet"}</button>
-              <button type="button" onClick={() => { setRecovering(false); setError(null); }} className="text-sm text-[#515a63] underline min-h-[44px]">Back</button>
+              <button type="button" onClick={() => { setRecovering(false); setError(null); }} className="text-sm text-text-2 underline min-h-[44px]">Back</button>
             </form>
           ) : (
-            <button type="button" onClick={() => { setRecovering(true); setError(null); }} className="text-sm text-[#515a63] underline min-h-[44px]">Already have a wallet on another phone?</button>
+            <button type="button" onClick={() => { setRecovering(true); setError(null); }} className="text-sm text-text-2 underline min-h-[44px]">Already have a wallet on another phone?</button>
           )}
         </div>
       </div>
@@ -252,17 +252,17 @@ export function RewardsView({ slug, info }: { slug: string; info: RewardsInfo })
 
   return (
     <div className="flex flex-col gap-4">
-      <section className="v2-sheet border border-[#e8ecec] p-5 flex items-center gap-4">
+      <section className="v2-sheet border border-line p-5 flex items-center gap-4">
         <div className="relative shrink-0">
           <Ring value={next ? wallet.visits - prevReq : 1} max={next ? next.visits_required - prevReq : 1} />
-          <span className="absolute inset-0 flex items-center justify-center font-bold text-lg text-[#1a1e23]">{wallet.visits}</span>
+          <span className="absolute inset-0 flex items-center justify-center font-bold text-lg text-ink">{wallet.visits}</span>
         </div>
         <div className="min-w-0">
-          <p className="font-semibold text-[#1a1e23] truncate">Hi, {wallet.member.name}</p>
-          <p className="text-sm text-[#515a63]">
+          <p className="font-semibold text-ink truncate">Hi, {wallet.member.name}</p>
+          <p className="text-sm text-text-2">
             {next ? `${next.remaining} more ${next.remaining === 1 ? "visit" : "visits"} to ${next.name}` : "You've earned every badge"}
           </p>
-          <p className="text-xs text-[#59636a] mt-0.5">Member ID {wallet.member.public_id}</p>
+          <p className="text-xs text-text-2 mt-0.5">Member ID {wallet.member.public_id}</p>
         </div>
       </section>
 
@@ -273,12 +273,12 @@ export function RewardsView({ slug, info }: { slug: string; info: RewardsInfo })
           <h2 className="vf-section-label mb-2">Your rewards</h2>
           <ul className="flex flex-col gap-2">
             {available.map((g) => (
-              <li key={g.id} className="rounded-2xl border-2 border-dashed border-[#2f68db] bg-white p-4">
-                <p className="text-xs font-semibold text-[#2f68db] uppercase tracking-wide">{rewardLine(g)}</p>
-                <p className="font-semibold text-[#1a1e23] mt-0.5">{g.title}</p>
-                {g.terms && <p className="text-sm text-[#515a63] mt-1">{g.terms}</p>}
-                <p className="mt-3 font-mono text-xl tracking-widest text-[#1a1e23]">{g.redeem_code}</p>
-                <p className="text-xs text-[#59636a] mt-1">
+              <li key={g.id} className="rounded-2xl border-2 border-dashed border-accent bg-white p-4">
+                <p className="text-xs font-semibold text-accent uppercase tracking-wide">{rewardLine(g)}</p>
+                <p className="font-semibold text-ink mt-0.5">{g.title}</p>
+                {g.terms && <p className="text-sm text-text-2 mt-1">{g.terms}</p>}
+                <p className="mt-3 font-mono text-xl tracking-widest text-ink">{g.redeem_code}</p>
+                <p className="text-xs text-text-2 mt-1">
                   Show this code to the staff to use it{g.expires_at ? ` · valid until ${new Date(g.expires_at).toLocaleDateString()}` : ""}
                 </p>
               </li>
@@ -291,12 +291,12 @@ export function RewardsView({ slug, info }: { slug: string; info: RewardsInfo })
         <h2 className="vf-section-label mb-2">Badges</h2>
         <ul className="grid grid-cols-3 gap-2">
           {wallet.badges.map((b) => (
-            <li key={b.id} className={`v2-sheet border border-[#e8ecec] p-3 text-center ${b.earned ? "" : "opacity-50"}`}>
-              <span className={`mx-auto w-11 h-11 rounded-full flex items-center justify-center ${b.earned ? "bg-[#2f68db] text-white" : "bg-[#e8ecec] text-[#59636a]"}`}>
+            <li key={b.id} className={`v2-sheet border border-line p-3 text-center ${b.earned ? "" : "opacity-50"}`}>
+              <span className={`mx-auto w-11 h-11 rounded-full flex items-center justify-center ${b.earned ? "bg-accent text-white" : "bg-line text-text-2"}`}>
                 <Icon name={b.earned ? b.icon : "clock"} />
               </span>
-              <p className="text-sm font-semibold text-[#1a1e23] mt-2 leading-tight">{b.name}</p>
-              <p className="text-xs text-[#59636a]">{b.visits_required} visits</p>
+              <p className="text-sm font-semibold text-ink mt-2 leading-tight">{b.name}</p>
+              <p className="text-xs text-text-2">{b.visits_required} visits</p>
             </li>
           ))}
         </ul>
@@ -307,7 +307,7 @@ export function RewardsView({ slug, info }: { slug: string; info: RewardsInfo })
           <h2 className="vf-section-label mb-2">Used and expired</h2>
           <ul className="flex flex-col gap-2">
             {past.map((g) => (
-              <li key={g.id} className="v2-sheet border border-[#e8ecec] p-3 flex justify-between text-sm opacity-60">
+              <li key={g.id} className="v2-sheet border border-line p-3 flex justify-between text-sm opacity-60">
                 <span>{g.title}</span>
                 <span className="capitalize">{g.status}</span>
               </li>
@@ -319,14 +319,14 @@ export function RewardsView({ slug, info }: { slug: string; info: RewardsInfo })
       <div className="pt-2 text-center">
         {confirmDelete ? (
           <div className="flex flex-col gap-2 items-center">
-            <p className="text-sm text-[#515a63]">Delete your wallet, badges and rewards from this business?</p>
+            <p className="text-sm text-text-2">Delete your wallet, badges and rewards from this business?</p>
             <div className="flex gap-2">
               <button type="button" className="btn-pill-light min-h-[44px] px-5" onClick={() => setConfirmDelete(false)}>Keep it</button>
               <button type="button" className="min-h-[44px] px-5 rounded-full bg-[#c62445] text-white font-semibold" onClick={async () => { await deleteWallet(slug); setWallet(null); joined.current = false; setConfirmDelete(false); }}>Delete</button>
             </div>
           </div>
         ) : (
-          <button type="button" onClick={() => setConfirmDelete(true)} className="text-xs text-[#59636a] underline min-h-[44px]">Delete my wallet</button>
+          <button type="button" onClick={() => setConfirmDelete(true)} className="text-xs text-text-2 underline min-h-[44px]">Delete my wallet</button>
         )}
       </div>
 

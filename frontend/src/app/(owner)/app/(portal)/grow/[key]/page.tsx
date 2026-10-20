@@ -74,7 +74,7 @@ export default function ServiceDetailPage() {
                 q.type === "choice" ? (
                   <label key={q.key} className="text-sm font-medium text-ink flex flex-col gap-1">
                     {q.label}
-                    <select required value={answers[q.key] ?? ""} onChange={(e) => setAnswers({ ...answers, [q.key]: e.target.value })} className="rounded-lg border border-[#d5dcdc] bg-white px-3 py-2.5 text-base">
+                    <select required value={answers[q.key] ?? ""} onChange={(e) => setAnswers({ ...answers, [q.key]: e.target.value })} className="rounded-lg border border-line-strong bg-white px-3 py-2.5 text-base">
                       <option value="">Choose…</option>
                       {q.options?.map((o) => <option key={o} value={o}>{o}</option>)}
                     </select>

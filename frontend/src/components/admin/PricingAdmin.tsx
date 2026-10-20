@@ -7,7 +7,7 @@ import { fetchAdminPricing, saveAdminCountry, saveAdminPlanPrice, type AdminPric
 import { formatMoney } from "@/lib/format";
 
 type Plan = AdminPricing["plans"][number];
-const selectCls = "w-full rounded-lg border border-[#d5dcdc] bg-white px-3.5 py-2.5 text-base text-[#1a1e23]";
+const selectCls = "w-full rounded-lg border border-line-strong bg-white px-3.5 py-2.5 text-base text-ink";
 
 export function PricingAdmin() {
   const [data, setData] = useState<AdminPricing | null>(null);
@@ -21,11 +21,11 @@ export function PricingAdmin() {
     load();
   }, [load]);
 
-  if (!data) return <p className="max-w-6xl mx-auto text-sm text-[#515a63]">Loading…</p>;
+  if (!data) return <p className="max-w-6xl mx-auto text-sm text-text-2">Loading…</p>;
 
   return (
     <div className="max-w-6xl mx-auto flex flex-col gap-4">
-      <p className="text-sm text-[#515a63]">
+      <p className="text-sm text-text-2">
         A business pays the price of its own country&rsquo;s tier and currency. Changing a price adds a new row and
         keeps the old one as history; existing subscriptions are not repriced here. Non-INR prices need the
         gateway&rsquo;s recurring plan id for that exact amount, or checkout falls back to a one-time payment.
@@ -44,7 +44,7 @@ function Plans({ data, onSaved, toast }: { data: AdminPricing; onSaved: (d: Admi
       {data.plans.length === 0 ? (
         <EmptyState title="No prices yet" />
       ) : (
-        <div className="flex flex-col divide-y divide-[#e8ecec]">
+        <div className="flex flex-col divide-y divide-line">
           {data.plans.map((p) => (
             <PlanRow key={`${p.tier_code}-${p.currency_code}-${p.code}`} plan={p} onSaved={onSaved} toast={toast} />
           ))}
@@ -85,10 +85,10 @@ function PlanRow({ plan, onSaved, toast }: { plan: Plan; onSaved: (d: AdminPrici
   return (
     <div className="py-3 grid gap-3 sm:grid-cols-[10rem_1fr_1fr_auto] sm:items-end">
       <div>
-        <p className="font-semibold text-[#1a1e23]">
+        <p className="font-semibold text-ink">
           {plan.tier_code} · {plan.code}
         </p>
-        <p className="text-xs text-[#515a63]">
+        <p className="text-xs text-text-2">
           {plan.currency_code} · now {formatMoney(plan.amount_minor, plan.currency_code)}
         </p>
       </div>
@@ -127,8 +127,8 @@ function NewPrice({ tiers, onSaved, toast }: { tiers: AdminPricing["tiers"]; onS
   }
 
   return (
-    <div className="mt-4 pt-4 border-t border-[#e8ecec]">
-      <h3 className="text-sm font-semibold text-[#1a1e23] mb-2">Add or replace a price</h3>
+    <div className="mt-4 pt-4 border-t border-line">
+      <h3 className="text-sm font-semibold text-ink mb-2">Add or replace a price</h3>
       <div className="grid gap-3 sm:grid-cols-6 sm:items-end">
         <label className="text-sm font-medium flex flex-col gap-1">
           Tier
@@ -182,7 +182,7 @@ function Countries({ data, onSaved, toast }: { data: AdminPricing; onSaved: (d: 
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-[#515a63]">
+            <tr className="text-left text-text-2">
               <th className="py-1 pr-3">Country</th>
               <th className="pr-3">Tier</th>
               <th className="pr-3">Currency</th>
@@ -192,7 +192,7 @@ function Countries({ data, onSaved, toast }: { data: AdminPricing; onSaved: (d: 
           </thead>
           <tbody>
             {data.countries.map((c) => (
-              <tr key={c.country_code} className={`border-t border-[#e8ecec] ${c.active ? "" : "opacity-50"}`}>
+              <tr key={c.country_code} className={`border-t border-line ${c.active ? "" : "opacity-50"}`}>
                 <td className="py-1.5 pr-3 font-semibold">{c.country_code}</td>
                 <td className="pr-3">{c.tier_code}</td>
                 <td className="pr-3">{c.currency_code}</td>
@@ -216,7 +216,7 @@ function Countries({ data, onSaved, toast }: { data: AdminPricing; onSaved: (d: 
           </tbody>
         </table>
       </div>
-      <div className="mt-4 pt-4 border-t border-[#e8ecec] grid gap-3 sm:grid-cols-5 sm:items-end">
+      <div className="mt-4 pt-4 border-t border-line grid gap-3 sm:grid-cols-5 sm:items-end">
         <TextInput label="Country (ISO or *)" maxLength={2} placeholder="DE" value={country} onChange={(e) => setCountry(e.target.value)} />
         <label className="text-sm font-medium flex flex-col gap-1">
           Tier

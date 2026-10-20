@@ -65,7 +65,7 @@ export default function BillingPage() {
 
       {billing.referral_discounts_earned > 0 && (
         <div className="rounded-xl border border-success/25 bg-success-50 p-4 text-sm">
-          <p className="font-semibold text-[#2f6b1a]">
+          <p className="font-semibold text-success-strong">
             You&rsquo;ve earned {billing.referral_discounts_earned} referral {billing.referral_discounts_earned === 1 ? "discount" : "discounts"}: 70% off your next bill.
           </p>
           <p className="text-text-2 mt-0.5">We apply it to your next invoice. You don&rsquo;t need to do anything.</p>
@@ -189,7 +189,7 @@ function PlanCard({
     <div className={`rounded-xl border p-5 flex flex-col ${highlight ? "border-accent bg-accent-50/40" : "border-line bg-sheet"}`}>
       <div className="flex items-center justify-between gap-2">
         <p className="font-semibold text-ink">{name}</p>
-        {badge && <span className="text-xs font-bold text-[#2f6b1a] bg-success-50 border border-success/25 px-2 py-0.5 rounded-full">{badge}</span>}
+        {badge && <span className="text-xs font-bold text-success-strong bg-success-50 border border-success/25 px-2 py-0.5 rounded-full">{badge}</span>}
       </div>
       <p className="mt-2 font-display text-4xl text-ink tabular-nums">
         {price}

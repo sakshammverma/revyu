@@ -29,10 +29,10 @@ export function ServicesAdmin() {
   const { push } = useToasts();
   return (
     <div className="max-w-6xl mx-auto flex flex-col gap-4">
-      <div role="tablist" className="flex gap-1 p-1 rounded-xl bg-[#e8ecec] w-full sm:w-auto sm:self-start">
+      <div role="tablist" className="flex gap-1 p-1 rounded-xl bg-line w-full sm:w-auto sm:self-start">
         {([["requests", "Requests"], ["catalog", "Catalogue"], ["kits", "Print kits"]] as const).map(([k, l]) => (
           <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)}
-            className={`flex-1 sm:flex-none min-h-[42px] px-5 rounded-lg text-sm font-semibold ${tab === k ? "bg-white shadow-sm text-[#1a1e23]" : "text-[#515a63]"}`}>{l}</button>
+            className={`flex-1 sm:flex-none min-h-[42px] px-5 rounded-lg text-sm font-semibold ${tab === k ? "bg-white shadow-sm text-ink" : "text-text-2"}`}>{l}</button>
         ))}
       </div>
       {tab === "requests" && <Requests toast={push} />}
@@ -89,15 +89,15 @@ function Requests({ toast }: { toast: Toast }) {
         {COLUMNS.map(([status, label]) => {
           const col = items.filter((r) => r.status === status);
           return (
-            <section key={status} aria-label={label} className="bg-[#e8ecec]/60 rounded-xl p-2.5 min-w-[220px]">
-              <h2 className="text-xs font-bold uppercase tracking-wide text-[#515a63] px-1 mb-2">{label} · {col.length}</h2>
+            <section key={status} aria-label={label} className="bg-line/60 rounded-xl p-2.5 min-w-[220px]">
+              <h2 className="text-xs font-bold uppercase tracking-wide text-text-2 px-1 mb-2">{label} · {col.length}</h2>
               <ul className="flex flex-col gap-2">
                 {col.map((r) => (
                   <li key={r.id}>
-                    <button type="button" onClick={() => show(r)} className="w-full text-left bg-white rounded-lg border border-[#e8ecec] p-3 hover:border-[#bfc8ca]">
-                      <span className="block font-semibold text-sm text-[#1a1e23]">{r.business_name}</span>
-                      <span className="block text-xs text-[#515a63]">{r.service_name}</span>
-                      <span className={`block text-xs mt-1 ${age(r.updated_at) > 3 && status !== "delivered" ? "text-[#b45309] font-semibold" : "text-[#59636a]"}`}>{age(r.updated_at)}d in stage</span>
+                    <button type="button" onClick={() => show(r)} className="w-full text-left bg-white rounded-lg border border-line p-3 hover:border-[#bfc8ca]">
+                      <span className="block font-semibold text-sm text-ink">{r.business_name}</span>
+                      <span className="block text-xs text-text-2">{r.service_name}</span>
+                      <span className={`block text-xs mt-1 ${age(r.updated_at) > 3 && status !== "delivered" ? "text-warning font-semibold" : "text-text-2"}`}>{age(r.updated_at)}d in stage</span>
                     </button>
                   </li>
                 ))}
@@ -110,17 +110,17 @@ function Requests({ toast }: { toast: Toast }) {
       <Sheet open={!!open} title={open ? `${open.service_name} · ${open.business_name}` : ""} onClose={() => setOpen(null)}>
         {open && (
           <div className="flex flex-col gap-4">
-            <p className="text-sm text-[#515a63]">{open.owner_email}</p>
-            {open.brief && <p className="text-sm bg-[#f2f7f7] rounded-lg p-3 whitespace-pre-line">{open.brief}</p>}
+            <p className="text-sm text-text-2">{open.owner_email}</p>
+            {open.brief && <p className="text-sm bg-bg rounded-lg p-3 whitespace-pre-line">{open.brief}</p>}
             {open.answers && Object.keys(open.answers).length > 0 && (
               <dl className="text-sm grid gap-1">
-                {Object.entries(open.answers).map(([k, v]) => <div key={k} className="flex gap-2"><dt className="text-[#59636a] shrink-0">{k}:</dt><dd>{v}</dd></div>)}
+                {Object.entries(open.answers).map(([k, v]) => <div key={k} className="flex gap-2"><dt className="text-text-2 shrink-0">{k}:</dt><dd>{v}</dd></div>)}
               </dl>
             )}
 
             <label className="text-sm font-medium">
               Status
-              <select value={open.status} onChange={(e) => update({ status: e.target.value })} disabled={busy} className="mt-1 w-full rounded-lg border border-[#d5dcdc] bg-white px-3 py-2.5">
+              <select value={open.status} onChange={(e) => update({ status: e.target.value })} disabled={busy} className="mt-1 w-full rounded-lg border border-line-strong bg-white px-3 py-2.5">
                 {ALL_STATUS.map((s) => <option key={s} value={s}>{s.replace("_", " ")}</option>)}
               </select>
             </label>
@@ -131,7 +131,7 @@ function Requests({ toast }: { toast: Toast }) {
                 {open.status === "requested" ? "Send quote" : "Update"}
               </Btn>
             </div>
-            {open.quoted_amount_minor !== null && <p className="text-xs text-[#59636a] -mt-2">Current: {formatMoney(open.quoted_amount_minor, open.currency_code)}</p>}
+            {open.quoted_amount_minor !== null && <p className="text-xs text-text-2 -mt-2">Current: {formatMoney(open.quoted_amount_minor, open.currency_code)}</p>}
 
             <div>
               <TextArea label="Message to owner (emailed)" value={message} onChange={(e) => setMessage(e.target.value)} />
@@ -142,10 +142,10 @@ function Requests({ toast }: { toast: Toast }) {
               <Btn variant="light" className="mt-2" disabled={!note.trim() || busy} onClick={() => update({ note })}>Save note</Btn>
             </div>
 
-            <ul className="border-t border-[#e8ecec] pt-3 flex flex-col gap-1.5 text-sm">
+            <ul className="border-t border-line pt-3 flex flex-col gap-1.5 text-sm">
               {(open.events ?? []).map((e) => (
-                <li key={e.id} className={e.kind === "note" ? "text-[#b45309]" : ""}>
-                  <span className="text-[#59636a]">{new Date(e.created_at).toLocaleString()} · {e.actor}{e.kind === "note" ? " (internal)" : ""}:</span> {e.body}
+                <li key={e.id} className={e.kind === "note" ? "text-warning" : ""}>
+                  <span className="text-text-2">{new Date(e.created_at).toLocaleString()} · {e.actor}{e.kind === "note" ? " (internal)" : ""}:</span> {e.body}
                 </li>
               ))}
             </ul>
@@ -193,14 +193,14 @@ function Catalog({ toast }: { toast: Toast }) {
   if (!items) return <div className="ui-skeleton h-48 rounded-2xl" />;
   return (
     <Card title="Service catalogue" hint="No prices are shown to owners. Each request is quoted." action={<Btn className="!min-h-[40px]" onClick={() => edit(null)}>+ New service</Btn>}>
-      <ul className="divide-y divide-[#e8ecec]">
+      <ul className="divide-y divide-line">
         {items.map((s) => (
           <li key={s.id} className="py-3 flex items-center gap-3">
             <button type="button" className="flex-1 text-left min-w-0" onClick={() => edit(s)}>
-              <span className={`block font-semibold ${s.active ? "" : "text-[#59636a] line-through"}`}>{s.name}</span>
-              <span className="block text-sm text-[#515a63] truncate">{s.tagline}</span>
+              <span className={`block font-semibold ${s.active ? "" : "text-text-2 line-through"}`}>{s.name}</span>
+              <span className="block text-sm text-text-2 truncate">{s.tagline}</span>
             </button>
-            <span className="text-xs text-[#59636a] shrink-0">{s.key}</span>
+            <span className="text-xs text-text-2 shrink-0">{s.key}</span>
           </li>
         ))}
       </ul>
@@ -232,15 +232,15 @@ function Kits({ toast }: { toast: Toast }) {
   if (!items.length) return <EmptyState title="No delivery requests" body="Owners who ask for delivery appear here." />;
   return (
     <Card title="Print kit deliveries">
-      <ul className="divide-y divide-[#e8ecec]">
+      <ul className="divide-y divide-line">
         {items.map((k) => (
           <li key={k.id} className="py-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
             <div className="flex-1 min-w-0">
               <p className="font-semibold">{k.business_name}</p>
-              <p className="text-sm text-[#515a63] whitespace-pre-line">{k.address}</p>
-              <p className="text-xs text-[#59636a]">{k.phone} · {formatMoney(k.fee_minor, k.currency_code)}</p>
+              <p className="text-sm text-text-2 whitespace-pre-line">{k.address}</p>
+              <p className="text-xs text-text-2">{k.phone} · {formatMoney(k.fee_minor, k.currency_code)}</p>
             </div>
-            <select aria-label="Status" value={k.status} onChange={async (e) => { try { await adminGrowthApi.setKitStatus(k.id, e.target.value); await load(); } catch (err) { fail(toast, err); } }} className="rounded-lg border border-[#d5dcdc] bg-white px-3 py-2.5 text-sm">
+            <select aria-label="Status" value={k.status} onChange={async (e) => { try { await adminGrowthApi.setKitStatus(k.id, e.target.value); await load(); } catch (err) { fail(toast, err); } }} className="rounded-lg border border-line-strong bg-white px-3 py-2.5 text-sm">
               {["requested", "paid", "shipped", "delivered", "cancelled"].map((s) => <option key={s} value={s}>{s}</option>)}
             </select>
           </li>

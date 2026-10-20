@@ -13,13 +13,13 @@ export function CountryPicker({ className = "" }: { className?: string }) {
   const name = (c: string) => (c === "*" ? "Other countries" : (names.of(c) ?? c));
   const options = COUNTRIES.includes(pricing.country) ? COUNTRIES : [pricing.country, ...COUNTRIES];
   return (
-    <label className={`inline-flex items-center gap-2 text-xs text-[#515a63] ${className}`}>
+    <label className={`inline-flex items-center gap-2 text-xs text-text-2 ${className}`}>
       <span>Prices shown for</span>
       <select
         aria-label="Country for prices"
         value={pricing.country}
         onChange={(e) => pricing.setCountry(e.target.value)}
-        className="rounded-lg border border-[#d5dcdc] bg-white px-2 py-1.5 text-xs font-semibold text-[#1a1e23]"
+        className="rounded-lg border border-line-strong bg-white px-2 py-1.5 text-xs font-semibold text-ink"
       >
         {options.map((c) => (
           <option key={c} value={c}>

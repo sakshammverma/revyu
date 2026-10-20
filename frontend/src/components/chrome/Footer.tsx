@@ -12,7 +12,7 @@ export function Footer() {
 
   return (
     <div className="mx-2 sm:mx-3 mb-3 mt-12 sm:mt-16">
-      <footer className="rounded-2xl bg-[#1f2429] text-white p-8 sm:p-12 lg:p-16 border border-[#2b3239]">
+      <footer className="rounded-2xl bg-ink-dark text-white p-8 sm:p-12 lg:p-16 border border-[#2b3239]">
         {/* Top Grid: CTA on Left, 3 Columns on Right */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 pb-12 border-b border-[#2b3239]">
           {/* Left Column: CTA Headline & Email Capture */}
@@ -28,7 +28,7 @@ export function Footer() {
               <h3 className="heading-h3 font-display text-white text-2xl sm:text-3xl leading-snug">
                 A printed QR that helps your customers write their own Google reviews.
               </h3>
-              <p className="mt-3 text-sm text-[#9aa1a3] leading-relaxed">
+              <p className="mt-3 text-sm text-text-on-dark leading-relaxed">
                 For any local shop or business. No app, no gating, no incentives.
               </p>
             </div>
@@ -40,7 +40,7 @@ export function Footer() {
                   e.preventDefault();
                   router.push(`/signup?email=${encodeURIComponent(email.trim())}`);
                 }}
-                className="flex items-center p-1.5 rounded-xl bg-white/5 border border-white/15 focus-within:border-[#397dff] focus-within:bg-white/10 transition-all max-w-[400px]"
+                className="flex items-center p-1.5 rounded-xl bg-white/5 border border-white/15 focus-within:border-accent focus-within:bg-white/10 transition-all max-w-[400px]"
               >
                 <input
                   type="email"
@@ -58,7 +58,7 @@ export function Footer() {
                   <span className="font-bold">→</span>
                 </button>
               </form>
-              <p className="text-[11px] text-[#9aa1a3] mt-2">
+              <p className="text-[11px] text-text-on-dark mt-2">
                 15 days free · then <Price plan="monthly" suffix="/month flat" fallback="one flat monthly price" /> · cancel anytime
               </p>
             </div>
@@ -68,7 +68,7 @@ export function Footer() {
           <div className="lg:col-span-6 grid grid-cols-2 sm:grid-cols-3 gap-8">
             {/* Column 1: Platform */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#9aa1a3] mb-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-text-on-dark mb-4">
                 Platform
               </p>
               <ul className="flex flex-col gap-3 text-sm text-[#e2e4e5]">
@@ -102,7 +102,7 @@ export function Footer() {
 
             {/* Column 2: Specialties */}
             <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#9aa1a3] mb-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-text-on-dark mb-4">
                 Where it fits
               </p>
               <ul className="flex flex-col gap-3 text-sm text-[#e2e4e5]">
@@ -136,7 +136,7 @@ export function Footer() {
 
             {/* Column 3: Company */}
             <div className="col-span-2 sm:col-span-1">
-              <p className="text-xs font-semibold uppercase tracking-wider text-[#9aa1a3] mb-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-text-on-dark mb-4">
                 Company &amp; Legal
               </p>
               <ul className="flex flex-col gap-3 text-sm text-[#e2e4e5]">
@@ -176,9 +176,9 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar: Copyright & Policy Guarantee */}
-        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#9aa1a3]">
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-text-on-dark">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#449127] animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
             <span>Google link shown at every rating · no incentives, ever</span>
           </div>
           <p>© {new Date().getFullYear()} Revyu. All rights reserved.</p>

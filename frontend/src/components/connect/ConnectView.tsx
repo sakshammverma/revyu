@@ -69,18 +69,18 @@ export function ConnectView({ data }: { data: ConnectPayload }) {
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => click("google_maps")}
-          className="v2-sheet border border-[#e8ecec] p-4 flex items-center gap-4 min-h-[72px] active:scale-[0.99] transition-transform"
+          className="v2-sheet border border-line p-4 flex items-center gap-4 min-h-[72px] active:scale-[0.99] transition-transform"
         >
-          <span className="w-11 h-11 rounded-xl bg-[#e7f5fd] text-[#2f68db] flex items-center justify-center shrink-0">
+          <span className="w-11 h-11 rounded-xl bg-accent-50 text-accent flex items-center justify-center shrink-0">
             <Icon name="pin" className="w-6 h-6" />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block font-semibold text-[#1a1e23]">Get directions</span>
-            <span className="block text-sm text-[#515a63] truncate">
+            <span className="block font-semibold text-ink">Get directions</span>
+            <span className="block text-sm text-text-2 truncate">
               {[profile?.address_line, profile?.locality].filter(Boolean).join(", ") || "Open in Google Maps"}
             </span>
           </span>
-          <Icon name="arrow" className="w-5 h-5 text-[#59636a]" />
+          <Icon name="arrow" className="w-5 h-5 text-text-2" />
         </a>
       )}
 
@@ -88,11 +88,11 @@ export function ConnectView({ data }: { data: ConnectPayload }) {
         <a
           href={`tel:${phone}`}
           onClick={() => click("phone")}
-          className="v2-sheet border border-[#e8ecec] p-4 flex items-center gap-4 min-h-[64px]"
+          className="v2-sheet border border-line p-4 flex items-center gap-4 min-h-[64px]"
         >
-          <Icon name="phone" className="w-5 h-5 text-[#2f68db]" />
-          <span className="font-semibold text-[#1a1e23] flex-1">Call us</span>
-          <span className="text-sm text-[#515a63]">{phone}</span>
+          <Icon name="phone" className="w-5 h-5 text-accent" />
+          <span className="font-semibold text-ink flex-1">Call us</span>
+          <span className="text-sm text-text-2">{phone}</span>
         </a>
       )}
 
@@ -103,18 +103,18 @@ export function ConnectView({ data }: { data: ConnectPayload }) {
           target={l.url.startsWith("http") ? "_blank" : undefined}
           rel="noopener noreferrer"
           onClick={() => click(l.kind)}
-          className="v2-sheet border border-[#e8ecec] p-4 flex items-center gap-4 min-h-[64px] active:scale-[0.99] transition-transform"
+          className="v2-sheet border border-line p-4 flex items-center gap-4 min-h-[64px] active:scale-[0.99] transition-transform"
         >
-          <span className="w-10 h-10 rounded-xl bg-[#f2f7f7] text-[#1a1e23] flex items-center justify-center shrink-0">
+          <span className="w-10 h-10 rounded-xl bg-bg text-ink flex items-center justify-center shrink-0">
             <Icon name={ICONS[l.kind] ?? "link"} />
           </span>
-          <span className="font-semibold text-[#1a1e23] flex-1 truncate">{l.label || LABELS[l.kind] || "Link"}</span>
-          <Icon name="arrow" className="w-5 h-5 text-[#59636a]" />
+          <span className="font-semibold text-ink flex-1 truncate">{l.label || LABELS[l.kind] || "Link"}</span>
+          <Icon name="arrow" className="w-5 h-5 text-text-2" />
         </a>
       ))}
 
       {data.open_now && (
-        <p className="text-sm text-[#515a63] flex items-center gap-2 px-1">
+        <p className="text-sm text-text-2 flex items-center gap-2 px-1">
           <Icon name="clock" className="w-4 h-4" />
           {data.open_now.open ? `Open now${data.open_now.until ? ` until ${data.open_now.until}` : ""}` : "Closed right now"}
         </p>

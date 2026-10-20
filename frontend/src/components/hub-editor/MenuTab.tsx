@@ -124,7 +124,7 @@ export function MenuTab({ api, state, reload, toast }: TabProps) {
               <button
                 type="button"
                 disabled={catBusy}
-                className="text-sm text-[#c62445] px-3 min-h-[40px] disabled:opacity-50"
+                className="text-sm text-alert px-3 min-h-[40px] disabled:opacity-50"
                 aria-label={`Delete category ${c.name}`}
                 onClick={async () => {
                   if (c.items.length && !window.confirm(`Delete “${c.name}” and its ${c.items.length} items?`)) return;
@@ -144,9 +144,9 @@ export function MenuTab({ api, state, reload, toast }: TabProps) {
           }
         >
           {c.items.length === 0 ? (
-            <p className="text-sm text-[#59636a]">No items yet.</p>
+            <p className="text-sm text-text-2">No items yet.</p>
           ) : (
-            <ul className="divide-y divide-[#e8ecec]">
+            <ul className="divide-y divide-line">
               {c.items.map((i) => (
                 <li key={i.id} className="py-3 flex items-center gap-3">
                   {i.photo_url && (
@@ -154,8 +154,8 @@ export function MenuTab({ api, state, reload, toast }: TabProps) {
                     <img src={i.photo_url} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" />
                   )}
                   <button type="button" className="flex-1 min-w-0 text-left" onClick={() => { setError(null); setConfirmDel(false); setDraft(fromItem(i)); }}>
-                    <span className={`block font-semibold ${i.available ? "text-[#1a1e23]" : "text-[#59636a] line-through"}`}>{i.name}</span>
-                    <span className="block text-sm text-[#515a63]">
+                    <span className={`block font-semibold ${i.available ? "text-ink" : "text-text-2 line-through"}`}>{i.name}</span>
+                    <span className="block text-sm text-text-2">
                       {i.price_on_request || i.amount_minor === null ? "Price on request" : formatMoney(i.amount_minor, i.currency_code)}
                     </span>
                   </button>
@@ -174,7 +174,7 @@ export function MenuTab({ api, state, reload, toast }: TabProps) {
           onChange={(e) => setNewCat(e.target.value)}
           maxLength={80}
           placeholder="New category, e.g. Haircuts"
-          className="flex-1 min-w-0 rounded-lg border border-[#d5dcdc] bg-white px-3.5 py-2.5 text-base outline-none focus:border-[#397dff] focus:ring-2 focus:ring-[#397dff]/25"
+          className="flex-1 min-w-0 rounded-lg border border-line-strong bg-white px-3.5 py-2.5 text-base outline-none focus:border-accent focus:ring-2 focus:ring-accent/25"
         />
         <Btn type="submit" variant="light" disabled={!newCat.trim()} busy={catBusy}>Add category</Btn>
       </form>
@@ -193,13 +193,13 @@ export function MenuTab({ api, state, reload, toast }: TabProps) {
             </label>
             <TextInput label="Duration (minutes, optional)" inputMode="numeric" value={draft.duration_min ?? ""} onChange={(e) => setDraft({ ...draft, duration_min: e.target.value ? parseInt(e.target.value, 10) || null : null })} />
             <div>
-              <p className="text-sm font-medium text-[#1a1e23] mb-1.5">Tags</p>
+              <p className="text-sm font-medium text-ink mb-1.5">Tags</p>
               <div className="flex flex-wrap gap-2">
                 {DIET.map(([k, l]) => {
                   const on = draft.dietary.includes(k);
                   return (
                     <button key={k} type="button" aria-pressed={on} onClick={() => setDraft({ ...draft, dietary: on ? draft.dietary.filter((x) => x !== k) : [...draft.dietary, k] })}
-                      className={`min-h-[40px] px-4 rounded-full text-sm font-semibold border ${on ? "bg-[#1f2429] text-white border-[#1f2429]" : "bg-white border-[#d5dcdc]"}`}>{l}</button>
+                      className={`min-h-[40px] px-4 rounded-full text-sm font-semibold border ${on ? "bg-ink-dark text-white border-ink-dark" : "bg-white border-line-strong"}`}>{l}</button>
                   );
                 })}
               </div>
@@ -213,21 +213,21 @@ export function MenuTab({ api, state, reload, toast }: TabProps) {
                 {uploading ? "Uploading…" : draft.photo_url ? "Change photo" : "Add photo"}
                 <input type="file" accept="image/*" className="sr-only" onChange={(e) => upload(e.target.files?.[0])} />
               </label>
-              {draft.photo_url && <button type="button" className="text-sm underline text-[#515a63]" onClick={() => setDraft({ ...draft, photo_url: null })}>Remove</button>}
+              {draft.photo_url && <button type="button" className="text-sm underline text-text-2" onClick={() => setDraft({ ...draft, photo_url: null })}>Remove</button>}
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">Available today</span>
               <Switch label="Available" checked={draft.available} onChange={(v) => setDraft({ ...draft, available: v })} />
             </div>
             {state.menu.length > 1 && (
-              <label className="text-sm font-medium text-[#1a1e23]">
+              <label className="text-sm font-medium text-ink">
                 Category
-                <select value={draft.category_id} onChange={(e) => setDraft({ ...draft, category_id: e.target.value })} className="mt-1 w-full rounded-lg border border-[#d5dcdc] bg-white px-3 py-2.5">
+                <select value={draft.category_id} onChange={(e) => setDraft({ ...draft, category_id: e.target.value })} className="mt-1 w-full rounded-lg border border-line-strong bg-white px-3 py-2.5">
                   {state.menu.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </label>
             )}
-            {error && <p className="text-sm text-[#c62445]" role="alert">{error}</p>}
+            {error && <p className="text-sm text-alert" role="alert">{error}</p>}
             <div className="flex gap-2 pt-1">
               <Btn type="submit" busy={busy} className="flex-1">Save</Btn>
               {draft.id && (
