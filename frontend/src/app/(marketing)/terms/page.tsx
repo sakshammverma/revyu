@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
 import { LegalPage } from "@/components/marketing/LegalPage";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: "/terms",
   title: "Terms of Service — Revyu",
-};
+  description:
+    "The terms for using Revyu.",
+});
 
 export default function TermsPage() {
   return (

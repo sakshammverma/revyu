@@ -115,7 +115,7 @@ function Card({
         onFocus={() => pauseSet(true)}
         onBlur={() => pauseSet(false)}
       >
-        <Image src={photo} alt="" fill className="object-cover" />
+        <Image src={photo} alt="" fill sizes="(min-width: 1024px) 33vw, 100vw" className="object-cover" />
         <div className="absolute inset-0 bg-ink/45 backdrop-blur-[2px]" />
         <div className="relative z-10">{phone}</div>
         <div className="relative z-10 flex flex-col items-center gap-2 px-4">

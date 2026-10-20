@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import { MarketingPage } from "@/components/chrome/MarketingPage";
 import { MonoLabel } from "@/components/chrome/MonoLabel";
 import { Section } from "@/components/chrome/Grid";
 import { SignupForm } from "@/components/marketing/SignupForm";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: "/signup",
   title: "Start your free trial — Revyu",
-  description: "Set up your Google review collection QR in 3 minutes. 15-day free trial. Secure payment set-up, first charge after your trial.",
-};
+  description:
+    "Set up your Google review collection QR in 3 minutes. 15-day free trial. Secure payment set-up, first charge after your trial.",
+});
 
 export default async function SignupPage({
   searchParams,

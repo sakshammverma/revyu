@@ -75,6 +75,7 @@ export function EditorialRail() {
                   src={article.image}
                   alt=""
                   fill
+                  sizes="(min-width: 1024px) 33vw, 100vw"
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute top-2.5 left-2.5 bg-white/90 backdrop-blur-md px-2.5 py-0.5 rounded text-[11px] font-semibold text-ink">

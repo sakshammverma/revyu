@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
 import { LegalPage } from "@/components/marketing/LegalPage";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: "/privacy",
   title: "Privacy Policy — Revyu",
-};
+  description:
+    "How Revyu handles the data of business owners and the customers who scan a QR code.",
+});
 
 export default function PrivacyPage() {
   return (

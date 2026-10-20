@@ -1,6 +1,3 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
 import { Price } from "@/lib/pricing";
 
@@ -40,12 +37,6 @@ const FAQS = [
 ];
 
 export function FAQSection() {
-  const [openIndex, setOpenIndex] = useState<number | null>(0);
-
-  function toggleFAQ(idx: number) {
-    setOpenIndex(openIndex === idx ? null : idx);
-  }
-
   return (
     <div id="faq" className="mx-2 sm:mx-3 my-16 sm:my-24">
       <section className="v2-sheet max-w-[1296px] mx-auto border border-line p-6 sm:p-12 lg:p-16">
@@ -62,40 +53,23 @@ export function FAQSection() {
           </p>
         </div>
 
-        {/* Accordion List */}
+        {/* Accordion: native <details name="faq"> (one open at a time). Every answer is in the HTML,
+            so search engines and find-in-page see them, and no client JS is needed. */}
         <div className="max-w-4xl divide-y divide-line border-y border-line">
-          {FAQS.map((faq, idx) => {
-            const isOpen = openIndex === idx;
-            return (
-              <div key={idx} className="py-5 sm:py-6">
-                <h3>
-                <button
-                  type="button"
-                  onClick={() => toggleFAQ(idx)}
-                  aria-expanded={isOpen}
-                  aria-controls={`faq-answer-${idx}`}
-                  className="w-full flex items-center justify-between gap-4 text-left group cursor-pointer"
+          {FAQS.map((faq, idx) => (
+            <details key={idx} name="faq" open={idx === 0} className="group py-5 sm:py-6">
+              <summary className="list-none [&::-webkit-details-marker]:hidden w-full flex items-center justify-between gap-4 text-left cursor-pointer">
+                <h3 className="font-display text-lg sm:text-xl text-ink group-hover:text-accent transition-colors">{faq.q}</h3>
+                <span
+                  aria-hidden
+                  className="w-7 h-7 rounded-full bg-bg border border-line flex items-center justify-center text-sm font-semibold text-ink shrink-0 transition-transform duration-200 group-open:rotate-45 group-open:bg-accent group-open:text-white group-open:border-accent"
                 >
-                  <span className="font-display text-lg sm:text-xl text-ink group-hover:text-accent transition-colors">
-                    {faq.q}
-                  </span>
-                  <span
-                    className={`w-7 h-7 rounded-full bg-bg border border-line flex items-center justify-center text-sm font-semibold text-ink shrink-0 transition-transform duration-200 ${
-                      isOpen ? "rotate-45 bg-accent text-white border-accent" : ""
-                    }`}
-                  >
-                    +
-                  </span>
-                </button>
-                </h3>
-                {isOpen && (
-                  <p id={`faq-answer-${idx}`} className="mt-4 text-sm sm:text-base text-text-2 leading-relaxed pr-8 animate-[chatBubbleIn_0.25s_ease]">
-                    {faq.a}
-                  </p>
-                )}
-              </div>
-            );
-          })}
+                  +
+                </span>
+              </summary>
+              <p className="mt-4 text-sm sm:text-base text-text-2 leading-relaxed pr-8">{faq.a}</p>
+            </details>
+          ))}
         </div>
 
         {/* Bottom Help Note */}

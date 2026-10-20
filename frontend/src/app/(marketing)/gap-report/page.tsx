@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
 import { MarketingPage } from "@/components/chrome/MarketingPage";
 import { Section } from "@/components/chrome/Grid";
 import { GapReportTool } from "@/components/marketing/GapReportTool";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: "/gap-report",
   title: "Free Google review gap report — Revyu",
   description:
     "See how many Google reviews your business has next to the strongest nearby competitors. Free, instant, no signup.",
-};
+});
 
 export default function GapReportPage() {
   return (

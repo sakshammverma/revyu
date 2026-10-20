@@ -207,6 +207,7 @@ export function PlatformTabs() {
                   src={tab.image}
                   alt={`Revyu's ${tab.title.toLowerCase()} print file (example)`}
                   fill
+                  sizes="(min-width: 1024px) 50vw, 100vw"
                   // The printed piece sits right of centre; keep it in frame on narrow screens.
                   className="object-cover object-[92%_center] sm:object-[80%_center]"
                 />

@@ -1,13 +1,17 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
 import { Button } from "@/components/chrome/Button";
 import { MarketingPage } from "@/components/chrome/MarketingPage";
 import { MonoLabel } from "@/components/chrome/MonoLabel";
 import { Section } from "@/components/chrome/Grid";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: "/contact",
   title: "Contact — Revyu",
-};
+  description:
+    "How to reach the Revyu team for setup help, billing questions or anything about your QR code.",
+});
 
 export default function ContactPage() {
   return (

@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { MarketingPage } from "@/components/chrome/MarketingPage";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: "/compliance",
   title: "Compliance — Revyu",
-  description: "The five rules that keep your Google Business Profile safe from penalties and suspensions.",
-};
+  description:
+    "The five rules that keep your Google Business Profile safe from penalties and suspensions.",
+});
 
 const RULES = [
   {

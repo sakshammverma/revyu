@@ -116,7 +116,12 @@ export function Hero() {
           onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setIsPaused(false); }}
         >
           {/* Stack of Cinematic Landscape Photos with Cross-fade (Non-cartoonish, expansive natural landscapes) */}
-          {STORIES.map((story, idx) => (
+          {STORIES.map((story, idx) => {
+            // Mount the slide on screen plus its neighbours (the previous one is still fading out): the others would
+            // each download a full-width photo nobody sees yet.
+            const near = [activeStory, (activeStory + 1) % STORIES.length, (activeStory + STORIES.length - 1) % STORIES.length];
+            if (!near.includes(idx)) return null;
+            return (
             <div
               key={story.name}
               className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
@@ -128,11 +133,13 @@ export function Hero() {
                 alt=""
                 aria-hidden="true"
                 fill
-                priority={idx === 0}
-                className="object-cover object-center transform transition-transform duration-10000 ease-out scale-105"
+                sizes="100vw"
+                preload={idx === 0}
+                className="object-cover object-center"
               />
             </div>
-          ))}
+            );
+          })}
 
           {/* Gentle top white fade */}
           <div className="absolute top-0 left-0 right-0 h-20 bg-gradient-to-b from-white to-transparent pointer-events-none z-20" />

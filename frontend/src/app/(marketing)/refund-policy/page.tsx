@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
 import { LegalPage } from "@/components/marketing/LegalPage";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: "/refund-policy",
   title: "Refund Policy — Revyu",
-};
+  description:
+    "When you pay, when you do not, and how refunds work.",
+});
 
 export default function RefundPolicyPage() {
   return (

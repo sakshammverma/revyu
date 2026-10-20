@@ -17,7 +17,9 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: "swap",
 });
 
-const siteUrl = process.env.FRONTEND_BASE_URL || "http://localhost:3000";
+const siteUrl =
+  process.env.FRONTEND_BASE_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
 const description =
   "For any local shop or business. Customers scan, tap what stood out, edit a draft and paste it on Google. Google link at every rating. Flat monthly price, 15-day free trial.";
 
@@ -34,7 +36,7 @@ export const metadata: Metadata = {
     title: "Revyu — More honest Google reviews from a printed QR",
     description,
   },
-  twitter: { card: "summary", title: "Revyu", description },
+  twitter: { card: "summary_large_image", title: "Revyu", description },
   formatDetection: { telephone: false, email: false, address: false },
 };
 
@@ -46,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${lora.variable} ${plusJakartaSans.variable} h-full scroll-smooth`}
     >
       <body className="min-h-full flex flex-col bg-bg text-ink font-sans antialiased selection:bg-accent/15 selection:text-ink">

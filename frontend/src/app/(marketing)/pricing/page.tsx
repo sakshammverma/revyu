@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { MarketingPage } from "@/components/chrome/MarketingPage";
 import { CountryPicker } from "@/components/marketing/CountryPicker";
 import { IfPriced, Price } from "@/lib/pricing";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: "/pricing",
   title: "Pricing — Revyu",
-  description: "Simple, flat pricing for single-outlet businesses, in your local currency. Monthly or annual, with a 15-day free trial.",
-};
+  description:
+    "Simple, flat pricing for single-outlet businesses, in your local currency. Monthly or annual, with a 15-day free trial.",
+});
 
 export default function PricingPage() {
   return (

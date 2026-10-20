@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { pageMetadata, siteUrl } from "@/lib/seo";
 import { PromoBar } from "@/components/chrome/PromoBar";
 import { Header } from "@/components/chrome/Header";
 import { Hero } from "@/components/marketing/Hero";
@@ -16,9 +18,27 @@ import { FinalCTA } from "@/components/marketing/FinalCTA";
 import { Footer } from "@/components/chrome/Footer";
 import { PlaygroundProvider, PlaygroundTracker } from "@/components/marketing/interact";
 
+export const metadata: Metadata = pageMetadata({
+  path: "/",
+  title: "Revyu — A printed QR that helps customers write their own Google reviews",
+  description:
+    "For any local shop or business. Customers scan, tap what stood out, edit a draft and paste it on Google. Google link at every rating. Flat monthly price, 15-day free trial.",
+});
+
+// Structured data for the brand itself. No prices or ratings here: prices vary by country and
+// are loaded in the browser, and the site makes no claims about outcomes.
+const siteJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "Organization", name: "Revyu", url: siteUrl, logo: `${siteUrl}/icon.svg` },
+    { "@type": "WebSite", name: "Revyu", url: siteUrl },
+  ],
+};
+
 export default function Home() {
   return (
     <PlaygroundProvider>
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd).replace(/</g, "\u003c") }} />
     <div className="min-h-screen flex flex-col bg-bg text-ink selection:bg-accent/15 selection:text-ink">
       {/* 1. Top Announcement Bar */}
       <PromoBar />

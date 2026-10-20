@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
 import { LegalPage } from "@/components/marketing/LegalPage";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: "/credits",
   title: "Photo Credits — Revyu",
-};
+  description:
+    "Credits and licences for the photographs used on the Revyu website.",
+});
 
 // Every photo on the marketing site comes from Wikimedia Commons. CC BY and
 // CC BY-SA require this attribution; keep the list in sync with public/images.

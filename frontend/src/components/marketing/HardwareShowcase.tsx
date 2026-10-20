@@ -151,6 +151,7 @@ export function HardwareShowcase() {
               src="/images/shop-cloth-counter.jpg"
               alt=""
               fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
               className="object-cover opacity-60"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#1a1e23] via-[#1a1e23]/60 to-transparent" />

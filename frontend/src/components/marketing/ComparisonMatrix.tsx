@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 
 // Three ways a shop handles it, framed by what each one costs the owner.

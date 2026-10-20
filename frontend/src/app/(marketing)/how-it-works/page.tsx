@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { MarketingPage } from "@/components/chrome/MarketingPage";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
+  path: "/how-it-works",
   title: "How it works — Revyu",
-  description: "Three steps: scan, tap, paste. No app, no review gating, no pre-written reviews."
-};
+  description:
+    "Three steps: scan, tap, paste. No app, no review gating, no pre-written reviews.",
+});
 
 const STEPS = [
   {

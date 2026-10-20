@@ -213,6 +213,7 @@ export function Header() {
                     src="/images/hero-stand-idle.jpg"
                     alt="A printed QR standee on a reception counter"
                     fill
+                    sizes="(min-width: 768px) 500px, 100vw"
                     className="object-cover"
                   />
                   <div className="absolute top-2.5 right-2.5 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full text-xs font-semibold text-ink shadow-xs">

@@ -22,6 +22,7 @@ const securityHeaders = [
 // a FastAPI process; see documents/25-SUPABASE-MIGRATION-PLAN.md.)
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  images: { formats: ["image/avif", "image/webp"] },
   allowedDevOrigins: [
     "*.ngrok-free.app",
     "*.ngrok.app",
