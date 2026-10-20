@@ -452,6 +452,60 @@ body {
 }
 
 
+/* Interaction affordances (components/marketing/interact) */
+@keyframes affordBreathe {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(47 109 240 / 0.25); }
+  50% { box-shadow: 0 0 0 7px rgb(47 109 240 / 0); }
+}
+
+@keyframes ghostRipple {
+  0% { transform: scale(0.4); opacity: 0.9; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+.afford-ring {
+  animation: affordBreathe 2s ease-in-out infinite;
+}
+
+.ghost-hand {
+  animation: heroPopIn 200ms var(--ease-enter) both;
+}
+
+.ghost-ripple {
+  animation: ghostRipple 700ms ease-out both;
+}
+
+/* Slider with a grip thumb and filled track (--fill is set inline, 0-100%) */
+.range-fill {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  background: linear-gradient(to right, var(--accent) var(--fill, 0%), var(--line) var(--fill, 0%));
+}
+.range-fill::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: #fff;
+  border: 3px solid var(--accent);
+  box-shadow: var(--shadow-btn);
+  cursor: grab;
+}
+.range-fill::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: #fff;
+  border: 3px solid var(--accent);
+  box-shadow: var(--shadow-btn);
+  cursor: grab;
+}
+.range-fill:active::-webkit-slider-thumb { cursor: grabbing; }
+
+
 /* Pre-reduced motion accessibility rule */
 @media (prefers-reduced-motion: reduce) {
   *,

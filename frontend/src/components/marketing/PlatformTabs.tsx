@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+
+import { GhostHand, InteractiveTag, TryHint, useInView, usePlayground, usePrefersReducedMotion, useTablist } from "./interact";
 
 import { getDemoVertical } from "@/lib/marketing/demo";
 import { Price } from "@/lib/pricing";
@@ -85,10 +87,17 @@ export function PlatformTabs() {
   const [activeTab, setActiveTab] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [cycleKey, setCycleKey] = useState(0);
+  // Once the visitor picks a tab themselves the autoplay never takes it back.
+  const [manual, setManual] = useState(false);
+  const reduced = usePrefersReducedMotion();
+  const { tried, markTried } = usePlayground("specialty");
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(tabsRef);
+  const autoplay = !manual && !reduced;
 
   // Switch image and content after every 3.3 seconds
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || !autoplay) return;
 
     const interval = setInterval(() => {
       setActiveTab((prev) => (prev + 1) % TABS.length);
@@ -96,12 +105,15 @@ export function PlatformTabs() {
     }, 3300);
 
     return () => clearInterval(interval);
-  }, [isPaused, activeTab]);
+  }, [isPaused, activeTab, autoplay]);
 
   function handleTabClick(idx: number) {
+    markTried();
+    setManual(true);
     setActiveTab(idx);
     setCycleKey((k) => k + 1);
   }
+  const { listProps, tabProps, panelProps } = useTablist(TABS.length, activeTab, handleTabClick, "specialty");
 
   const current = TABS[activeTab];
 
@@ -114,8 +126,8 @@ export function PlatformTabs() {
       >
         {/* Section Heading */}
         <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-          <p className="vf-section-label uppercase tracking-wider mb-2 text-[#515a63]">
-            Built for every kind of shop
+          <p className="vf-section-label uppercase tracking-wider mb-2 text-[#515a63] flex items-center justify-center gap-3">
+            Built for every kind of shop <InteractiveTag />
           </p>
           <h2 className="heading-h2 font-display text-[#1a1e23]">
             Wherever customers pay, the QR fits.
@@ -123,13 +135,20 @@ export function PlatformTabs() {
         </div>
 
         {/* 5-Column Tab Switcher */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 rounded-xl border border-[#e8ecec] bg-[#fcfcfc] overflow-hidden divide-x divide-y lg:divide-y-0 divide-[#e8ecec]">
+        <div className="relative">
+        <div
+          ref={tabsRef}
+          {...listProps}
+          aria-label="Shop types"
+          className="grid grid-cols-2 lg:grid-cols-5 rounded-xl border border-[#e8ecec] bg-[#fcfcfc] overflow-hidden divide-x divide-y lg:divide-y-0 divide-[#e8ecec]"
+        >
           {TABS.map((tab, idx) => {
             const isActive = activeTab === idx;
             return (
               <button
                 key={tab.id}
                 type="button"
+                {...tabProps(idx)}
                 onClick={() => handleTabClick(idx)}
                 className={`relative p-4 sm:p-5 text-left transition-colors cursor-pointer ${
                   isActive ? "bg-white" : "bg-[#fcfcfc] hover:bg-white/60"
@@ -148,7 +167,7 @@ export function PlatformTabs() {
                 </p>
 
                 {/* 3.3s Progress Underline */}
-                {isActive && !isPaused && (
+                {isActive && !isPaused && autoplay && (
                   <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#e8ecec] overflow-hidden">
                     <div
                       key={`tab-progress-${idx}-${cycleKey}`}
@@ -156,16 +175,24 @@ export function PlatformTabs() {
                     />
                   </div>
                 )}
-                {isActive && isPaused && (
+                {isActive && (isPaused || !autoplay) && (
                   <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#397dff]" />
                 )}
               </button>
             );
           })}
         </div>
+        <div aria-hidden className="pointer-events-none absolute inset-0 hidden lg:block">
+          <GhostHand play={inView && !tried} path={[{ x: "30%", y: "50%" }]} onStep={() => !tried && setActiveTab(1)} />
+        </div>
+        <div className="mt-3 flex items-center justify-center gap-3">
+          <TryHint label="Pick your kind of shop" done={tried} />
+          {manual && <span className="text-xs text-text-2">Paused · you&apos;re in control</span>}
+        </div>
+        </div>
 
         {/* Large Stage Frame (Product UI on top of Cinematic Landscape) */}
-        <div className="mt-8 rounded-2xl overflow-hidden border border-[#e8ecec] bg-[#1a1e23] shadow-v2-rest relative">
+        <div {...panelProps} className="mt-8 rounded-2xl overflow-hidden border border-[#e8ecec] bg-[#1a1e23] shadow-v2-rest relative">
           <div className="relative aspect-[16/9] sm:aspect-[21/9] min-h-[340px] sm:min-h-[440px] w-full">
             {TABS.map((tab, idx) => (
               <div

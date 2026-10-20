@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
 import { assembleDraft } from "@/lib/flow/draft";
 import { getDemoVertical } from "@/lib/marketing/demo";
+import { GhostHand, InteractiveTag, TryHint, useInView, usePlayground } from "./interact";
 
 const DEMO = getDemoVertical("general");
 const DEMO_TAGS = DEMO.tags.slice(0, 6);
@@ -54,6 +55,36 @@ export function ShowcaseDeck() {
   const [selectedTags, setSelectedTags] = useState<string[]>(
     DEMO_TAGS.slice(0, 3).map((t) => t.id)
   );
+  const { tried, markTried } = usePlayground("draft");
+  const stageRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(stageRef, { threshold: 0.5 });
+  const go = (i: number) => {
+    markTried();
+    setActiveCenter(i);
+  };
+  // Side phones: a click brings them to the front; give keyboard users the same.
+  const sidePhone = (i: number) =>
+    activeCenter === i
+      ? {}
+      : {
+          role: "button" as const,
+          tabIndex: 0,
+          "aria-label": `Show step ${i + 1}: ${WORKFLOW_STEPS[i].shortTitle}`,
+          onKeyDown: (e: KeyboardEvent) => {
+            if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) {
+              e.preventDefault();
+              go(i);
+            }
+          },
+        };
+  // The ghost shows the real flow: focus the tag phone, add two tags, open the draft.
+  const demoStep = (n: number) => {
+    if (tried) return;
+    if (n === 0) setActiveCenter(1);
+    if (n === 1) setSelectedTags((t) => (t.includes(DEMO_TAGS[3].id) ? t : [...t, DEMO_TAGS[3].id]));
+    if (n === 2) setSelectedTags((t) => (t.includes(DEMO_TAGS[4].id) ? t : [...t, DEMO_TAGS[4].id]));
+    if (n === 3) setActiveCenter(2);
+  };
   const [ownerMode, setOwnerMode] = useState<"lowrating" | "inbox">("lowrating");
 
   // Real draft assembler, same as the live flow. No tags -> empty (CR-1).
@@ -64,10 +95,12 @@ export function ShowcaseDeck() {
   );
 
   function nextPhone() {
+    markTried();
     setActiveCenter((prev) => (prev + 1) % 5);
   }
 
   function prevPhone() {
+    markTried();
     setActiveCenter((prev) => (prev - 1 + 5) % 5);
   }
 
@@ -79,6 +112,7 @@ export function ShowcaseDeck() {
   }
 
   function toggleTag(tag: string) {
+    markTried();
     if (selectedTags.includes(tag)) {
       setSelectedTags(selectedTags.filter((t) => t !== tag));
     } else {
@@ -93,8 +127,8 @@ export function ShowcaseDeck() {
       <section className="v2-sheet max-w-[1296px] mx-auto border border-[#e8ecec] p-6 sm:p-12 lg:p-16">
         {/* Section Header */}
         <div className="max-w-3xl mb-10">
-          <p className="vf-section-label uppercase tracking-wider mb-2 text-[#515a63]">
-            How it works, step by step
+          <p className="vf-section-label uppercase tracking-wider mb-2 text-[#515a63] flex items-center gap-3">
+            How it works, step by step <InteractiveTag />
           </p>
           <h2 className="heading-h2 font-display text-[#1a1e23]">
             From a printed QR to a review they wrote themselves.
@@ -102,17 +136,20 @@ export function ShowcaseDeck() {
           <p className="mt-3 text-base sm:text-lg text-[#6e797b] leading-relaxed">
             Click through the five screens your customer sees. The phones are interactive — tap stars and tags and watch the draft change.
           </p>
+          <div className="mt-4">
+            <TryHint label="Tap tags and watch the review write itself" done={tried} />
+          </div>
         </div>
 
         {/* Step Selector Pills Nav */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 scrollbar-none">
+        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-8 no-scrollbar">
           {WORKFLOW_STEPS.map((step) => {
             const isActive = activeCenter === step.id;
             return (
               <button
                 key={step.id}
                 type="button"
-                onClick={() => setActiveCenter(step.id)}
+                onClick={() => go(step.id)}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-medium transition-all shrink-0 cursor-pointer ${
                   isActive
                     ? "bg-[#1a1e23] text-white shadow-v2-elevated"
@@ -164,10 +201,22 @@ export function ShowcaseDeck() {
           </button>
 
           {/* Fanned 5 Phones Stage */}
-          <div className="relative w-full max-w-[1100px] h-[590px] sm:h-[670px] flex items-center justify-center">
+          <div ref={stageRef} className="relative w-full max-w-[1100px] h-[590px] sm:h-[670px] flex items-center justify-center">
+            <GhostHand
+              play={inView && !tried}
+              stepMs={1100}
+              onStep={demoStep}
+              path={[
+                { x: "34%", y: "55%" },
+                { x: "42%", y: "46%" },
+                { x: "56%", y: "46%" },
+                { x: "50%", y: "84%" },
+              ]}
+            />
             {/* Phone 0 (Step 1): Scan & rate */}
             <div
-              onClick={() => setActiveCenter(0)}
+              onClick={() => go(0)}
+              {...sidePhone(0)}
               className={`absolute transition-all duration-500 cursor-pointer hidden md:block ${
                 activeCenter === 0
                   ? "z-30 scale-100 opacity-100 shadow-v2-phone"
@@ -206,8 +255,11 @@ export function ShowcaseDeck() {
                         <button
                           key={star}
                           type="button"
+                          aria-label={`${star} star${star > 1 ? "s" : ""}`}
+                          aria-pressed={star === selectedRating}
                           onClick={(e) => {
                             e.stopPropagation();
+                            markTried();
                             setSelectedRating(star);
                           }}
                           className={`text-2xl transition-transform hover:scale-125 cursor-pointer ${
@@ -235,7 +287,7 @@ export function ShowcaseDeck() {
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setActiveCenter(1);
+                        go(1);
                       }}
                       className="w-full py-2.5 bg-[#397dff] text-white rounded-lg text-xs font-semibold shadow-2xs hover:bg-[#2f68db] transition-colors"
                     >
@@ -248,7 +300,8 @@ export function ShowcaseDeck() {
 
             {/* Phone 1 (Step 2): Tag Selection Matrix */}
             <div
-              onClick={() => setActiveCenter(1)}
+              onClick={() => go(1)}
+              {...sidePhone(1)}
               className={`absolute transition-all duration-500 cursor-pointer ${
                 activeCenter === 1
                   ? "z-30 scale-100 opacity-100 shadow-v2-phone"
@@ -283,6 +336,7 @@ export function ShowcaseDeck() {
                         <button
                           key={tag.id}
                           type="button"
+                          aria-pressed={isSelected}
                           onClick={(e) => {
                             e.stopPropagation();
                             toggleTag(tag.id);
@@ -313,7 +367,7 @@ export function ShowcaseDeck() {
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setActiveCenter(2);
+                        go(2);
                       }}
                       className="w-full py-2.5 bg-[#397dff] text-white rounded-lg text-xs font-semibold shadow-2xs hover:bg-[#2f68db] transition-colors"
                     >
@@ -326,7 +380,8 @@ export function ShowcaseDeck() {
 
             {/* Phone 2 (Step 3 - CENTER FRONT ELEVATED): Editable draft & copy */}
             <div
-              onClick={() => setActiveCenter(2)}
+              onClick={() => go(2)}
+              {...sidePhone(2)}
               className={`absolute transition-all duration-500 cursor-pointer ${
                 activeCenter === 2
                   ? "z-30 scale-100 opacity-100 shadow-v2-phone"
@@ -400,7 +455,8 @@ export function ShowcaseDeck() {
 
             {/* Phone 3 (Step 4): Google review page — customer pastes */}
             <div
-              onClick={() => setActiveCenter(3)}
+              onClick={() => go(3)}
+              {...sidePhone(3)}
               className={`absolute transition-all duration-500 cursor-pointer ${
                 activeCenter === 3
                   ? "z-30 scale-100 opacity-100 shadow-v2-phone"
@@ -425,7 +481,7 @@ export function ShowcaseDeck() {
                         setPostedToast(true);
                         setTimeout(() => {
                           setPostedToast(false);
-                          setActiveCenter(4);
+                          go(4);
                         }, 1200);
                       }}
                       className="px-3 py-1 bg-[#1a73e8] hover:bg-[#1557b0] text-white text-[11px] font-semibold rounded-full shadow-2xs transition-colors cursor-pointer"
@@ -477,7 +533,8 @@ export function ShowcaseDeck() {
 
             {/* Phone 4 (Step 5): Low-rating routing & owner inbox */}
             <div
-              onClick={() => setActiveCenter(4)}
+              onClick={() => go(4)}
+              {...sidePhone(4)}
               className={`absolute transition-all duration-500 cursor-pointer hidden md:block ${
                 activeCenter === 4
                   ? "z-30 scale-100 opacity-100 shadow-v2-phone"
@@ -561,7 +618,7 @@ export function ShowcaseDeck() {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setActiveCenter(3);
+                          go(3);
                         }}
                         className="w-full py-2.5 border border-[#1a1e23] bg-white hover:bg-[#f8fafc] text-[#1a1e23] rounded text-[10px] font-semibold transition-colors cursor-pointer"
                       >

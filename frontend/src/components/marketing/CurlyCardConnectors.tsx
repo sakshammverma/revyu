@@ -1,6 +1,10 @@
 "use client";
 
+import { usePrefersReducedMotion } from "./interact";
+
 export function CurlyCardConnectors() {
+  // SMIL ignores the CSS reduced-motion rule, so drop the traveling pulses here.
+  const reduced = usePrefersReducedMotion();
   return (
     <div className="relative w-full max-w-[1296px] mx-auto px-4 sm:px-8 -mt-2 sm:-mt-4 -mb-8 sm:-mb-10 pointer-events-none z-0 overflow-visible">
       {/* Refined, compact SVG canvas for organic curly connecting lines */}
@@ -59,11 +63,13 @@ export function CurlyCardConnectors() {
 
         {/* Traveling Light Pulse along Card 1 path */}
         <circle r="2.8" fill="#397dff">
-          <animateMotion
+          {!reduced && (
+<animateMotion
             dur="4s"
             repeatCount="indefinite"
             path="M 200 4 C 160 25, 250 40, 220 65 C 190 90, 320 75, 410 85 C 490 95, 540 105, 600 116"
           />
+)}
         </circle>
 
         {/* =================================================================== */}
@@ -84,11 +90,13 @@ export function CurlyCardConnectors() {
 
         {/* Traveling Light Pulse along Card 2 path */}
         <circle r="2.8" fill="#f59e0b">
-          <animateMotion
+          {!reduced && (
+<animateMotion
             dur="3s"
             repeatCount="indefinite"
             path="M 600 4 C 560 25, 640 45, 575 70 C 520 90, 630 95, 600 116"
           />
+)}
         </circle>
 
         {/* =================================================================== */}
@@ -119,11 +127,13 @@ export function CurlyCardConnectors() {
 
         {/* Traveling Light Pulse along Card 3 path */}
         <circle r="2.8" fill="#16a34a">
-          <animateMotion
+          {!reduced && (
+<animateMotion
             dur="4s"
             repeatCount="indefinite"
             path="M 1000 4 C 1040 25, 950 40, 980 65 C 1010 90, 880 75, 790 85 C 710 95, 660 105, 600 116"
           />
+)}
         </circle>
 
         {/* Central Influx Node where streams meet */}

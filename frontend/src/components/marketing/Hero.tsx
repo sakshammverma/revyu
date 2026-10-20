@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { assembleDraft } from "@/lib/flow/draft";
 import { getDemoVertical } from "@/lib/marketing/demo";
+import { usePrefersReducedMotion, useTablist } from "./interact";
 
 const WORDS_LINE_1 = ["Good", "work", "nobody", "writes", "down"];
 const WORDS_LINE_2 = ["goes", "to", "the", "shop", "next", "door."];
@@ -38,10 +39,14 @@ export function Hero() {
   const [activeStory, setActiveStory] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [timerKey, setTimerKey] = useState(0);
+  // A manual pick ends autoplay for good; reduced motion never autoplays.
+  const [manual, setManual] = useState(false);
+  const reduced = usePrefersReducedMotion();
+  const autoplay = !manual && !reduced;
 
   // Cycle images and customer stories every 3.3 seconds (3300ms)
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || !autoplay) return;
 
     const timer = setInterval(() => {
       setActiveStory((prev) => (prev + 1) % STORIES.length);
@@ -49,9 +54,12 @@ export function Hero() {
     }, 3300);
 
     return () => clearInterval(timer);
-  }, [isPaused, activeStory]);
+  }, [isPaused, activeStory, autoplay]);
+
+  const { listProps, tabProps } = useTablist(STORIES.length, activeStory, (i) => handleSelectStory(i), "hero");
 
   function handleSelectStory(idx: number) {
+    setManual(true);
     setActiveStory(idx);
     setTimerKey((k) => k + 1);
   }
@@ -157,8 +165,8 @@ export function Hero() {
 
           {/* 3.3s Auto-Play Indicator Badge (Top right) */}
           <div className="absolute top-4 right-4 sm:right-8 z-30 hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-md text-white/90 text-[11px] font-medium border border-white/20">
-            <span className={`w-2 h-2 rounded-full ${isPaused ? "bg-amber-400" : "bg-[#397dff] animate-ping"}`} />
-            <span>{isPaused ? "Paused" : "Example flow"}</span>
+            <span className={`w-2 h-2 rounded-full ${isPaused || !autoplay ? "bg-amber-400" : "bg-[#397dff] animate-ping"}`} />
+            <span>{manual ? "Paused · you're in control" : isPaused ? "Paused" : "Example flow"}</span>
           </div>
 
           {/* Floating example card: what the customer tapped -> the draft it builds */}
@@ -202,12 +210,14 @@ export function Hero() {
 
         {/* Vertical strip with 3.3s progress underline */}
         <div
+          {...listProps}
+          aria-label="Example businesses"
           className="w-full border-t border-[#e8ecec] bg-[#ffffff] grid grid-cols-2 sm:grid-cols-6 divide-x divide-y sm:divide-y-0 divide-[#e8ecec] text-xs"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
           <div className="p-3.5 sm:p-4 flex items-center justify-center font-semibold text-[#6e797b] bg-[#fcfcfc] col-span-2 sm:col-span-1">
-            Built for
+            Tap one ↓
           </div>
           {STORIES.map((s, idx) => {
             const isActive = activeStory === idx;
@@ -215,6 +225,7 @@ export function Hero() {
               <button
                 key={s.name}
                 type="button"
+                {...tabProps(idx)}
                 onClick={() => handleSelectStory(idx)}
                 className={`relative p-3.5 sm:p-4 flex flex-col justify-center items-start transition-colors cursor-pointer text-left ${
                   isActive ? "bg-white" : "bg-[#fcfcfc] hover:bg-white"
@@ -231,7 +242,7 @@ export function Hero() {
                 <span className="text-[11px] text-[#9aa1a3] mt-0.5">8 tags, set per business</span>
 
                 {/* 3.3-second Progress underline for active story */}
-                {isActive && !isPaused && (
+                {isActive && !isPaused && autoplay && (
                   <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#e8ecec] overflow-hidden">
                     <div
                       key={`progress-${idx}-${timerKey}`}
@@ -239,7 +250,7 @@ export function Hero() {
                     />
                   </div>
                 )}
-                {isActive && isPaused && (
+                {isActive && (isPaused || !autoplay) && (
                   <div className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-[#397dff]" />
                 )}
               </button>

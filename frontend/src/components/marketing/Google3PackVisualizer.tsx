@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+
+import { GhostHand, InteractiveTag, TryHint, useCountUp, useInView, usePlayground } from "./interact";
 
 // Act 1 — "The gap" (documents/21-CONVERSION-DESIGN.md §3, FR-79). Loss is
 // stated once, about the owner's *current* situation, with numbers they can
@@ -9,10 +11,17 @@ import { useState } from "react";
 export function Google3PackVisualizer() {
   const [yours, setYours] = useState(47);
   const [theirs, setTheirs] = useState(180);
-  const gap = Math.max(theirs - yours, 0);
+  const gap = useCountUp(Math.max(theirs - yours, 0));
+  const { tried, markTried } = usePlayground("rank");
+  const fieldsRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(fieldsRef);
+  const edit = (set: (v: number) => void) => (v: number) => {
+    markTried();
+    set(v);
+  };
 
   return (
-    <section className="mx-2 sm:mx-3 my-12 sm:my-16">
+    <section id="gap" className="mx-2 sm:mx-3 my-12 sm:my-16">
       <div className="v2-sheet max-w-[1296px] mx-auto border border-[#e8ecec] p-6 sm:p-12 lg:p-16">
         {/* Section Heading */}
         <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
@@ -32,9 +41,7 @@ export function Google3PackVisualizer() {
           {/* Left Column: owner's own numbers (5 cols) */}
           <div className="lg:col-span-5 flex flex-col justify-between">
             <div>
-              <span className="inline-block text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded bg-[#397dff]/10 text-[#397dff] mb-2">
-                Try your own numbers
-              </span>
+              <InteractiveTag className="mb-2" />
               <h3 className="font-display text-xl sm:text-2xl text-[#1a1e23] leading-snug mb-2">
                 Where do you stand today?
               </h3>
@@ -43,9 +50,17 @@ export function Google3PackVisualizer() {
               </p>
             </div>
 
-            <div className="bg-white rounded-xl p-5 border border-[#e8ecec] shadow-2xs mb-6 grid grid-cols-2 gap-4">
-              <NumberField label="Your Google reviews" value={yours} onChange={setYours} />
-              <NumberField label="Nearby competitor" value={theirs} onChange={setTheirs} />
+            <div ref={fieldsRef} className="relative bg-white rounded-xl p-5 border border-[#e8ecec] shadow-2xs mb-3 grid grid-cols-2 gap-4">
+              <NumberField label="Your Google reviews" value={yours} onChange={edit(setYours)} ring={!tried} />
+              <NumberField label="Nearby competitor" value={theirs} onChange={edit(setTheirs)} />
+              <GhostHand
+                play={inView && !tried}
+                path={[{ x: "25%", y: "68%" }]}
+                onStep={() => !tried && setYours(62)}
+              />
+            </div>
+            <div className="mb-6 flex">
+              <TryHint label="Type your own review count" done={tried} />
             </div>
 
             <div className="grid grid-cols-2 gap-3 mb-6">
@@ -99,10 +114,12 @@ function NumberField({
   label,
   value,
   onChange,
+  ring = false,
 }: {
   label: string;
   value: number;
   onChange: (v: number) => void;
+  ring?: boolean;
 }) {
   return (
     <label className="flex flex-col gap-1.5">
@@ -113,7 +130,7 @@ function NumberField({
         max={99999}
         value={value}
         onChange={(e) => onChange(Math.max(0, Math.min(99999, Number(e.target.value) || 0)))}
-        className="w-full px-3 py-2 rounded-lg border border-[#e8ecec] text-base font-bold text-[#1a1e23] focus:outline-none focus:border-[#397dff]"
+        className={`w-full px-3 py-2 rounded-lg border border-[#e8ecec] text-base font-bold text-[#1a1e23] focus:outline-none focus:border-[#397dff] ${ring ? "afford-ring" : ""}`}
       />
     </label>
   );

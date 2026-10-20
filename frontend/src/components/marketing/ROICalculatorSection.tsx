@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 
 import { usePricing } from "@/lib/pricing";
+import { GhostHand, InteractiveTag, TryHint, useCountUp, useInView, usePlayground } from "./interact";
 
 // "One customer covers a year" (documents/21-CONVERSION-DESIGN.md §6).
 // Pure arithmetic on our published price and the owner's own average bill —
@@ -16,6 +17,13 @@ const LAUNCH_MONTHLY_MINOR = 49_900;
 export function ROICalculatorSection() {
   const pricing = usePricing();
   const [pos, setPos] = useState(1500);
+  const { tried, markTried } = usePlayground("roi");
+  const demoRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(demoRef);
+  const touch = (n: number) => {
+    markTried();
+    setPos(n);
+  };
 
   const monthlyMinor = pricing.monthlyMinor ?? LAUNCH_MONTHLY_MINOR;
   const annualMinor = pricing.annualMinor ?? monthlyMinor * 9;
@@ -25,16 +33,18 @@ export function ROICalculatorSection() {
   const showMajor = (major: number) => show(major * 100);
 
   const avgBill = scaled(pos);
-  const customersPerYearAnnual = Math.max(1, Math.ceil(annualMinor / 100 / avgBill));
-  const customersPerYearMonthly = Math.max(1, Math.ceil((monthlyMinor * 12) / 100 / avgBill));
+  const customersPerYearAnnual = useCountUp(Math.max(1, Math.ceil(annualMinor / 100 / avgBill)));
+  const customersPerYearMonthly = useCountUp(Math.max(1, Math.ceil((monthlyMinor * 12) / 100 / avgBill)));
+  const shownBill = useCountUp(avgBill);
+  const fill = ((pos - 200) / (10000 - 200)) * 100;
 
   return (
     <div id="calculator" className="mx-2 sm:mx-3 my-16 sm:my-24">
       <section className="v2-sheet max-w-[1296px] mx-auto border border-[#e8ecec] p-6 sm:p-12 lg:p-16">
         {/* Header */}
         <div className="max-w-3xl mb-12">
-          <p className="vf-section-label uppercase tracking-wider mb-2 text-[#515a63]">
-            The price, in customers
+          <p className="vf-section-label uppercase tracking-wider mb-2 text-[#515a63] flex items-center gap-3">
+            The price, in customers <InteractiveTag />
           </p>
           <h2 className="heading-h2 font-display text-[#1a1e23]">
             One new customer can cover a whole year.
@@ -48,26 +58,43 @@ export function ROICalculatorSection() {
         {/* Calculator Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-[#fcfcfc] rounded-2xl border border-[#e8ecec] p-6 sm:p-10">
           {/* Left Column: slider */}
-          <div className="lg:col-span-6 flex flex-col gap-6">
+          <div ref={demoRef} className="lg:col-span-6 flex flex-col gap-6">
             <div>
               <div className="flex items-center justify-between mb-3">
                 <label htmlFor="avg-bill" className="text-sm font-semibold text-[#1a1e23]">
                   Average bill per customer
                 </label>
                 <span className="font-display text-2xl font-bold text-[#397dff] px-3 py-1 rounded-lg bg-[#397dff]/10">
-                  {showMajor(avgBill)}
+                  {showMajor(shownBill)}
                 </span>
               </div>
-              <input
-                id="avg-bill"
-                type="range"
-                min="200"
-                max="10000"
-                step="100"
-                value={pos}
-                onChange={(e) => setPos(Number(e.target.value))}
-                className="w-full h-2.5 bg-[#e8ecec] rounded-lg appearance-none cursor-pointer accent-[#397dff]"
-              />
+              <div className="relative py-2">
+                <input
+                  id="avg-bill"
+                  type="range"
+                  min="200"
+                  max="10000"
+                  step="100"
+                  value={pos}
+                  onChange={(e) => touch(Number(e.target.value))}
+                  style={{ "--fill": `${fill}%` } as React.CSSProperties}
+                  className={`range-fill w-full ${tried ? "" : "afford-ring"}`}
+                />
+                <GhostHand
+                  play={inView && !tried}
+                  path={[
+                    { x: "13%", y: "55%" },
+                    { x: "38%", y: "55%" },
+                    { x: "13%", y: "55%" },
+                  ]}
+                  onStep={(i) => {
+                    if (!tried && i > 0) setPos(i === 1 ? 4000 : 1500);
+                  }}
+                />
+              </div>
+              <div className="mt-2 flex justify-center">
+                <TryHint label="Drag to your average bill" done={tried} />
+              </div>
               <div className="flex justify-between text-[11px] text-[#9aa1a3] mt-2">
                 <span>{showMajor(scaled(200))}</span>
                 <span>{showMajor(scaled(2500))}</span>

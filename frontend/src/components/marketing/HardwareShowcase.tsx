@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
+
+import { GhostHand, InteractiveTag, TryHint, useInView, usePlayground, useTablist } from "./interact";
 
 // Mirrors backend/app/services/print_assets.py — these are the files we
 // generate for every approved outlet. We ship files, not hardware: the owner
@@ -64,14 +66,23 @@ const KIT_ITEMS = [
 export function HardwareShowcase() {
   const [activeItem, setActiveItem] = useState(0);
   const current = KIT_ITEMS[activeItem];
+  const { tried, markTried } = usePlayground("kit");
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const inView = useInView(tabsRef);
+  const select = (i: number) => {
+    markTried();
+    setActiveItem(i);
+  };
+  const { listProps, tabProps, panelProps } = useTablist(KIT_ITEMS.length, activeItem, select, "kit");
+  const ghostStep = (i: number) => !tried && i === 0 && setActiveItem(1);
 
   return (
-    <section className="mx-2 sm:mx-3 my-12 sm:my-16">
+    <section id="kit" className="mx-2 sm:mx-3 my-12 sm:my-16">
       <div className="v2-sheet max-w-[1296px] mx-auto border border-[#e8ecec] p-6 sm:p-12 lg:p-16">
         {/* Section Heading */}
         <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-          <p className="vf-section-label uppercase tracking-wider mb-2 text-[#515a63]">
-            Your print kit
+          <p className="vf-section-label uppercase tracking-wider mb-2 text-[#515a63] flex items-center justify-center gap-3">
+            Your print kit <InteractiveTag />
           </p>
           <h2 className="heading-h2 font-display text-[#1a1e23]">
             Four print-ready files. Print them anywhere.
@@ -82,14 +93,21 @@ export function HardwareShowcase() {
         </div>
 
         {/* 3-Column Tab Selector */}
-        <div className="grid grid-cols-2 md:grid-cols-4 rounded-xl border border-[#e8ecec] bg-[#fcfcfc] overflow-hidden divide-x divide-y md:divide-y-0 divide-[#e8ecec] mb-8">
+        <div className="relative mb-8">
+        <div
+          ref={tabsRef}
+          {...listProps}
+          aria-label="Print kit items"
+          className="grid grid-cols-2 md:grid-cols-4 rounded-xl border border-[#e8ecec] bg-[#fcfcfc] overflow-hidden divide-x divide-y md:divide-y-0 divide-[#e8ecec]"
+        >
           {KIT_ITEMS.map((item, idx) => {
             const isActive = activeItem === idx;
             return (
               <button
                 key={item.id}
                 type="button"
-                onClick={() => setActiveItem(idx)}
+                {...tabProps(idx)}
+                onClick={() => select(idx)}
                 className={`p-4 sm:p-5 text-left transition-colors cursor-pointer ${
                   isActive ? "bg-white" : "bg-[#fcfcfc] hover:bg-white/60"
                 }`}
@@ -113,9 +131,19 @@ export function HardwareShowcase() {
             );
           })}
         </div>
+        <div aria-hidden className="pointer-events-none absolute inset-0 hidden md:block">
+          <GhostHand play={inView && !tried} path={[{ x: "37%", y: "55%" }]} onStep={ghostStep} />
+        </div>
+        <div aria-hidden className="pointer-events-none absolute inset-0 md:hidden">
+          <GhostHand play={inView && !tried} path={[{ x: "75%", y: "28%" }]} onStep={ghostStep} />
+        </div>
+        <div className="mt-3 flex justify-center">
+          <TryHint label="Tap an item to preview it" done={tried} />
+        </div>
+        </div>
 
         {/* Print asset visual & specs */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-[#f8fafc] rounded-2xl border border-[#e8ecec] p-6 sm:p-10">
+        <div {...panelProps} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-[#f8fafc] rounded-2xl border border-[#e8ecec] p-6 sm:p-10">
           {/* Visual Showcase (Left 7 cols) */}
           <div className="lg:col-span-7 relative aspect-[16/10] rounded-xl overflow-hidden border border-[#e8ecec] bg-[#1a1e23] flex items-center justify-center">
             {/* Shop photo background */}

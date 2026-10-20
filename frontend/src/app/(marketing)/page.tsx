@@ -14,9 +14,11 @@ import { EditorialRail } from "@/components/marketing/EditorialRail";
 import { FAQSection } from "@/components/marketing/FAQSection";
 import { FinalCTA } from "@/components/marketing/FinalCTA";
 import { Footer } from "@/components/chrome/Footer";
+import { PlaygroundProvider, PlaygroundTracker } from "@/components/marketing/interact";
 
 export default function Home() {
   return (
+    <PlaygroundProvider>
     <div className="min-h-screen flex flex-col bg-[#f2f7f7] text-[#1a1e23] selection:bg-[#397dff]/15 selection:text-[#1a1e23]">
       {/* 1. Top Announcement Bar */}
       <PromoBar />
@@ -63,11 +65,17 @@ export default function Home() {
         <FAQSection />
 
         {/* 15. Pre-Footer Conversion Call-to-Action Sheet */}
-        <FinalCTA />
+        <div id="final-cta">
+          <FinalCTA />
+        </div>
       </main>
 
       {/* 16. Dark Footer Sheet */}
       <Footer />
+
+      {/* Checklist of the live demos on this page */}
+      <PlaygroundTracker />
     </div>
+    </PlaygroundProvider>
   );
 }

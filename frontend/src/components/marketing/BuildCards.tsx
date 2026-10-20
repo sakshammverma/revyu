@@ -10,6 +10,7 @@ import { TagChips } from "@/components/flow/TagChips";
 import { assembleDraft } from "@/lib/flow/draft";
 import { getDemoVertical } from "@/lib/marketing/demo";
 import { StatTile } from "@/components/ui/Card";
+import { InteractiveTag, TryHint, usePlayground, usePrefersReducedMotion } from "./interact";
 import { PhoneMockup } from "./PhoneMockup";
 
 const DEMO = getDemoVertical("general");
@@ -20,12 +21,12 @@ const STAGE_MS = 3800;
 function useStages(count: number) {
   const [stage, setStage] = useState(0);
   const [paused, setPaused] = useState(false);
+  const reduced = usePrefersReducedMotion();
   useEffect(() => {
-    if (paused) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (paused || reduced) return;
     const t = setInterval(() => setStage((s) => (s + 1) % count), STAGE_MS);
     return () => clearInterval(t);
-  }, [paused, count]);
+  }, [paused, reduced, count]);
   return { stage, setStage, paused, setPaused };
 }
 
@@ -129,8 +130,13 @@ function Card({
                 aria-label={`Show screen ${i + 1} of ${stages}`}
                 aria-current={stage === i}
                 onClick={() => onStage(i)}
-                className={`h-2 rounded-full transition-all cursor-pointer ${stage === i ? "w-6 bg-white" : "w-2 bg-white/50"}`}
-              />
+                className="group/dot flex h-6 cursor-pointer items-center px-0.5"
+              >
+                <span
+                  aria-hidden
+                  className={`block h-2 rounded-full transition-all group-hover/dot:bg-white ${stage === i ? "w-6 bg-white" : "w-2 bg-white/50"}`}
+                />
+              </button>
             ))}
           </div>
         </div>
@@ -157,6 +163,11 @@ export function BuildCards() {
   const c1 = useStages(3);
   const c2 = useStages(3);
   const c3 = useStages(3);
+  const { tried, markTried } = usePlayground("rate");
+  const stageTo = (c: { setStage: (s: number) => void }) => (s: number) => {
+    markTried();
+    c.setStage(s);
+  };
 
   const [rating, setRating] = useState<number | null>(5);
   const [selected, setSelected] = useState<Set<string>>(new Set(TAGS.slice(0, 3).map((t) => t.id)));
@@ -170,12 +181,14 @@ export function BuildCards() {
   const low = rating !== null && rating <= 3;
 
   function rate(v: number) {
+    markTried();
     setRating(v);
     c1.setPaused(true);
     c1.setStage(1);
   }
 
   function toggle(id: string) {
+    markTried();
     const next = new Set(selected);
     if (next.has(id)) next.delete(id);
     else next.add(id);
@@ -183,6 +196,7 @@ export function BuildCards() {
   }
 
   function copy() {
+    markTried();
     navigator.clipboard?.writeText(draft);
     c2.setStage(1);
   }
@@ -204,16 +218,20 @@ export function BuildCards() {
   ];
 
   return (
-    <section className="max-w-[1296px] mx-auto px-4 sm:px-8 pt-16 sm:pt-24 pb-6 sm:pb-10">
+    <section id="build" className="max-w-[1296px] mx-auto px-4 sm:px-8 pt-16 sm:pt-24 pb-6 sm:pb-10">
       <div className="max-w-3xl mb-12">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#e7f5fd] border border-[#397dff]/20 text-[#397dff] text-xs font-semibold uppercase tracking-wider mb-3">
           <span>● The product, screen by screen</span>
         </div>
+        <InteractiveTag className="ml-3 align-top" />
         <h2 className="heading-h2 font-display text-[#1a1e23]">Three screens. Scan, tap, paste.</h2>
         <p className="mt-3 text-base sm:text-lg text-[#6e797b] leading-relaxed">
           These are the real screens: what your customer sees on their own phone, what they paste into Google, and what you see
           afterwards. Tap the stars and chips. The draft is built from exactly what you select.
         </p>
+        <div className="mt-4">
+          <TryHint label="Tap a star or chip, it's the real flow" done={tried} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-start">
@@ -224,7 +242,7 @@ export function BuildCards() {
           caption={cap1[c1.stage]}
           stages={3}
           stage={c1.stage}
-          onStage={(s) => c1.setStage(s)}
+          onStage={stageTo(c1)}
           num="01"
           title="Scan, rate, tap."
           body="The customer scans the QR on a receipt, card or counter standee with their own camera, picks a star rating, and taps what stood out."
@@ -296,7 +314,7 @@ export function BuildCards() {
           caption={cap2[c2.stage]}
           stages={3}
           stage={c2.stage}
-          onStage={(s) => c2.setStage(s)}
+          onStage={stageTo(c2)}
           num="02"
           title="Edit, copy, paste."
           body="The draft is built only from what they tapped, sits in an editable box, and says so. They copy it and paste it on Google. Google doesn't let anyone pre-fill a review, so that step is real."
@@ -375,7 +393,7 @@ export function BuildCards() {
           caption={cap3[c3.stage]}
           stages={3}
           stage={c3.stage}
-          onStage={(s) => c3.setStage(s)}
+          onStage={stageTo(c3)}
           num="03"
           title="See what happened."
           body="Log in with a one-time email code. See scans, completed flows, private feedback, and your Google rating against the day you started."

@@ -236,7 +236,7 @@ export function ThreeEngineLogo() {
 
   return (
     <div
-      className="relative w-44 h-44 sm:w-48 sm:h-48 mx-auto -mb-1 flex items-center justify-center cursor-pointer select-none group"
+      className="relative w-44 h-44 sm:w-48 sm:h-48 mx-auto -mb-1 flex items-center justify-center select-none group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
