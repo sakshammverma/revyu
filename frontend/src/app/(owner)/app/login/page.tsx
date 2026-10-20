@@ -94,7 +94,7 @@ function LoginForm() {
     <main className="min-h-screen flex items-center justify-center px-4 py-10 bg-bg">
       <div className="v2-sheet border border-line max-w-sm w-full p-6 sm:p-8">
         <Link href="/" className="text-ink flex mb-6 pb-5 border-b border-line">
-          <Logo className="text-xl" markClassName="w-5 h-5 text-accent" />
+          <Logo className="text-xl" markClassName="w-7 h-7" />
         </Link>
 
         {step === "email" ? (

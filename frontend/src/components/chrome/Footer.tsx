@@ -21,7 +21,7 @@ export function Footer() {
               <Link href="/" className="inline-flex items-center gap-2 mb-4 group">
                 <Logo
                   className="text-2xl text-white"
-                  markClassName="w-6 h-6 text-[#397dff] group-hover:text-white transition-colors"
+                  markClassName="w-8 h-8 transition-transform group-hover:scale-105"
                 />
               </Link>
 
@@ -59,7 +59,7 @@ export function Footer() {
                 </button>
               </form>
               <p className="text-[11px] text-[#9aa1a3] mt-2">
-                15 days free · then <Price plan="monthly" />/month flat · cancel anytime
+                15 days free · then <Price plan="monthly" suffix="/month flat" fallback="one flat monthly price" /> · cancel anytime
               </p>
             </div>
           </div>

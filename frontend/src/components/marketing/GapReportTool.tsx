@@ -204,7 +204,7 @@ function EmailCapture({ placeId, businessName }: { placeId: string; businessName
         <div>
           <h2 className="font-display text-xl text-ink">Close the gap</h2>
           <p className="text-sm text-text-2 mt-1">
-            A QR on your receipt helps every happy customer write a Google review in their own words. <Price plan="monthly" />/month, 15-day free trial.
+            A QR on your receipt helps every happy customer write a Google review in their own words. <Price plan="monthly" suffix="/month, " fallback="" />15-day free trial.
           </p>
           <Link
             href={`/signup?place=${encodeURIComponent(placeId)}&name=${encodeURIComponent(businessName)}`}

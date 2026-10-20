@@ -53,7 +53,7 @@ export function Header() {
           >
             <Logo
               className="text-lg text-[#1a1e23]"
-              markClassName="w-5 h-5 group-hover:text-[#397dff] transition-colors"
+              markClassName="w-7 h-7 transition-transform group-hover:scale-105"
             />
           </Link>
 
@@ -274,7 +274,7 @@ export function Header() {
                     className="flex items-center gap-2 p-2 rounded hover:bg-[#f2f7f7] hover:text-[#1a1e23] transition-colors"
                   >
                     <span className="text-[#397dff]">🏷️</span>
-                    <span><Price plan="monthly" />/month, flat</span>
+                    <span><Price plan="monthly" suffix="/month, flat" fallback="One flat monthly price" /></span>
                   </Link>
                   <Link
                     href="/signup"

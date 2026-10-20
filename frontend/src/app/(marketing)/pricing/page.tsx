@@ -107,7 +107,7 @@ export default function PricingPage() {
                 <span className="text-sm text-[#6e797b] font-medium">/ year</span>
               </div>
               <p className="mt-2 text-xs sm:text-sm text-[#6e797b]">
-                Works out to about <Price plan="annualPerMonth" />/month, versus <Price plan="monthly" /> paying monthly.
+                Works out to about <Price plan="annualPerMonth" suffix="/month" fallback="a lower monthly rate" />, versus <Price plan="monthly" fallback="the monthly price" /> paying monthly.
               </p>
 
               <div className="mt-8 pt-6 border-t border-[#e8ecec]">

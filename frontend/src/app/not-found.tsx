@@ -9,7 +9,7 @@ export default function NotFound() {
   return (
     <main className="min-h-screen bg-bg flex items-center justify-center px-4 py-10">
       <div className="v2-sheet border border-line w-full max-w-md p-8 text-center">
-        <Logo className="text-lg text-ink" markClassName="w-5 h-5 text-accent" />
+        <Logo className="text-lg text-ink" markClassName="w-7 h-7" />
         <p className="text-xs font-semibold uppercase tracking-wider text-text-2 mt-4">404</p>
         <h1 className="font-display text-2xl text-ink mt-2">We can&rsquo;t find that page</h1>
         <p className="text-sm text-text-2 mt-2">The link may be old or mistyped.</p>

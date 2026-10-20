@@ -20,7 +20,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen bg-bg">
       <nav aria-label="Admin" className="bg-sheet border-b border-line">
         <div className="max-w-5xl mx-auto px-3 sm:px-8 h-14 flex items-center gap-1 overflow-x-auto">
-          <Logo label="Revyu Admin" className="text-ink mr-3 shrink-0" markClassName="w-4 h-4 text-accent" />
+          <Logo label="Revyu Admin" className="text-ink mr-3 shrink-0" markClassName="w-6 h-6" />
           {LINKS.map((l) => (
             <Link
               key={l.href}

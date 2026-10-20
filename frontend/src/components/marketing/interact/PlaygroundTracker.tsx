@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { DEMOS, usePlayground } from "./Playground";
 import { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 
-const DISMISS_KEY = "revyu.playground.dismissed";
+const MIN_KEY = "revyu.playground.minimized";
 // Sections where the tracker would only be noise (the conversion zone).
 const HIDE_ON = ["faq", "final-cta"];
 
@@ -15,9 +15,9 @@ export function PlaygroundTracker() {
   const reduced = usePrefersReducedMotion();
   const [open, setOpen] = useState(false);
   // Only read after hydration matters: the tracker renders null until the visitor scrolls.
-  const [dismissed, setDismissed] = useState(() => {
+  const [minimized, setMinimizedState] = useState(() => {
     try {
-      return typeof window !== "undefined" && sessionStorage.getItem(DISMISS_KEY) === "1";
+      return typeof window !== "undefined" && sessionStorage.getItem(MIN_KEY) === "1";
     } catch {
       return false;
     }
@@ -45,12 +45,14 @@ export function PlaygroundTracker() {
 
   const count = DEMOS.filter((d) => all.has(d.id)).length;
   const complete = count === DEMOS.length;
-  if (dismissed || !pastHero || inConversion) return null;
+  if (!pastHero || inConversion) return null;
 
-  const dismiss = () => {
-    setDismissed(true);
+  // × only shrinks the tracker to its progress ring; the ring brings it back.
+  const setMinimized = (v: boolean) => {
+    setMinimizedState(v);
+    if (v) setOpen(false);
     try {
-      sessionStorage.setItem(DISMISS_KEY, "1");
+      sessionStorage.setItem(MIN_KEY, v ? "1" : "0");
     } catch {}
   };
   const jump = (anchor: string) => {
@@ -63,7 +65,7 @@ export function PlaygroundTracker() {
 
   return (
     <div
-      className="fixed left-3 z-40 flex flex-col items-start gap-2 sm:left-5"
+      className="fixed right-3 z-40 flex flex-col items-end gap-2 sm:right-5"
       style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
     >
       {open && (
@@ -117,11 +119,16 @@ export function PlaygroundTracker() {
       <div className="flex items-center gap-1.5">
         <button
           type="button"
-          onClick={() => setOpen((o) => !o)}
+          onClick={() => {
+            if (minimized) {
+              setMinimized(false);
+              setOpen(true);
+            } else setOpen((o) => !o);
+          }}
           aria-expanded={open}
           aria-controls="playground-panel"
-          aria-label={`Live demos, ${count} of ${DEMOS.length} tried`}
-          className="flex h-11 cursor-pointer items-center gap-2.5 rounded-full border border-line bg-sheet pl-1.5 pr-1.5 text-sm font-semibold text-ink shadow-v2-elevated hover:border-accent sm:pr-4"
+          aria-label={`${minimized ? "Show live demos" : "Live demos"}, ${count} of ${DEMOS.length} tried`}
+          className={`flex h-11 cursor-pointer items-center gap-2.5 rounded-full border border-line bg-sheet pl-1.5 pr-1.5 text-sm font-semibold text-ink shadow-v2-elevated hover:border-accent ${minimized ? "" : "sm:pr-4"}`}
         >
           <span className="relative flex h-8 w-8 items-center justify-center">
             <svg aria-hidden width="34" height="34" viewBox="0 0 34 34" className="absolute -rotate-90">
@@ -143,16 +150,18 @@ export function PlaygroundTracker() {
               {count}/{DEMOS.length}
             </span>
           </span>
-          <span className="hidden sm:inline">{complete ? "All demos tried" : "Try the live demos"}</span>
+          {!minimized && <span className="hidden sm:inline">{complete ? "All demos tried" : "Try the live demos"}</span>}
         </button>
-        <button
-          type="button"
-          onClick={dismiss}
-          aria-label="Dismiss demo checklist"
-          className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-text-2 hover:bg-sheet hover:text-ink"
-        >
-          ×
-        </button>
+        {!minimized && (
+          <button
+            type="button"
+            onClick={() => setMinimized(true)}
+            aria-label="Minimize demo checklist"
+            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-text-2 hover:bg-sheet hover:text-ink"
+          >
+            ×
+          </button>
+        )}
       </div>
     </div>
   );

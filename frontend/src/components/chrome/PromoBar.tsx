@@ -21,7 +21,7 @@ export function PromoBar() {
 
       {/* Center Row Content */}
       <div className="relative z-10 mx-auto flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
-        <span className="font-semibold text-white tracking-tight"><Price plan="monthly" />/month, flat</span>
+        <span className="font-semibold text-white tracking-tight"><Price plan="monthly" suffix="/month, flat" fallback="One flat monthly price" /></span>
         <span className="text-[#9aa1a3] hidden sm:inline">·</span>
         <span className="text-[#9aa1a3] hidden sm:inline">
           Ask every customer before the shop next door does · 15 days free

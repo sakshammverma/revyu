@@ -93,10 +93,21 @@ const EMPTY: PricingView = {
 export const usePricing = (): PricingView => useContext(PricingContext) ?? EMPTY;
 
 /** Inline price for copy: `<Price plan="monthly" />`. Reserves its width until loaded so text doesn't jump. */
-export function Price({ plan }: { plan: "monthly" | "annual" | "annualPerMonth" | "saving" }) {
+export function Price({
+  plan,
+  suffix,
+  fallback,
+}: {
+  plan: "monthly" | "annual" | "annualPerMonth" | "saving";
+  /** Text that belongs to the price ("/month, flat"); dropped with it so a failed load never shows "-/month". */
+  suffix?: string;
+  /** Shown instead of price + suffix if the price could not be loaded. */
+  fallback?: React.ReactNode;
+}) {
   const p = usePricing();
   const text = p[plan];
-  if (text) return <>{text}</>;
-  if (!p.loading) return <>-</>; // load failed: no price rather than a guessed one
+  if (text) return <>{text}{suffix}</>;
+  // load failed: no price rather than a guessed one
+  if (!p.loading) return <>{fallback !== undefined ? fallback : suffix ? null : "-"}</>;
   return <span aria-hidden className="inline-block w-[3ch] animate-pulse rounded bg-line align-middle">&nbsp;</span>;
 }
