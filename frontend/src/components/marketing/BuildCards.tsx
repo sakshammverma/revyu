@@ -1,614 +1,458 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 
+import { FlowButton } from "@/components/flow/Button";
+import { GOOGLE_LABEL, PRIVATE_LABEL } from "@/components/flow/CustomerFlow";
+import { StarRating } from "@/components/flow/StarRating";
+import { TagChips } from "@/components/flow/TagChips";
 import { assembleDraft } from "@/lib/flow/draft";
 import { getDemoVertical } from "@/lib/marketing/demo";
+import { StatTile } from "@/components/ui/Card";
+import { PhoneMockup } from "./PhoneMockup";
 
 const DEMO = getDemoVertical("general");
-const ALL_TAGS = DEMO.tags.slice(0, 6).map((t) => t.label);
+const TAGS = DEMO.tags.slice(0, 6).map((t, i) => ({ ...t, sort_order: i }));
+const STAGE_MS = 3800;
+
+// Autoplay that pauses on hover/focus/interaction and never runs under reduced motion.
+function useStages(count: number) {
+  const [stage, setStage] = useState(0);
+  const [paused, setPaused] = useState(false);
+  useEffect(() => {
+    if (paused) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const t = setInterval(() => setStage((s) => (s + 1) % count), STAGE_MS);
+    return () => clearInterval(t);
+  }, [paused, count]);
+  return { stage, setStage, paused, setPaused };
+}
+
+function Tap({ className = "" }: { className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={`pointer-events-none absolute w-12 h-12 rounded-full bg-accent/30 border-2 border-accent/60 animate-[tapPulse_1.2s_ease-in-out_infinite] ${className}`}
+    />
+  );
+}
+
+function BrandHeader({ step }: { step?: number }) {
+  return (
+    <>
+      <div className="flex items-center justify-between gap-3 pb-3 mb-4 border-b border-line">
+        <div className="flex items-center gap-2 min-w-0">
+          <span aria-hidden className="w-2 h-2 rounded-full bg-accent shrink-0" />
+          <span className="text-sm font-semibold text-ink truncate">{DEMO.exampleBusiness}</span>
+        </div>
+        {step && <span className="text-xs text-text-2">Step {step} of 3</span>}
+      </div>
+      {step && (
+        <div aria-hidden className="flex gap-1.5 -mt-1 mb-4">
+          {[1, 2, 3].map((i) => (
+            <span key={i} className={`h-1 flex-1 rounded-full ${i <= step ? "bg-accent" : "bg-line"}`} />
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+// Same two always-available options as the live flow (CR-3).
+function StickyBar() {
+  return (
+    <div className="absolute bottom-0 inset-x-0 bg-sheet/95 border-t border-line px-3 pt-3 pb-2 flex flex-col gap-1">
+      <FlowButton variant="outline" tabIndex={-1}>{GOOGLE_LABEL}</FlowButton>
+      <span className="min-h-[40px] flex items-center justify-center text-sm font-semibold text-accent-hover underline underline-offset-2">
+        {PRIVATE_LABEL}
+      </span>
+    </div>
+  );
+}
+
+function Heading({ title, sub }: { title: string; sub?: string }) {
+  return (
+    <div>
+      <h3 className="font-display text-[26px] leading-tight tracking-tight text-ink">{title}</h3>
+      {sub && <p className="text-sm text-text-2 mt-1.5">{sub}</p>}
+    </div>
+  );
+}
+
+function Card({
+  photo,
+  pauseSet,
+  caption,
+  stages,
+  stage,
+  onStage,
+  phone,
+  num,
+  title,
+  body,
+  chips,
+}: {
+  photo: string;
+  pauseSet: (v: boolean) => void;
+  caption: string;
+  stages: number;
+  stage: number;
+  onStage: (s: number) => void;
+  phone: React.ReactNode;
+  num: string;
+  title: string;
+  body: string;
+  chips: string[];
+}) {
+  return (
+    <div className="flex flex-col group">
+      <div
+        className="relative rounded-2xl overflow-hidden shadow-v2-rest border border-[#e8ecec] py-6 flex flex-col items-center gap-4"
+        onMouseEnter={() => pauseSet(true)}
+        onMouseLeave={() => pauseSet(false)}
+        onFocus={() => pauseSet(true)}
+        onBlur={() => pauseSet(false)}
+      >
+        <Image src={photo} alt="" fill className="object-cover" />
+        <div className="absolute inset-0 bg-[#1a1e23]/45 backdrop-blur-[2px]" />
+        <div className="relative z-10">{phone}</div>
+        <div className="relative z-10 flex flex-col items-center gap-2 px-4">
+          <p className="text-center text-sm font-medium text-white min-h-[40px] max-w-[270px]" aria-live="polite">
+            {caption}
+          </p>
+          <div className="flex gap-2">
+            {Array.from({ length: stages }, (_, i) => (
+              <button
+                key={i}
+                type="button"
+                aria-label={`Show screen ${i + 1} of ${stages}`}
+                aria-current={stage === i}
+                onClick={() => onStage(i)}
+                className={`h-2 rounded-full transition-all cursor-pointer ${stage === i ? "w-6 bg-white" : "w-2 bg-white/50"}`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="pt-4 flex items-start gap-2.5">
+        <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-[#e8ecec] text-[#1a1e23] shrink-0 mt-0.5">{num}</span>
+        <div>
+          <p className="text-xs sm:text-sm text-[#515a63] leading-relaxed">
+            <strong className="text-[#1a1e23] font-semibold">{title} </strong>
+            {body}
+          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 text-[11px] text-[#397dff] font-medium">
+            {chips.map((c, i) => (
+              <span key={c}>{i > 0 && <span className="mr-2">•</span>}✓ {c}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function BuildCards() {
-  // Timeline loops for Card 1, Card 2, and Card 3
-  const [stepCard1, setStepCard1] = useState(0); // 0: Star rating, 1: Tag matrix, 2: Ready for draft
-  const [stepCard2, setStepCard2] = useState(0); // 0: Editable draft, 1: Copy tapped, 2: Google handoff
-  const [stepCard3, setStepCard3] = useState(0); // 0: Weekly digest, 1: Dashboard readout
+  const c1 = useStages(3);
+  const c2 = useStages(3);
+  const c3 = useStages(3);
 
-  // Hover states to pause auto-cycling for user inspection
-  const [paused1, setPaused1] = useState(false);
-  const [paused2, setPaused2] = useState(false);
-  const [paused3, setPaused3] = useState(false);
+  const [rating, setRating] = useState<number | null>(5);
+  const [selected, setSelected] = useState<Set<string>>(new Set(TAGS.slice(0, 3).map((t) => t.id)));
 
-  // Interactive state for Card 1 (Visitors can toggle tags!)
-  const [selectedRating, setSelectedRating] = useState(5);
-  const [activeTags, setActiveTags] = useState<string[]>([
-    "friendly staff",
-    "great service",
-    "quick and easy",
-  ]);
-
-
-  // Same assembler as the live customer flow — zero tags gives an empty draft (CR-1).
+  // Same assembler as the live flow. Zero tags gives an empty draft (CR-1).
   const draft = assembleDraft(
-    DEMO.tags.filter((t) => activeTags.includes(t.label)),
+    TAGS.filter((t) => selected.has(t.id)),
     { businessName: DEMO.exampleBusiness, vertical: DEMO.key },
     "buildcards-demo"
   );
+  const low = rating !== null && rating <= 3;
 
-  function toggleTag(tag: string) {
-    if (activeTags.includes(tag)) {
-      setActiveTags(activeTags.filter((t) => t !== tag));
-    } else {
-      setActiveTags([...activeTags, tag]);
-    }
+  function rate(v: number) {
+    setRating(v);
+    c1.setPaused(true);
+    c1.setStage(1);
   }
 
-  // Card 1 Video Loop: cycles every 3.3s through 3 states if not hovered
-  useEffect(() => {
-    if (paused1) return;
-    const timer = setInterval(() => {
-      setStepCard1((prev) => (prev + 1) % 3);
-    }, 3300);
-    return () => clearInterval(timer);
-  }, [paused1]);
+  function toggle(id: string) {
+    const next = new Set(selected);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
+    setSelected(next);
+  }
 
-  // Card 2 Video Loop: cycles every 3.3s through 3 states if not hovered
-  useEffect(() => {
-    if (paused2) return;
-    const timer = setInterval(() => {
-      setStepCard2((prev) => (prev + 1) % 3);
-    }, 3300);
-    return () => clearInterval(timer);
-  }, [paused2]);
-
-  // Card 3 Video Loop: cycles every 3.3s through 2 states if not hovered
-  useEffect(() => {
-    if (paused3) return;
-    const timer = setInterval(() => {
-      setStepCard3((prev) => (prev + 1) % 2);
-    }, 3300);
-    return () => clearInterval(timer);
-  }, [paused3]);
-
-  function handleCopyCard2() {
+  function copy() {
     navigator.clipboard?.writeText(draft);
-    setStepCard2(1);
-    setTimeout(() => setStepCard2(2), 1200);
+    c2.setStage(1);
   }
+
+  const cap1 = [
+    "Customer points their camera at your QR. No app to install.",
+    low ? "At 1–3 stars they can write to you privately. Google is on the same screen." : "They tap a star. That's the only required step.",
+    "They tap what stood out, or skip. Google stays one tap away.",
+  ];
+  const cap2 = [
+    "Their draft is built only from what they tapped. They can edit it.",
+    "One tap copies it and sends them to your Google page.",
+    "They paste and post from their own Google account. Google doesn't allow pre-filled reviews.",
+  ];
+  const cap3 = [
+    "You get an email the moment someone leaves private feedback.",
+    "Your dashboard: how many scanned and how many finished.",
+    "Read the message, call or WhatsApp them, mark it resolved.",
+  ];
 
   return (
     <section className="max-w-[1296px] mx-auto px-4 sm:px-8 pt-16 sm:pt-24 pb-6 sm:pb-10">
-      {/* Section Header */}
       <div className="max-w-3xl mb-12">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#e7f5fd] border border-[#397dff]/20 text-[#397dff] text-xs font-semibold uppercase tracking-wider mb-3">
           <span>● The product, screen by screen</span>
         </div>
-        <h2 className="heading-h2 font-display text-[#1a1e23]">
-          Three screens. Scan, tap, paste.
-        </h2>
+        <h2 className="heading-h2 font-display text-[#1a1e23]">Three screens. Scan, tap, paste.</h2>
         <p className="mt-3 text-base sm:text-lg text-[#6e797b] leading-relaxed">
-          What your customer sees on their own phone, what they paste into Google, and what you see afterwards. Tap the chips — the draft is built from exactly what you select.
+          These are the real screens: what your customer sees on their own phone, what they paste into Google, and what you see
+          afterwards. Tap the stars and chips. The draft is built from exactly what you select.
         </p>
       </div>
 
-      {/* 3-Up Interactive Video Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
-        {/* CARD 1: SCREEN 1 — THE IN-STORE TOUCHPOINT (SCAN & TAG MATRIX) */}
-        <div className="flex flex-col justify-between group">
-          <div
-            className="relative aspect-square rounded-2xl overflow-hidden shadow-v2-rest border border-[#e8ecec] p-3 sm:p-4 flex items-center justify-center"
-            onMouseEnter={() => setPaused1(true)}
-            onMouseLeave={() => setPaused1(false)}
-          >
-            {/* Shop photo background with frost overlay */}
-            <Image
-              src="/images/shop-supermart-front.jpg"
-              alt=""
-              fill
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-[#1a1e23]/35 backdrop-blur-[2px]" />
-
-            {/* Smartphone Enclosure */}
-            <div className="relative z-10 w-full max-w-[270px] bg-[#1a1e23]/80 p-2 rounded-[30px] shadow-2xl border border-white/30 backdrop-blur-md">
-              {/* Dynamic Island / Top Speaker Notch */}
-              <div className="w-16 h-3 bg-[#111315] rounded-full mx-auto mb-1.5 flex items-center justify-center">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#1a1e23] border border-white/20" />
-              </div>
-
-              {/* Screen Interior */}
-              <div className="bg-white rounded-[22px] p-3 flex flex-col justify-between min-h-[300px] overflow-hidden shadow-inner">
-                {/* Status Bar */}
-                <div className="flex items-center justify-between text-[9px] text-[#6e797b] font-mono pb-1 border-b border-[#f0f2f2]">
-                  <span>9:41</span>
-                  <div className="flex items-center gap-1">
-                    <span>5G</span>
-                    <span>100%</span>
-                  </div>
-                </div>
-
-                {/* Video Timeline Progress Bar */}
-                <div className="w-full h-1 bg-[#f2f7f7] rounded-full overflow-hidden mt-1.5 mb-1.5">
-                  <div
-                    key={`c1-${stepCard1}-${paused1}`}
-                    className={`h-full bg-[#397dff] rounded-full ${paused1 ? "w-full" : "animate-[tabFill_3.3s_linear]"}`}
-                  />
-                </div>
-
-                {/* Outlet Header */}
-                <div className="flex items-center justify-between pb-1.5 border-b border-[#e8ecec]">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-[#449127] animate-pulse" />
-                    <span className="text-[11px] font-semibold text-[#1a1e23]">{DEMO.exampleBusiness}</span>
-                  </div>
-                  <span className="text-[8px] font-medium text-[#397dff] bg-[#397dff]/10 px-1.5 py-0.5 rounded-full">
-                    {stepCard1 === 0 ? "01: Rating" : stepCard1 === 1 ? "02: Tags" : "03: Draft"}
-                  </span>
-                </div>
-
-                {/* Dynamic Screen Content */}
-                <div className="my-auto py-1">
-                  {stepCard1 === 0 && (
-                    /* Stage 0: 5-Star Selection Animation */
-                    <div className="text-center py-1">
-                      <span className="inline-block px-2 py-0.5 rounded-full bg-[#f2f7f7] text-[8px] font-medium text-[#515a63] mb-1">
-                        📍 Scanned from receipt QR
-                      </span>
-                      <p className="text-[11px] font-bold text-[#1a1e23]">
-                        How was your visit today?
-                      </p>
-
-                      {/* Interactive glowing gold stars */}
-                      <div className="flex items-center justify-center gap-1.5 my-2 text-xl cursor-pointer">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            type="button"
-                            onClick={() => setSelectedRating(star)}
-                            className={`transition-transform hover:scale-125 ${
-                              star <= selectedRating ? "text-[#f59e0b]" : "text-[#d1d5db]"
-                            }`}
-                          >
-                            ★
-                          </button>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-start">
+        {/* 1. Customer: scan, rate, tag */}
+        <Card
+          photo="/images/shop-supermart-front.jpg"
+          pauseSet={c1.setPaused}
+          caption={cap1[c1.stage]}
+          stages={3}
+          stage={c1.stage}
+          onStage={(s) => c1.setStage(s)}
+          num="01"
+          title="Scan, rate, tap."
+          body="The customer scans the QR on a receipt, card or counter standee with their own camera, picks a star rating, and taps what stood out."
+          chips={["No app, no login", "Zero tags is allowed"]}
+          phone={
+            <PhoneMockup chrome="browser">
+              <div className="h-full relative">
+                {c1.stage === 0 && (
+                  <div className="h-full bg-[#14181c] relative flex flex-col items-center justify-center">
+                    <div className="w-[210px] bg-white rounded-2xl p-4 text-center shadow-xl">
+                      <p className="text-[13px] font-semibold text-ink">Loved it? Tell us.</p>
+                      <div aria-hidden className="mt-2 mx-auto w-[120px] h-[120px] grid grid-cols-5 grid-rows-5 gap-[3px]">
+                        {Array.from({ length: 25 }, (_, i) => (
+                          <span key={i} className={[0, 1, 2, 4, 5, 6, 10, 12, 14, 18, 20, 22, 23, 24, 8, 16].includes(i) ? "bg-ink rounded-[1px]" : "bg-transparent"} />
                         ))}
                       </div>
+                      <p className="mt-2 text-[11px] text-text-2">Scan with your camera</p>
+                    </div>
+                    <div className="absolute bottom-16 inset-x-0 flex justify-center">
+                      <span className="px-4 py-2 rounded-full bg-[#ffd60a] text-[#1a1e23] text-[14px] font-semibold shadow-lg">
+                        revyu.in · Open {DEMO.exampleBusiness}
+                      </span>
+                    </div>
+                  </div>
+                )}
+                {c1.stage === 1 && (
+                  <div className="h-full p-5 pb-36 overflow-hidden bg-sheet">
+                    <BrandHeader step={1} />
+                    {low ? (
+                      <div className="flex flex-col gap-3">
+                        <Heading title="Sorry that didn’t go well." sub="Tell them directly. The owner sees private feedback today." />
+                        <div className="rounded-xl border border-line-strong bg-white p-3 text-[15px] text-text-muted min-h-[84px]">What went wrong with your visit?</div>
+                        <FlowButton tabIndex={-1}>Send privately to the owner</FlowButton>
+                        <p className="text-center text-xs font-medium tracking-wider text-text-2 uppercase">or</p>
+                        <FlowButton variant="outline" tabIndex={-1}>{GOOGLE_LABEL}</FlowButton>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col gap-5 text-center">
+                        <Heading title="How was your visit?" sub="Tap a star to rate your experience" />
+                        <div className="relative py-3 px-2 bg-paper-subtle/50 rounded-2xl border border-line">
+                          <StarRating value={rating} onChange={rate} />
+                          {!c1.paused && <Tap className="right-2 top-4" />}
+                        </div>
+                      </div>
+                    )}
+                    {!low && <StickyBar />}
+                  </div>
+                )}
+                {c1.stage === 2 && (
+                  <div className="h-full p-5 pb-36 overflow-hidden bg-sheet">
+                    <BrandHeader step={2} />
+                    <div className="flex flex-col gap-4">
+                      <Heading title="What stood out?" sub="Tap whatever applies, or skip to continue." />
+                      <TagChips tags={TAGS} selected={selected} onToggle={toggle} />
+                      <FlowButton tabIndex={-1} onClick={() => c2.setStage(0)}>Assemble my review →</FlowButton>
+                    </div>
+                    <StickyBar />
+                  </div>
+                )}
+              </div>
+            </PhoneMockup>
+          }
+        />
 
-                      <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#ecfdf5] border border-[#a7f3d0] text-[8px] font-semibold text-[#065f46]">
-                        ✓ {selectedRating}.0 Stars Selected
+        {/* 2. Customer: draft, copy, paste on Google */}
+        <Card
+          photo="/images/shop-supermarket-evening.jpg"
+          pauseSet={c2.setPaused}
+          caption={cap2[c2.stage]}
+          stages={3}
+          stage={c2.stage}
+          onStage={(s) => c2.setStage(s)}
+          num="02"
+          title="Edit, copy, paste."
+          body="The draft is built only from what they tapped, sits in an editable box, and says so. They copy it and paste it on Google. Google doesn't let anyone pre-fill a review, so that step is real."
+          chips={["Google link at every rating", "Never auto-posted"]}
+          phone={
+            <PhoneMockup chrome={c2.stage === 2 ? "none" : "browser"}>
+              <div className="h-full relative">
+                {c2.stage === 0 && (
+                  <div className="h-full p-5 pb-36 overflow-hidden bg-sheet">
+                    <BrandHeader step={3} />
+                    <div className="flex flex-col gap-3">
+                      <Heading title="Your review draft" />
+                      <div className="px-3.5 py-2.5 rounded-xl bg-accent-50 border border-accent/25 text-sm font-medium leading-snug text-[#1e4fae]">
+                        We’ve written this from what you selected. Edit anything. It’s your review.
+                      </div>
+                      <div className="rounded-xl border border-line-strong bg-white p-4 text-base leading-relaxed text-ink min-h-[130px]">
+                        {draft || <span className="text-text-muted">Empty. The customer can write their own.</span>}
+                      </div>
+                      <div className="relative">
+                        <FlowButton onClick={copy}>Copy &amp; Continue to Google →</FlowButton>
+                        {!c2.paused && <Tap className="right-6 -top-1" />}
                       </div>
                     </div>
-                  )}
-
-                  {stepCard1 === 1 && (
-                    /* Stage 1: Interactive Tag Matrix Tapping */
-                    <div className="py-0.5 text-center">
-                      <p className="text-[11px] font-bold text-[#1a1e23] mb-0.5">
-                        What made your visit great?
-                      </p>
-                      <p className="text-[8px] text-[#6e797b] mb-1.5">
-                        Tap whatever applies — or none
-                      </p>
-
-                      <div className="flex flex-wrap gap-1 justify-center max-h-[88px] overflow-y-auto">
-                        {ALL_TAGS.map((tag) => {
-                          const isSel = activeTags.includes(tag);
-                          return (
-                            <button
-                              key={tag}
-                              type="button"
-                              onClick={() => toggleTag(tag)}
-                              className={`px-2 py-0.5 rounded-full text-[8px] font-medium transition-all cursor-pointer ${
-                                isSel
-                                  ? "bg-[#397dff] text-white shadow-2xs scale-102"
-                                  : "bg-[#f2f7f7] text-[#515a63] hover:bg-[#e8ecec]"
-                              }`}
-                            >
-                              {isSel ? `✓ ${tag}` : `+ ${tag}`}
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      <p className="text-[8px] text-[#397dff] font-medium mt-1.5">
-                        ● {activeTags.length} selected · draft updates as you tap
-                      </p>
-                    </div>
-                  )}
-
-                  {stepCard1 === 2 && (
-                    /* Stage 2: Synthesis Handoff Preview */
-                    <div className="py-1 text-center">
-                      <div className="w-7 h-7 rounded-full bg-[#449127]/10 text-[#449127] flex items-center justify-center font-bold text-xs mx-auto mb-1">
-                        ✓
-                      </div>
-                      <p className="text-[11px] font-bold text-[#1a1e23]">
-                        Your draft
-                      </p>
-                      <div className="text-[8px] text-[#515a63] mt-1 italic px-2 bg-[#fcfcfc] p-1.5 rounded border border-[#e8ecec] leading-relaxed">
-                        {draft ? <>&ldquo;{draft}&rdquo;</> : "No tags selected — the draft stays empty."}
+                    <StickyBar />
+                  </div>
+                )}
+                {c2.stage === 1 && (
+                  <div className="h-full p-5 overflow-hidden bg-sheet flex flex-col gap-4">
+                    <BrandHeader />
+                    <div className="p-3.5 rounded-xl bg-success-50 border border-success/25 flex items-center gap-3">
+                      <span aria-hidden className="w-9 h-9 shrink-0 rounded-full bg-success text-white flex items-center justify-center font-bold">✓</span>
+                      <div>
+                        <p className="text-base font-semibold text-ink">Copied to your clipboard!</p>
+                        <p className="text-sm text-text-2">Ready to paste into Google Maps.</p>
                       </div>
                     </div>
-                  )}
-                </div>
-
-                {/* Interactive Step Navigator Pills */}
-                <div className="pt-1.5 border-t border-[#e8ecec] flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    {[0, 1, 2].map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => setStepCard1(s)}
-                        className={`w-4 h-4 rounded-full text-[8px] font-bold flex items-center justify-center transition-colors cursor-pointer ${
-                          stepCard1 === s
-                            ? "bg-[#397dff] text-white"
-                            : "bg-[#f2f7f7] text-[#6e797b] hover:bg-[#e8ecec]"
-                        }`}
-                      >
-                        {s + 1}
-                      </button>
-                    ))}
+                    <p className="text-sm text-text-2 leading-relaxed">
+                      Next step: paste your draft into Google Maps. You may need to sign in with your Google account first.
+                    </p>
+                    <FlowButton onClick={() => c2.setStage(2)}>Open Google Review Page →</FlowButton>
                   </div>
-                  <span className="text-[8px] text-[#9aa1a3]">
-                    {paused1 ? "Paused (Inspect)" : "Auto-playing 3.3s"}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Copy below card */}
-          <div className="pt-4 flex items-start gap-2.5">
-            <span className="text-base text-[#1a1e23] shrink-0 mt-0.5 font-mono text-xs px-1.5 py-0.5 rounded bg-[#e8ecec]">
-              01
-            </span>
-            <div>
-              <p className="text-xs sm:text-sm text-[#515a63] leading-relaxed">
-                <strong className="text-[#1a1e23] font-semibold">Scan, rate, tap. </strong>
-                The customer scans the QR on a receipt, card or counter standee with their own camera, picks a star rating, and taps what stood out.
-              </p>
-              <div className="mt-1 flex items-center gap-2 text-[11px] text-[#397dff] font-medium">
-                <span>✓ No app, no login</span>
-                <span>•</span>
-                <span>✓ Zero tags is allowed</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* CARD 2: SCREEN 2 — DISCLOSED DRAFT & 1-TAP GOOGLE MAPS HANDOFF */}
-        <div className="flex flex-col justify-between group">
-          <div
-            className="relative aspect-square rounded-2xl overflow-hidden shadow-v2-rest border border-[#e8ecec] p-3 sm:p-4 flex items-center justify-center"
-            onMouseEnter={() => setPaused2(true)}
-            onMouseLeave={() => setPaused2(false)}
-          >
-            {/* Shop photo background */}
-            <Image
-              src="/images/shop-supermarket-evening.jpg"
-              alt=""
-              fill
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-[#1a1e23]/35 backdrop-blur-[2px]" />
-
-            {/* Smartphone Enclosure */}
-            <div className="relative z-10 w-full max-w-[270px] bg-[#1a1e23]/80 p-2 rounded-[30px] shadow-2xl border border-white/30 backdrop-blur-md">
-              {/* Dynamic Island */}
-              <div className="w-16 h-3 bg-[#111315] rounded-full mx-auto mb-1.5 flex items-center justify-center">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#1a1e23] border border-white/20" />
-              </div>
-
-              {/* Screen Interior */}
-              <div className="bg-white rounded-[22px] p-3 flex flex-col justify-between min-h-[300px] overflow-hidden shadow-inner">
-                {/* Status Bar */}
-                <div className="flex items-center justify-between text-[9px] text-[#6e797b] font-mono pb-1 border-b border-[#f0f2f2]">
-                  <span>9:41</span>
-                  <div className="flex items-center gap-1">
-                    <span>5G</span>
-                    <span>100%</span>
-                  </div>
-                </div>
-
-                {/* Video Timeline Progress Bar */}
-                <div className="w-full h-1 bg-[#f2f7f7] rounded-full overflow-hidden mt-1.5 mb-1.5">
-                  <div
-                    key={`c2-${stepCard2}-${paused2}`}
-                    className={`h-full bg-[#397dff] rounded-full ${paused2 ? "w-full" : "animate-[tabFill_3.3s_linear]"}`}
-                  />
-                </div>
-
-                {/* Header */}
-                <div className="flex items-center justify-between pb-1.5 border-b border-[#e8ecec]">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs text-[#397dff]">✽</span>
-                    <span className="text-[11px] font-semibold text-[#1a1e23]">
-                      {stepCard2 === 2 ? "Pasting on Google" : "Editable draft"}
-                    </span>
-                  </div>
-                  <span className="text-[8px] text-[#449127] font-semibold bg-[#ecfdf5] px-1.5 py-0.5 rounded-full">
-                    Always editable
-                  </span>
-                </div>
-
-                {/* Dynamic Screen Content */}
-                <div className="my-auto py-1">
-                  {stepCard2 === 0 && (
-                    /* Stage 0: Disclosed Draft Synthesized */
-                    <div>
-                      <p className="text-[8px] text-[#515a63] mb-1 leading-tight">
-                        <strong>We&apos;ve written this from what you selected.</strong> Edit anything — it&apos;s your review.
-                      </p>
-                      <div className="p-2 rounded-lg bg-[#f2f7f7] border border-[#e8ecec] text-[9px] text-[#1a1e23] italic leading-snug">
-                        {draft ? <>&ldquo;{draft}&rdquo;</> : <span className="not-italic text-[#9aa1a3]">Empty — the customer can write their own.</span>}
+                )}
+                {c2.stage === 2 && (
+                  <div className="h-full bg-[#f8f9fa] flex flex-col font-sans">
+                    <div className="bg-white px-4 py-3 border-b border-[#dadce0] flex items-center justify-between">
+                      <div className="leading-tight">
+                        <p className="text-[15px] font-semibold text-[#202124]">{DEMO.exampleBusiness}</p>
+                        <p className="text-xs text-[#70757a]">Posting publicly</p>
                       </div>
-                      <div className="mt-1 flex items-center justify-between text-[8px] text-[#6e797b]">
-                        <span>{draft.length} characters</span>
-                        <span className="text-[#397dff] font-medium">Customer can clear it</span>
+                      <span className="px-4 py-1.5 bg-[#1a73e8] text-white text-[14px] font-semibold rounded-full">Post</span>
+                    </div>
+                    <div className="p-4 flex flex-col gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-9 h-9 rounded-full bg-[#1a73e8] text-white font-bold flex items-center justify-center">Y</span>
+                        <div className="leading-tight">
+                          <p className="text-sm font-semibold text-[#202124]">Your customer</p>
+                          <p className="text-xs text-[#70757a]">Their own Google account</p>
+                        </div>
+                      </div>
+                      <div className="text-[#fbbc04] text-3xl tracking-wide">★★★★★</div>
+                      <div className="bg-white p-3 rounded-lg border border-[#dadce0] text-[15px] text-[#202124] leading-relaxed min-h-[120px]">
+                        {draft || "They paste here, or write their own."}
                       </div>
                     </div>
-                  )}
+                  </div>
+                )}
+              </div>
+            </PhoneMockup>
+          }
+        />
 
-                  {stepCard2 === 1 && (
-                    /* Stage 1: 1-Tap Copy Triggered */
-                    <div className="text-center py-1">
-                      <div className="p-2 rounded-lg bg-[#ecfdf5] border border-[#a7f3d0] text-[9px] font-semibold text-[#065f46] shadow-2xs mb-1.5">
-                        ✓ Copied. Paste it into the box on the next screen.
+        {/* 3. Owner: what you see */}
+        <Card
+          photo="/images/shop-medical-counter.jpg"
+          pauseSet={c3.setPaused}
+          caption={cap3[c3.stage]}
+          stages={3}
+          stage={c3.stage}
+          onStage={(s) => c3.setStage(s)}
+          num="03"
+          title="See what happened."
+          body="Log in with a one-time email code. See scans, completed flows, private feedback, and your Google rating against the day you started."
+          chips={["No password", "Weekly email summary"]}
+          phone={
+            <PhoneMockup dark={c3.stage === 0}>
+              <div className="h-full relative">
+                {c3.stage === 0 && (
+                  <div className="h-full bg-gradient-to-b from-[#2b3a55] to-[#0e1113] px-4 pt-10">
+                    <p className="text-center text-white/80 text-6xl font-light">9:41</p>
+                    <div className="mt-16 bg-white/90 rounded-2xl p-3.5 text-[#1a1e23] shadow-lg animate-[chatBubbleIn_0.4s_ease]">
+                      <div className="flex justify-between text-xs text-[#515a63]">
+                        <span className="font-semibold">Mail · Revyu</span><span>now</span>
                       </div>
-                      <p className="text-[8px] text-[#6e797b]">
-                        Opening your business&apos;s Google review page…
+                      <p className="text-[15px] font-semibold mt-1">New private feedback on Revyu</p>
+                      <p className="text-sm text-[#515a63] leading-snug">
+                        A customer left private feedback for {DEMO.exampleBusiness}. Rating: 2. View it in your dashboard.
                       </p>
                     </div>
-                  )}
-
-                  {stepCard2 === 2 && (
-                    /* Stage 2: Google Maps Official Dialog */
-                    <div className="bg-[#f8f9fa] p-2 rounded-lg border border-[#dadce0]">
-                      <div className="flex items-center justify-between pb-1 border-b border-[#dadce0] text-[8px]">
-                        <span className="font-bold text-[#202124]">Google review (customer pastes)</span>
-                        <span className="px-1.5 py-0.5 bg-[#1a73e8] text-white rounded font-bold">Post</span>
+                  </div>
+                )}
+                {c3.stage === 1 && (
+                  <div className="h-full bg-paper flex flex-col">
+                    <div className="px-4 py-3 border-b border-line bg-white flex items-center justify-between">
+                      <div className="leading-tight">
+                        <p className="font-display text-lg text-ink">Revyu</p>
+                        <p className="text-xs text-text-2">{DEMO.exampleBusiness}</p>
                       </div>
-                      <div className="text-[#fbbc04] text-[11px] my-1">★★★★★</div>
-                      <p className="text-[8px] text-[#202124] bg-white p-1 rounded border border-[#dadce0] leading-tight">
-                        {draft || "…"}
-                      </p>
+                      <span className="text-xs font-semibold text-success bg-success-50 px-2 py-1 rounded-full">Collecting</span>
                     </div>
-                  )}
-                </div>
-
-                {/* Clickable Action Button */}
-                <button
-                  type="button"
-                  onClick={handleCopyCard2}
-                  className={`w-full py-1.5 rounded-lg text-[9px] font-semibold text-center shadow-2xs flex items-center justify-center gap-1 transition-all cursor-pointer ${
-                    stepCard2 === 1
-                      ? "bg-[#16a34a] text-white"
-                      : "bg-[#397dff] text-white hover:bg-[#2f68db]"
-                  }`}
-                >
-                  <span>📋</span>
-                  <span>{stepCard2 === 1 ? "Copied — opening Google…" : "Copy & open Google"}</span>
-                </button>
-
-                {/* Interactive Step Navigator Pills */}
-                <div className="pt-1.5 mt-1 border-t border-[#e8ecec] flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    {[0, 1, 2].map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => setStepCard2(s)}
-                        className={`w-4 h-4 rounded-full text-[8px] font-bold flex items-center justify-center transition-colors cursor-pointer ${
-                          stepCard2 === s
-                            ? "bg-[#397dff] text-white"
-                            : "bg-[#f2f7f7] text-[#6e797b] hover:bg-[#e8ecec]"
-                        }`}
-                      >
-                        {s + 1}
-                      </button>
-                    ))}
+                    <div className="p-4 flex flex-col gap-4 flex-1 overflow-hidden">
+                      <Heading title="Overview" sub="How your QR code is performing, last 30 days." />
+                      <div className="grid grid-cols-3 gap-2">
+                        <StatTile label="Total scans" value={143} note="QR opened" />
+                        <StatTile label="Completed flows" value={28} note="Copied their draft" />
+                        <StatTile label="Conversion" value="20%" note="Scan to complete" highlight />
+                      </div>
+                      <div className="bg-white rounded-xl border border-line p-3.5">
+                        <p className="text-[15px] font-semibold text-ink">1 customer left private feedback</p>
+                        <span className="mt-2 inline-block px-3 py-1.5 rounded-lg bg-accent text-white text-sm font-semibold">Open inbox</span>
+                      </div>
+                      <p className="text-[11px] text-text-2">Sample numbers</p>
+                    </div>
+                    <div className="grid grid-cols-5 border-t border-line bg-white pb-6 pt-2 text-center text-[11px] text-text-2">
+                      {["Overview", "Feedback", "QR & Print", "Billing", "More"].map((t, i) => (
+                        <span key={t} className={i === 0 ? "font-semibold text-accent" : ""}>{t}</span>
+                      ))}
+                    </div>
                   </div>
-                  <span className="text-[8px] text-[#9aa1a3]">
-                    {paused2 ? "Paused (Inspect)" : "Auto-playing 3.3s"}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Copy below card */}
-          <div className="pt-4 flex items-start gap-2.5">
-            <span className="text-base text-[#1a1e23] shrink-0 mt-0.5 font-mono text-xs px-1.5 py-0.5 rounded bg-[#e8ecec]">
-              02
-            </span>
-            <div>
-              <p className="text-xs sm:text-sm text-[#515a63] leading-relaxed">
-                <strong className="text-[#1a1e23] font-semibold">Edit, copy, paste. </strong>
-                The draft is built only from what they tapped, sits in an editable box, and says so. They copy it and paste it on Google — Google doesn&apos;t let anyone pre-fill a review, so that step is real.
-              </p>
-              <div className="mt-1 flex items-center gap-2 text-[11px] text-[#397dff] font-medium">
-                <span>✓ Google link at every rating</span>
-                <span>•</span>
-                <span>✓ Never auto-posted</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* CARD 3: SCREEN 3 — THE OWNER EXPERIENCE (WEEKLY DIGEST & DASHBOARD) */}
-        <div className="flex flex-col justify-between group">
-          <div
-            className="relative aspect-square rounded-2xl overflow-hidden shadow-v2-rest border border-[#e8ecec] p-3 sm:p-4 flex items-center justify-center"
-            onMouseEnter={() => setPaused3(true)}
-            onMouseLeave={() => setPaused3(false)}
-          >
-            {/* Shop photo background */}
-            <Image
-              src="/images/shop-medical-counter.jpg"
-              alt=""
-              fill
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-[#1a1e23]/35 backdrop-blur-[2px]" />
-
-            {/* Smartphone Enclosure */}
-            <div className="relative z-10 w-full max-w-[270px] bg-[#1a1e23]/80 p-2 rounded-[30px] shadow-2xl border border-white/30 backdrop-blur-md">
-              {/* Dynamic Island */}
-              <div className="w-16 h-3 bg-[#111315] rounded-full mx-auto mb-1.5 flex items-center justify-center">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#1a1e23] border border-white/20" />
-              </div>
-
-              {/* Screen Interior */}
-              <div className="bg-white rounded-[22px] p-3 flex flex-col justify-between min-h-[300px] overflow-hidden shadow-inner">
-                {/* Status Bar */}
-                <div className="flex items-center justify-between text-[9px] text-[#6e797b] font-mono pb-1 border-b border-[#f0f2f2]">
-                  <span>9:41</span>
-                  <div className="flex items-center gap-1">
-                    <span>5G</span>
-                    <span>100%</span>
-                  </div>
-                </div>
-
-                {/* Video Timeline Progress Bar */}
-                <div className="w-full h-1 bg-[#f2f7f7] rounded-full overflow-hidden mt-1.5 mb-1.5">
-                  <div
-                    key={`c3-${stepCard3}-${paused3}`}
-                    className={`h-full bg-[#16a34a] rounded-full ${paused3 ? "w-full" : "animate-[tabFill_3.3s_linear]"}`}
-                  />
-                </div>
-
-                {/* Header */}
-                <div className="flex items-center justify-between pb-1.5 border-b border-[#e8ecec]">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs">{stepCard3 === 0 ? "💬" : "📊"}</span>
-                    <span className="text-[11px] font-semibold text-[#1a1e23]">
-                      {stepCard3 === 0 ? "Weekly email digest" : "Owner dashboard"}
-                    </span>
-                  </div>
-                  <span className="text-[8px] font-semibold text-[#16a34a] bg-[#ecfdf5] px-1.5 py-0.5 rounded-full">
-                    {stepCard3 === 0 ? "Mondays" : "Sample data"}
-                  </span>
-                </div>
-
-                {/* Dynamic Screen Content */}
-                <div className="my-auto py-1">
-                  {stepCard3 === 0 ? (
-                    /* Stage 0: Weekly digest email to the owner */
-                    <div className="bg-[#f0f2f5] p-2 rounded-xl border border-[#e1e4e8]">
-                      <div className="bg-white p-2 rounded-lg shadow-2xs border-l-3 border-[#25d366]">
-                        <p className="font-bold text-[#1a1e23] text-[9.5px]">
-                          📬 Your week at {DEMO.exampleBusiness}
-                        </p>
-                        <p className="text-[8px] text-[#515a63] mt-0.5">
-                          <strong>38</strong> scans · <strong>9</strong> completed · <strong>2</strong> private notes to read.
-                        </p>
-                        <div className="mt-1 pt-1 border-t border-[#e8ecec] flex items-center justify-between text-[7.5px] text-[#6e797b]">
-                          <span>Google rating: <strong>4.4 ★</strong></span>
-                          <span className="text-[#25d366] font-bold">+3 reviews this week</span>
+                )}
+                {c3.stage === 2 && (
+                  <div className="h-full bg-paper">
+                    <div className="px-4 py-3 border-b border-line bg-white">
+                      <p className="font-display text-lg text-ink">Feedback</p>
+                    </div>
+                    <div className="p-4 flex flex-col gap-3">
+                      <Heading title="Feedback" sub="Answer quickly. It's the cheapest way to keep a customer." />
+                      <div className="bg-white rounded-xl border border-line p-3.5 flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold text-[#b45309] bg-[#fef3c7] px-2 py-0.5 rounded-full">2★</span>
+                          <span className="text-xs text-text-2">2h ago</span>
+                        </div>
+                        <p className="text-[15px] text-ink leading-snug">Billing took too long and nobody told me why. Sample message.</p>
+                        <p className="text-xs text-text-2">Contact: +91 98xxx xxxxx</p>
+                        <div className="flex gap-2 text-xs font-semibold">
+                          <span className="px-3 py-1.5 rounded-lg border border-line-strong">Call</span>
+                          <span className="px-3 py-1.5 rounded-lg border border-line-strong">WhatsApp</span>
+                          <span className="ml-auto px-3 py-1.5 rounded-lg bg-ink text-white">Mark resolved</span>
                         </div>
                       </div>
                     </div>
-                  ) : (
-                    /* Stage 1: Dashboard readout (sample numbers) */
-                    <div>
-                      {/* SVG Conversion Curve */}
-                      <div className="h-14 w-full relative flex items-end">
-                        <svg className="w-full h-full overflow-visible" viewBox="0 0 100 40" preserveAspectRatio="none">
-                          <path
-                            d="M 0,35 L 25,28 L 50,18 L 75,10 L 100,2"
-                            fill="none"
-                            stroke="#16a34a"
-                            strokeWidth="2.5"
-                            strokeLinecap="round"
-                          />
-                          <path
-                            d="M 0,35 L 25,28 L 50,18 L 75,10 L 100,2 L 100,40 L 0,40 Z"
-                            fill="url(#greenGrad2)"
-                            opacity="0.15"
-                          />
-                          <defs>
-                            <linearGradient id="greenGrad2" x1="0" y1="0" x2="0" y2="1">
-                              <stop offset="0%" stopColor="#16a34a" />
-                              <stop offset="100%" stopColor="#16a34a" stopOpacity="0" />
-                            </linearGradient>
-                          </defs>
-                        </svg>
-                      </div>
-
-                      {/* Stats Grid */}
-                      <div className="mt-1.5 pt-1.5 border-t border-[#e8ecec] grid grid-cols-3 gap-1 text-center">
-                        <div>
-                          <p className="text-[7.5px] text-[#6e797b]">Scans</p>
-                          <p className="text-[11px] font-bold text-[#1a1e23]">143</p>
-                        </div>
-                        <div>
-                          <p className="text-[7.5px] text-[#6e797b]">Completed</p>
-                          <p className="text-[11px] font-bold text-[#16a34a]">28</p>
-                        </div>
-                        <div>
-                          <p className="text-[7.5px] text-[#6e797b]">Rating</p>
-                          <p className="text-[11px] font-bold text-[#397dff]">4.3 → 4.5</p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Bottom Status */}
-                <div className="py-1 px-1.5 rounded bg-[#f8fafc] border border-[#e8ecec] flex items-center justify-between text-[8px] text-[#6e797b]">
-                  <span className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#16a34a]" />
-                    <span>QR collecting</span>
-                  </span>
-                  <span className="text-[#16a34a] font-semibold">Rating checked weekly</span>
-                </div>
-
-                {/* Interactive Step Navigator Pills */}
-                <div className="pt-1.5 mt-1 border-t border-[#e8ecec] flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    {[0, 1].map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => setStepCard3(s)}
-                        className={`w-4 h-4 rounded-full text-[8px] font-bold flex items-center justify-center transition-colors cursor-pointer ${
-                          stepCard3 === s
-                            ? "bg-[#16a34a] text-white"
-                            : "bg-[#f2f7f7] text-[#6e797b] hover:bg-[#e8ecec]"
-                        }`}
-                      >
-                        {s + 1}
-                      </button>
-                    ))}
                   </div>
-                  <span className="text-[8px] text-[#9aa1a3]">
-                    {paused3 ? "Paused (Inspect)" : "Auto-playing 3.3s"}
-                  </span>
-                </div>
+                )}
               </div>
-            </div>
-          </div>
-
-          {/* Copy below card */}
-          <div className="pt-4 flex items-start gap-2.5">
-            <span className="text-base text-[#1a1e23] shrink-0 mt-0.5 font-mono text-xs px-1.5 py-0.5 rounded bg-[#e8ecec]">
-              03
-            </span>
-            <div>
-              <p className="text-xs sm:text-sm text-[#515a63] leading-relaxed">
-                <strong className="text-[#1a1e23] font-semibold">See what happened. </strong>
-                Log in with a one-time email code. See scans, completed flows, which tags customers pick, private feedback, and your Google rating against the day you started.
-              </p>
-              <div className="mt-1 flex items-center gap-2 text-[11px] text-[#16a34a] font-medium">
-                <span>✓ No password</span>
-                <span>•</span>
-                <span>✓ Weekly email summary</span>
-              </div>
-            </div>
-          </div>
-        </div>
+            </PhoneMockup>
+          }
+        />
       </div>
     </section>
   );

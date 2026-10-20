@@ -26,8 +26,8 @@ interface Props {
 }
 
 // CR-3 / SRS-17.1g: one neutral label, used at every rating.
-const GOOGLE_LABEL = "Post publicly on Google";
-const PRIVATE_LABEL = "Send private feedback to the owner";
+export const GOOGLE_LABEL = "Post publicly on Google";
+export const PRIVATE_LABEL = "Send private feedback to the owner";
 const PROGRESS_STEPS: Step[] = ["rating", "tags", "draft"];
 
 export function CustomerFlow({ slug, config }: Props) {
