@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { TabProps } from "@/components/hub-editor/PageTab";
 import { Icon } from "@/components/hub/Icons";
 import { Btn, Card, EmptyState, Sheet, Switch, TextArea, TextInput } from "@/components/ui/kit";
+import { formatDate } from "@/lib/format";
 import { HubApiError, formatMoney, type BadgeInput, type LoyaltyState, type MemberRow } from "@/lib/hub/api";
 
 type BadgeRow = BadgeInput & { id?: string };
@@ -21,22 +22,25 @@ const newBadge = (icons: string[]): BadgeRow => ({
   reward: { type: "percent_discount", percent: 10, value_minor: null, title: "", terms: null, expires_days: 30 },
 });
 
-export function RewardsTab({ api, state, reload, toast }: TabProps) {
+export function RewardsTab({ api, reload, toast }: TabProps) {
   const [data, setData] = useState<LoyaltyState | null>(null);
   const [members, setMembers] = useState<MemberRow[] | null>(null);
   const [log, setLog] = useState<{ title: string; member: string; public_id: string; redeemed_at: string }[]>([]);
   const [draft, setDraft] = useState<BadgeRow | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // One flag for the small actions (acknowledge, PINs, settings, retire): they all disable while any runs.
+  const [acting, setActing] = useState(false);
   const [ack, setAck] = useState(false);
   const [pin, setPin] = useState({ label: "", pin: "" });
-  const [cooldown, setCooldown] = useState(12);
+  // Text, so the field can be cleared while typing instead of snapping back to a number.
+  const [cooldown, setCooldown] = useState("12");
   const [terms, setTerms] = useState("");
 
   const load = useCallback(async () => {
     const d = await api.loyalty();
     setData(d);
-    setCooldown(d.cooldown_hours);
+    setCooldown(String(d.cooldown_hours));
     setTerms(d.terms ?? "");
   }, [api]);
 
@@ -50,9 +54,13 @@ export function RewardsTab({ api, state, reload, toast }: TabProps) {
 
   const fail = (e: unknown) => toast(e instanceof HubApiError ? e.message : "Something went wrong.", "error");
 
-  async function acknowledge() {
-    try { await api.acknowledge(); await load(); await reload(); } catch (e) { fail(e); }
+  async function act(fn: () => Promise<void>) {
+    if (acting) return;
+    setActing(true);
+    try { await fn(); } catch (e) { fail(e); } finally { setActing(false); }
   }
+
+  const acknowledge = () => act(async () => { await api.acknowledge(); await load(); await reload(); });
 
   async function saveBadge(e: React.FormEvent) {
     e.preventDefault();
@@ -97,7 +105,7 @@ export function RewardsTab({ api, state, reload, toast }: TabProps) {
           <input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} className="mt-0.5 w-5 h-5" />
           I understand and agree.
         </label>
-        <Btn className="mt-4" disabled={!ack} onClick={acknowledge}>Continue</Btn>
+        <Btn className="mt-4" disabled={!ack} busy={acting} onClick={acknowledge}>Continue</Btn>
       </Card>
     );
 
@@ -155,28 +163,28 @@ export function RewardsTab({ api, state, reload, toast }: TabProps) {
           {data.staff_pins.map((p) => (
             <li key={p.id} className="py-2.5 flex items-center justify-between">
               <span className={p.active ? "font-medium" : "text-[#59636a] line-through"}>{p.label}</span>
-              <Switch label={`${p.label} active`} checked={p.active} onChange={async (v) => { try { await api.setPinActive(p.id, v); await load(); } catch (e) { fail(e); } }} />
+              <Switch label={`${p.label} active`} checked={p.active} disabled={acting} onChange={(v) => act(async () => { await api.setPinActive(p.id, v); await load(); })} />
             </li>
           ))}
         </ul>
         <form
           className="grid grid-cols-[1fr_7rem_auto] gap-2 items-end"
-          onSubmit={async (e) => {
+          onSubmit={(e) => {
             e.preventDefault();
-            try { await api.addPin(pin.label, pin.pin); setPin({ label: "", pin: "" }); await load(); toast("PIN added"); } catch (err) { fail(err); }
+            act(async () => { await api.addPin(pin.label, pin.pin); setPin({ label: "", pin: "" }); await load(); toast("PIN added"); });
           }}
         >
           <TextInput label="Label" placeholder="Front desk" value={pin.label} onChange={(e) => setPin({ ...pin, label: e.target.value })} required />
           <TextInput label="PIN" inputMode="numeric" pattern="\d{4,6}" maxLength={6} placeholder="4-6 digits" value={pin.pin} onChange={(e) => setPin({ ...pin, pin: e.target.value.replace(/\D/g, "") })} required />
-          <Btn type="submit" variant="light">Add</Btn>
+          <Btn type="submit" variant="light" busy={acting}>Add</Btn>
         </form>
       </Card>
 
       <Card title="Programme settings">
         <div className="grid gap-3">
-          <TextInput label="Hours between visits" type="number" min={0} max={720} value={cooldown} onChange={(e) => setCooldown(parseInt(e.target.value || "0", 10))} hint="A customer's visit counts once in this window." />
+          <TextInput label="Hours between visits" type="number" min={0} max={720} value={cooldown} onChange={(e) => setCooldown(e.target.value.replace(/\D/g, ""))} hint="A customer's visit counts once in this window." />
           <TextArea label="Terms shown to customers" maxLength={1000} value={terms} onChange={(e) => setTerms(e.target.value)} />
-          <Btn className="self-start" onClick={async () => { try { await api.saveProgram(cooldown, terms || null); toast("Saved"); } catch (e) { fail(e); } }}>Save settings</Btn>
+          <Btn className="self-start" busy={acting} onClick={() => act(async () => { await api.saveProgram(parseInt(cooldown || "0", 10), terms || null); toast("Saved"); })}>Save settings</Btn>
         </div>
       </Card>
 
@@ -203,8 +211,8 @@ export function RewardsTab({ api, state, reload, toast }: TabProps) {
           <div className="mt-5">
             <h3 className="text-sm font-semibold mb-2">Redemption log</h3>
             <ul className="text-sm divide-y divide-[#e8ecec]">
-              {log.map((r, i) => (
-                <li key={i} className="py-2 flex justify-between gap-3"><span>{r.title} · {r.member}</span><span className="text-[#59636a] shrink-0">{new Date(r.redeemed_at).toLocaleDateString()}</span></li>
+              {log.map((r) => (
+                <li key={`${r.public_id}-${r.redeemed_at}`} className="py-2 flex justify-between gap-3"><span>{r.title} · {r.member}</span><span className="text-[#59636a] shrink-0">{formatDate(r.redeemed_at)}</span></li>
               ))}
             </ul>
           </div>
@@ -216,7 +224,7 @@ export function RewardsTab({ api, state, reload, toast }: TabProps) {
           <form onSubmit={saveBadge} className="flex flex-col gap-3">
             <div className="grid grid-cols-2 gap-3">
               <TextInput label="Badge name" required maxLength={60} placeholder="Regular" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
-              <TextInput label="Visits needed" type="number" min={1} max={1000} required value={draft.visits_required} onChange={(e) => setDraft({ ...draft, visits_required: parseInt(e.target.value || "1", 10) })} />
+              <TextInput label="Visits needed" type="number" min={1} max={1000} required value={draft.visits_required || ""} onChange={(e) => setDraft({ ...draft, visits_required: parseInt(e.target.value, 10) || 0 })} />
             </div>
             <div>
               <p className="text-sm font-medium mb-1.5">Icon</p>
@@ -249,14 +257,13 @@ export function RewardsTab({ api, state, reload, toast }: TabProps) {
             <div className="flex gap-2 pt-1">
               <Btn type="submit" busy={busy} className="flex-1">Save badge</Btn>
               {draft.id && (
-                <Btn type="button" variant="danger" onClick={async () => { try { await api.retireBadge(draft.id!); setDraft(null); await load(); await reload(); toast("Badge retired"); } catch (e) { fail(e); } }}>Retire</Btn>
+                <Btn type="button" variant="danger" busy={acting} onClick={() => { if (window.confirm("Retire this badge? Badges customers already earned are kept.")) act(async () => { await api.retireBadge(draft.id!); setDraft(null); await load(); await reload(); toast("Badge retired"); }); }}>Retire</Btn>
               )}
             </div>
             <p className="text-xs text-[#59636a]">Retiring hides a badge for new customers. Badges already earned are kept.</p>
           </form>
         )}
       </Sheet>
-      <span className="sr-only">{state.slug}</span>
     </div>
   );
 }

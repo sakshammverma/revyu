@@ -26,7 +26,7 @@ type Tab = "requests" | "catalog" | "kits";
 
 export function ServicesAdmin() {
   const [tab, setTab] = useState<Tab>("requests");
-  const { push, node } = useToasts();
+  const { push } = useToasts();
   return (
     <div className="max-w-6xl mx-auto flex flex-col gap-4">
       <div role="tablist" className="flex gap-1 p-1 rounded-xl bg-[#e8ecec] w-full sm:w-auto sm:self-start">
@@ -38,7 +38,6 @@ export function ServicesAdmin() {
       {tab === "requests" && <Requests toast={push} />}
       {tab === "catalog" && <Catalog toast={push} />}
       {tab === "kits" && <Kits toast={push} />}
-      {node}
     </div>
   );
 }

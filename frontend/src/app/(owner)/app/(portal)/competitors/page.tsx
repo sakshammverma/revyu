@@ -211,7 +211,7 @@ function AddCompetitor({ onChange }: { onChange: (v: CompetitorsView) => void })
                   {r.review_count != null && ` · ${r.rating ?? "–"}★ (${r.review_count})`}
                 </p>
               </div>
-              <Button variant="secondary" loading={adding === r.place_id} onClick={() => add(r)} className="shrink-0">
+              <Button variant="secondary" loading={adding === r.place_id} disabled={adding !== null} onClick={() => add(r)} className="shrink-0">
                 Follow
               </Button>
             </li>

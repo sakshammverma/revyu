@@ -1,3 +1,4 @@
+import { formatDate } from "@/lib/format";
 import type { RatingInfo } from "@/lib/dashboard/api";
 
 export function RatingView({ data }: { data: RatingInfo }) {
@@ -13,7 +14,7 @@ export function RatingView({ data }: { data: RatingInfo }) {
     <div className="v2-sheet border border-line p-4 sm:p-6 flex flex-col justify-between">
       <div>
         <div className="flex items-start justify-between gap-3 mb-4">
-          <h2 className="font-display text-xl text-ink">Google Rating</h2>
+          <h2 className="font-display text-xl text-ink">Google rating</h2>
           {newReviews > 0 ? (
             <span className="text-xs text-[#2f6b1a] bg-success-50 border border-success/25 px-2.5 py-0.5 rounded-full font-semibold shrink-0">
               +{newReviews} new {newReviews === 1 ? "review" : "reviews"}
@@ -45,7 +46,7 @@ export function RatingView({ data }: { data: RatingInfo }) {
 
       <p className="mt-5 pt-4 border-t border-line text-xs text-text-2">
         {checked
-          ? `Last checked with Google: ${new Date(data.polled_at!).toLocaleDateString()}`
+          ? `Last checked with Google: ${formatDate(data.polled_at!)}`
           : "We check your Google listing once a week. Numbers appear after the first check."}
       </p>
     </div>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Logo } from "@/components/ui/Logo";
+import { ToastProvider } from "@/components/ui/Toast";
 
 export const metadata: Metadata = { title: "Revyu Admin", robots: { index: false, follow: false } };
 
@@ -32,7 +33,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           ))}
         </div>
       </nav>
-      {children}
+      <ToastProvider>{children}</ToastProvider>
     </div>
   );
 }

@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
-import { Card } from "@/components/ui";
-import { growthApi, type Service, type ServiceRequest } from "@/lib/hub/api";
+import { Card, EmptyState, ErrorState, Skeleton, StatusPill } from "@/components/ui";
+import { formatDate } from "@/lib/format";
+import { growthApi } from "@/lib/hub/api";
+import { useAsync } from "@/lib/useAsync";
 
 const STATUS_LABEL: Record<string, string> = {
   requested: "Requested",
@@ -25,18 +26,12 @@ const ICON: Record<string, string> = {
 };
 
 export default function GrowPage() {
-  const [services, setServices] = useState<Service[] | null>(null);
-  const [requests, setRequests] = useState<ServiceRequest[]>([]);
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    Promise.all([growthApi.services(), growthApi.requests()])
-      .then(([s, r]) => {
-        setServices(s.items);
-        setRequests(r.items);
-      })
-      .catch(() => setFailed(true));
+  const data = useAsync(async () => {
+    const [s, r] = await Promise.all([growthApi.services(), growthApi.requests()]);
+    return { services: s.items, requests: r.items };
   }, []);
+  const services = data.data?.services ?? null;
+  const requests = data.data?.requests ?? [];
 
   const openFor = (key: string) =>
     requests.find((r) => r.service_key === key && ["requested", "quoted", "accepted", "in_progress"].includes(r.status));
@@ -48,8 +43,11 @@ export default function GrowPage() {
         <p className="text-sm text-text-2 mt-1">Done-for-you services from the Revyu team. Tell us what you need and we&rsquo;ll send a quote.</p>
       </div>
 
-      {failed && <p role="alert" className="text-alert text-sm">We couldn&rsquo;t load services. Please refresh.</p>}
-      {!services && !failed && <div className="ui-skeleton h-48 rounded-2xl" />}
+      {data.error ? <ErrorState message="We couldn't load services." onRetry={data.reload} /> : null}
+      {!services && !data.error && <Skeleton className="h-48 rounded-2xl" />}
+      {services && services.length === 0 && (
+        <EmptyState title="No services available yet" body="New services appear here as soon as the team adds them." />
+      )}
 
       {requests.length > 0 && (
         <Card title="Your requests">
@@ -59,11 +57,9 @@ export default function GrowPage() {
                 <Link href={`/app/grow/requests/${r.id}`} className="flex items-center justify-between gap-3 min-h-[56px] py-2">
                   <span className="min-w-0">
                     <span className="block font-semibold text-ink truncate">{r.service_name}</span>
-                    <span className="block text-xs text-text-2">Requested {new Date(r.created_at).toLocaleDateString()}</span>
+                    <span className="block text-xs text-text-2">Requested {formatDate(r.created_at)}</span>
                   </span>
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${r.status === "quoted" ? "bg-[#fff4d6] text-[#8a5a00]" : "bg-paper-subtle text-text-2"}`}>
-                    {STATUS_LABEL[r.status] ?? r.status}
-                  </span>
+                  <StatusPill tone={r.status === "quoted" ? "warning" : "neutral"}>{STATUS_LABEL[r.status] ?? r.status}</StatusPill>
                 </Link>
               </li>
             ))}

@@ -24,14 +24,16 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 export function Button({ variant = "primary", loading, full, href, className = "", children, disabled, ...rest }: Props) {
   const cls = `${BASE} ${VARIANTS[variant]} ${full ? "w-full" : ""} ${className}`;
   if (href) {
+    const { type: _type, ...linkProps } = rest;
+    void _type;
     return (
-      <Link href={href} className={cls}>
+      <Link {...(linkProps as object)} href={href} className={cls} aria-disabled={disabled || undefined}>
         {children}
       </Link>
     );
   }
   return (
-    <button {...rest} disabled={disabled || loading} aria-busy={loading || undefined} className={cls}>
+    <button type="button" {...rest} disabled={disabled || loading} aria-busy={loading || undefined} className={cls}>
       {loading && (
         <span aria-hidden className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />
       )}

@@ -28,10 +28,10 @@ export function AssetsPanel({ outletId, state }: { outletId: string; state: stri
       ) : (
         <div className="mt-4 flex flex-col gap-3">
           <div className="flex flex-wrap gap-2">
-            <a href={`${base}/qr?format=png`} download className="btn-primary min-h-[40px]">
+            <a href={`${base}/qr?format=png`} download="revyu-qr.png" className="btn-primary min-h-[40px]">
               QR code (PNG)
             </a>
-            <a href={`${base}/qr?format=svg`} download className="btn-pill-light min-h-[40px] border border-[#e8ecec]">
+            <a href={`${base}/qr?format=svg`} download="revyu-qr.svg" className="btn-pill-light min-h-[40px] border border-[#e8ecec]">
               QR code (SVG)
             </a>
           </div>

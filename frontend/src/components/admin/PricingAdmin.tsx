@@ -11,7 +11,7 @@ const selectCls = "w-full rounded-lg border border-[#d5dcdc] bg-white px-3.5 py-
 
 export function PricingAdmin() {
   const [data, setData] = useState<AdminPricing | null>(null);
-  const { push, node } = useToasts();
+  const { push } = useToasts();
 
   const load = useCallback(
     () => fetchAdminPricing().then(setData).catch(() => push("Could not load pricing.", "error")),
@@ -32,7 +32,6 @@ export function PricingAdmin() {
       </p>
       <Plans data={data} onSaved={setData} toast={push} />
       <Countries data={data} onSaved={setData} toast={push} />
-      {node}
     </div>
   );
 }

@@ -43,7 +43,7 @@ export default function BillingPage() {
     } catch {
       // Razorpay has the payment; its webhook activates the account even if this
       // confirm call failed, so don't tell the owner to pay again.
-      toast("Payment received. Your account will update in a minute. Don't pay again.", { tone: "error" });
+      toast("Payment received. Your account will update in a minute. Don't pay again.", { tone: "info" });
     } finally {
       await refresh();
       setBusyPlan(null);
@@ -108,14 +108,14 @@ export default function BillingPage() {
 
       <Card title="Payment history">
         {billing.payments.length === 0 ? (
-          <EmptyState title="No payments yet" body="Your first charge appears here after your free trial." />
+          <EmptyState title="No payments yet" body={outlet.state === "trial" ? "Your first charge appears here after your free trial." : "Payments appear here once you subscribe."} />
         ) : (
           <ul className="divide-y divide-line">
-            {billing.payments.map((p, i) => (
-              <li key={i} className="py-3 flex items-center justify-between gap-3 text-sm">
+            {billing.payments.map((p) => (
+              <li key={`${p.created_at}-${p.amount_minor}`} className="py-3 flex items-center justify-between gap-3 text-sm">
                 <span className="text-text-2 tabular-nums">{formatDate(p.created_at)}</span>
                 <span className="font-semibold text-ink tabular-nums">{formatMoney(p.amount_minor, p.currency_code)}</span>
-                <StatusPill tone={PAYMENT_TONE[p.status as keyof typeof PAYMENT_TONE] ?? "neutral"}>{p.status}</StatusPill>
+                <StatusPill tone={PAYMENT_TONE[p.status as keyof typeof PAYMENT_TONE] ?? "neutral"}>{PAYMENT_LABEL[p.status] ?? p.status}</StatusPill>
               </li>
             ))}
           </ul>
@@ -125,6 +125,15 @@ export default function BillingPage() {
   );
 }
 
+// Raw provider statuses mean nothing to an owner.
+const PAYMENT_LABEL: Record<string, string> = {
+  captured: "Paid",
+  authorized: "Authorised",
+  created: "Pending",
+  failed: "Failed",
+  refunded: "Refunded",
+};
+
 function StatusCard({ billing, isPaid }: { billing: BillingStatus; isPaid: boolean }) {
   let title: string;
   let body: string;
@@ -132,11 +141,11 @@ function StatusCard({ billing, isPaid }: { billing: BillingStatus; isPaid: boole
     title = `Subscribed${billing.plan ? ` · ${billing.plan}` : ""}`;
     body = billing.current_period_end ? `Renews on ${formatDate(billing.current_period_end)}.` : "Your subscription is active.";
   } else if (billing.state === "trial") {
-    title = `Free trial · ${billing.trial_days_left ?? 0} days left`;
+    title = `Free trial · ${billing.trial_days_left ?? 0} ${billing.trial_days_left === 1 ? "day" : "days"} left`;
     body = "You won't be charged until your trial ends, unless you choose a plan now.";
   } else if (billing.state === "locked") {
     title = "Dashboard locked";
-    body = `Your QR still collects for ${billing.credits_left ?? 0} more reviews. Choose a plan to unlock everything.`;
+    body = `Your QR still collects for ${billing.credits_left ?? 0} more ${billing.credits_left === 1 ? "review" : "reviews"}. Choose a plan to unlock everything.`;
   } else if (billing.state === "suspended") {
     title = "Review collection paused";
     body = "Your QR shows a neutral page. Choose a plan to switch it back on instantly, with the same QR code.";

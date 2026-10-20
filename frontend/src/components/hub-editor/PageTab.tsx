@@ -39,8 +39,12 @@ export function PageTab({ api, state, reload, toast, isAdmin }: TabProps) {
   const [hoursSet, setHoursSet] = useState(!!state.profile.hours);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
+  // Module and mode changes save one at a time; the controls wait instead of racing each other.
+  const [saving, setSaving] = useState(false);
 
   async function saveModules(next: { module: string; enabled: boolean }[], undo?: () => void) {
+    if (saving) return;
+    setSaving(true);
     try {
       await api.setModules(next);
       await reload();
@@ -48,6 +52,8 @@ export function PageTab({ api, state, reload, toast, isAdmin }: TabProps) {
     } catch (e) {
       toast(errText(e), "error");
       await reload();
+    } finally {
+      setSaving(false);
     }
   }
 
@@ -67,17 +73,28 @@ export function PageTab({ api, state, reload, toast, isAdmin }: TabProps) {
   }
 
   async function setMode(m: "direct" | "menu") {
+    if (saving) return;
+    setSaving(true);
     try {
       await api.setMode(m);
       await reload();
       toast(m === "menu" ? "Customers will see your page" : "Customers go straight to the form");
     } catch (e) {
       toast(errText(e), "error");
+    } finally {
+      setSaving(false);
     }
   }
 
   async function saveProfile(e: React.FormEvent) {
     e.preventDefault();
+    if (hoursSet) {
+      const bad = DAYS.find(([k]) => !days[k].closed && days[k].open >= days[k].close);
+      if (bad) {
+        toast(`${bad[1]}: opening time must be before closing time.`, "error");
+        return;
+      }
+    }
     setBusy(true);
     try {
       const hours = hoursSet
@@ -129,8 +146,8 @@ export function PageTab({ api, state, reload, toast, isAdmin }: TabProps) {
           {state.modules.map((m, i) => (
             <li key={m.key} className="py-3 flex items-center gap-3">
               <div className="flex flex-col">
-                <button type="button" aria-label={`Move ${m.label} up`} disabled={i === 0} onClick={() => move(i, -1)} className="w-8 h-6 text-[#515a63] disabled:opacity-25">▲</button>
-                <button type="button" aria-label={`Move ${m.label} down`} disabled={i === state.modules.length - 1} onClick={() => move(i, 1)} className="w-8 h-6 text-[#515a63] disabled:opacity-25">▼</button>
+                <button type="button" aria-label={`Move ${m.label} up`} disabled={i === 0 || saving} onClick={() => move(i, -1)} className="w-11 h-11 -my-1.5 text-[#515a63] disabled:opacity-25">▲</button>
+                <button type="button" aria-label={`Move ${m.label} down`} disabled={i === state.modules.length - 1 || saving} onClick={() => move(i, 1)} className="w-11 h-11 -my-1.5 text-[#515a63] disabled:opacity-25">▼</button>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-[#1a1e23]">{m.label}</p>
@@ -154,7 +171,7 @@ export function PageTab({ api, state, reload, toast, isAdmin }: TabProps) {
               <Switch
                 label={`${m.label} on or off`}
                 checked={m.enabled}
-                disabled={m.key === "review" ? false : !m.available && !isAdmin}
+                disabled={saving || (m.key === "review" ? false : !m.available && !isAdmin)}
                 onChange={(v) => toggle(m.key, v)}
               />
             </li>

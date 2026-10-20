@@ -7,7 +7,7 @@ export function TagFrequencyView({ data }: { data: TagFrequency }) {
     <div className="v2-sheet border border-[#e8ecec] p-4 sm:p-6 flex flex-col justify-between">
       <div>
         <div className="flex items-start justify-between gap-3 mb-4">
-          <h2 className="font-display text-xl text-[#1a1e23]">Customer Compliments</h2>
+          <h2 className="font-display text-xl text-[#1a1e23]">Customer compliments</h2>
           <span className="text-[11px] font-semibold tracking-wider text-[#515a63] uppercase shrink-0 mt-1.5">Top tags</span>
         </div>
 

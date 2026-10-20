@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef } from "react";
+
+import { useToast } from "@/components/ui/Toast";
 
 /* Small shared primitives for the owner/admin editors. Website look: white
    sheets, #e8ecec hairlines, #2f68db actions (AA contrast). */
@@ -133,8 +135,9 @@ export function Btn({ variant = "primary", busy, className = "", children, ...re
         ? "bg-white border border-[#c62445] text-[#c62445] hover:bg-[#fdf2f4]"
         : "bg-white border border-[#bfc8ca] text-[#1a1e23] hover:border-[#1a1e23]";
   return (
-    <button {...rest} disabled={rest.disabled || busy} className={`${base} ${v} ${className}`}>
-      {busy ? "Saving…" : children}
+    <button {...rest} disabled={rest.disabled || busy} aria-busy={busy || undefined} className={`${base} ${v} ${className}`}>
+      {busy && <span aria-hidden className="w-4 h-4 rounded-full border-2 border-current border-t-transparent animate-spin" />}
+      {children}
     </button>
   );
 }
@@ -152,11 +155,21 @@ export function Sheet({ open, title, onClose, children }: {
   useEffect(() => {
     closeRef.current = onClose;
   });
+  // Typing anywhere inside makes the sheet "dirty"; closing it then asks first, so a
+  // stray backdrop tap or Escape can't throw away what was typed.
+  const dirty = useRef(false);
+  useEffect(() => {
+    if (open) dirty.current = false;
+  }, [open]);
+  const requestClose = useCallback(() => {
+    if (dirty.current && !window.confirm("Discard your changes?")) return;
+    closeRef.current();
+  }, []);
   useEffect(() => {
     if (!open) return;
     const opener = document.activeElement as HTMLElement | null;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") return closeRef.current();
+      if (e.key === "Escape") return requestClose();
       if (e.key !== "Tab" || !ref.current) return;
       // Keep Tab inside the dialog.
       const items = ref.current.querySelectorAll<HTMLElement>(
@@ -175,19 +188,23 @@ export function Sheet({ open, title, onClose, children }: {
     };
     document.addEventListener("keydown", onKey);
     ref.current?.focus();
+    // The page behind must not scroll while the sheet is open.
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = overflow;
       opener?.focus?.();
     };
-  }, [open]);
+  }, [open, requestClose]);
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" role="dialog" aria-modal="true" aria-label={title}>
-      <button type="button" aria-label="Close" className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div ref={ref} tabIndex={-1} className="relative w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl max-h-[90vh] overflow-y-auto outline-none">
+      <button type="button" aria-label="Close" className="absolute inset-0 bg-black/40" onClick={requestClose} />
+      <div ref={ref} tabIndex={-1} onInput={() => { dirty.current = true; }} className="relative w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl max-h-[90dvh] overflow-y-auto outline-none">
         <div className="sticky top-0 bg-white border-b border-[#e8ecec] px-5 py-4 flex items-center justify-between">
           <h2 className="font-semibold text-[#1a1e23]">{title}</h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="w-10 h-10 -mr-2 rounded-lg text-[#515a63] hover:bg-[#f2f7f7]">✕</button>
+          <button type="button" onClick={requestClose} aria-label="Close" className="w-11 h-11 -mr-2 rounded-lg text-[#515a63] hover:bg-[#f2f7f7]">✕</button>
         </div>
         <div className="p-5">{children}</div>
       </div>
@@ -205,33 +222,14 @@ export function EmptyState({ title, body, action }: { title: string; body?: stri
   );
 }
 
-/* Toasts: one live region, success/error, optional undo. */
-export interface ToastMsg {
-  id: number;
-  text: string;
-  kind: "ok" | "error";
-  undo?: () => void;
-}
-
+/* Toasts: kept as an adapter so the editors keep their (text, kind, undo) call shape, but there
+   is one toast system (ui/Toast), so two stacks can never overlap. Needs a <ToastProvider> above. */
 export function useToasts() {
-  const [items, setItems] = useState<ToastMsg[]>([]);
-  const n = useRef(0);
-  const push = useCallback((text: string, kind: "ok" | "error" = "ok", undo?: () => void) => {
-    const id = ++n.current;
-    setItems((cur) => [...cur.slice(-2), { id, text, kind, undo }]);
-    setTimeout(() => setItems((cur) => cur.filter((t) => t.id !== id)), undo ? 6000 : 3500);
-  }, []);
-  const node = (
-    <div aria-live="polite" className="fixed bottom-20 lg:bottom-6 left-1/2 -translate-x-1/2 z-[60] flex flex-col gap-2 items-center w-[calc(100%-2rem)] max-w-sm pointer-events-none">
-      {items.map((t) => (
-        <div key={t.id} role={t.kind === "error" ? "alert" : "status"} className={`pointer-events-auto w-full rounded-xl px-4 py-3 text-sm font-medium shadow-v2-elevated flex items-center justify-between gap-3 ${t.kind === "error" ? "bg-[#c62445] text-white" : "bg-[#1f2429] text-white"}`}>
-          <span>{t.text}</span>
-          {t.undo && (
-            <button type="button" onClick={() => { t.undo?.(); setItems((c) => c.filter((x) => x.id !== t.id)); }} className="font-bold underline">Undo</button>
-          )}
-        </div>
-      ))}
-    </div>
+  const { toast } = useToast();
+  const push = useCallback(
+    (text: string, kind: "ok" | "error" = "ok", undo?: () => void) =>
+      toast(text, { tone: kind === "error" ? "error" : "success", onAction: undo }),
+    [toast],
   );
-  return { push, node };
+  return { push, node: null as React.ReactNode };
 }

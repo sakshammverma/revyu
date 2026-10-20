@@ -136,10 +136,13 @@ export interface Wallet {
 export class HubApiError extends Error {
   code: string;
   status: number;
-  constructor(code: string, message: string, status: number) {
+  /** Some conflicts name the record they collided with (ALREADY_REQUESTED -> the existing request). */
+  id?: string;
+  constructor(code: string, message: string, status: number, id?: string) {
     super(message);
     this.code = code;
     this.status = status;
+    this.id = id;
   }
 }
 
@@ -155,7 +158,7 @@ async function parse<T>(res: Response): Promise<T> {
     err?.message ??
     (Array.isArray(raw) ? "Please check the highlighted fields." : null) ??
     "Something went wrong. Please try again.";
-  throw new HubApiError(err?.code ?? "UNKNOWN", message, res.status);
+  throw new HubApiError(err?.code ?? "UNKNOWN", message, res.status, typeof err?.id === "string" ? err.id : undefined);
 }
 
 /* ------------------------------------------------------ customer beacons */
@@ -576,10 +579,5 @@ export const adminGrowthApi = {
 
 /* --------------------------------------------------------------- helpers */
 
-export function formatMoney(amountMinor: number, currency: string, locale = "en-IN") {
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency,
-    maximumFractionDigits: amountMinor % 100 === 0 ? 0 : 2,
-  }).format(amountMinor / 100);
-}
+// One implementation (currency-aware minor units); see lib/format.ts.
+export { formatMoney } from "@/lib/format";

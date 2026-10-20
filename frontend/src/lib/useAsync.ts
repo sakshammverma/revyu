@@ -24,6 +24,7 @@ export function useAsync<T>(fn: () => Promise<T>, deps: unknown[] = []) {
   useEffect(() => {
     let cancelled = false;
     const requested = deps;
+    setState((s) => (s.error ? { ...s, error: null } : s));
     (async () => {
       try {
         const data = await fnRef.current();

@@ -18,8 +18,22 @@ const KINDS: { value: string; label: string; placeholder: string }[] = [
   { value: "custom", label: "Other link", placeholder: "https://" },
 ];
 
+// Website-style links must parse as a URL with a real host; the other kinds (handles, numbers) are normalised on the server.
+function validAddress(l: EditorLink): boolean {
+  if (l.kind !== "website" && l.kind !== "custom") return true;
+  const raw = l.url.trim();
+  try {
+    const u = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`);
+    return u.hostname.includes(".");
+  } catch {
+    return false;
+  }
+}
+
 export function ConnectTab({ api, state, reload, toast }: TabProps) {
   const [links, setLinks] = useState<EditorLink[]>(state.links);
+  // Stable React keys that travel with a row when it is moved or removed (rows have no id until saved).
+  const [keys, setKeys] = useState(() => state.links.map(() => crypto.randomUUID()));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const dirty = JSON.stringify(links) !== JSON.stringify(state.links);
@@ -31,9 +45,21 @@ export function ConnectTab({ api, state, reload, toast }: TabProps) {
     const next = [...links];
     [next[i], next[j]] = [next[j], next[i]];
     setLinks(next);
+    const k = [...keys];
+    [k[i], k[j]] = [k[j], k[i]];
+    setKeys(k);
+  };
+  const remove = (i: number) => {
+    setLinks(links.filter((_, n) => n !== i));
+    setKeys(keys.filter((_, n) => n !== i));
   };
 
   async function save() {
+    const bad = links.find((l) => l.url.trim() && !validAddress(l));
+    if (bad) {
+      setError(`“${bad.url.trim()}” doesn’t look like a web address. Check it and try again.`);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -62,7 +88,7 @@ export function ConnectTab({ api, state, reload, toast }: TabProps) {
             {links.map((l, i) => {
               const k = KINDS.find((x) => x.value === l.kind);
               return (
-                <li key={i} className="rounded-xl border border-[#e8ecec] p-3 flex flex-col gap-2">
+                <li key={keys[i] ?? i} className="rounded-xl border border-[#e8ecec] p-3 flex flex-col gap-2">
                   <div className="flex items-center gap-2">
                     <select
                       aria-label="Link type"
@@ -92,9 +118,9 @@ export function ConnectTab({ api, state, reload, toast }: TabProps) {
                     />
                   )}
                   <div className="flex gap-2 text-sm">
-                    <button type="button" disabled={i === 0} onClick={() => move(i, -1)} className="px-2 py-1 text-[#515a63] disabled:opacity-30">↑ Up</button>
-                    <button type="button" disabled={i === links.length - 1} onClick={() => move(i, 1)} className="px-2 py-1 text-[#515a63] disabled:opacity-30">↓ Down</button>
-                    <button type="button" onClick={() => setLinks(links.filter((_, n) => n !== i))} className="px-2 py-1 text-[#c62445] ml-auto">Remove</button>
+                    <button type="button" disabled={i === 0} onClick={() => move(i, -1)} className="px-3 min-h-[44px] text-[#515a63] disabled:opacity-30">↑ Up</button>
+                    <button type="button" disabled={i === links.length - 1} onClick={() => move(i, 1)} className="px-3 min-h-[44px] text-[#515a63] disabled:opacity-30">↓ Down</button>
+                    <button type="button" onClick={() => remove(i)} className="px-3 min-h-[44px] text-[#c62445] ml-auto">Remove</button>
                   </div>
                 </li>
               );
@@ -103,7 +129,7 @@ export function ConnectTab({ api, state, reload, toast }: TabProps) {
         )}
         {error && <p className="text-sm text-[#c62445] mt-3" role="alert">{error}</p>}
         <div className="flex gap-2 mt-4">
-          <Btn variant="light" onClick={() => setLinks([...links, { kind: "instagram", label: null, url: "", enabled: true }])}>+ Add link</Btn>
+          <Btn variant="light" onClick={() => { setLinks([...links, { kind: "instagram", label: null, url: "", enabled: true }]); setKeys([...keys, crypto.randomUUID()]); }}>+ Add link</Btn>
           <Btn onClick={save} busy={busy} disabled={!dirty}>Save links</Btn>
         </div>
       </Card>

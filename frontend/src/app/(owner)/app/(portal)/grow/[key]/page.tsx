@@ -29,7 +29,8 @@ export default function ServiceDetailPage() {
       router.push(`/app/grow/requests/${req.id}`);
     } catch (err) {
       if (err instanceof HubApiError && err.code === "ALREADY_REQUESTED") {
-        router.push("/app/grow");
+        // Take them to the request they already have, not back to the list.
+        router.push(err.id ? `/app/grow/requests/${err.id}` : "/app/grow");
         return;
       }
       setError(err instanceof HubApiError ? err.message : "Couldn't send your request.");
@@ -73,13 +74,13 @@ export default function ServiceDetailPage() {
                 q.type === "choice" ? (
                   <label key={q.key} className="text-sm font-medium text-ink flex flex-col gap-1">
                     {q.label}
-                    <select value={answers[q.key] ?? ""} onChange={(e) => setAnswers({ ...answers, [q.key]: e.target.value })} className="rounded-lg border border-[#d5dcdc] bg-white px-3 py-2.5 text-base">
+                    <select required value={answers[q.key] ?? ""} onChange={(e) => setAnswers({ ...answers, [q.key]: e.target.value })} className="rounded-lg border border-[#d5dcdc] bg-white px-3 py-2.5 text-base">
                       <option value="">Choose…</option>
                       {q.options?.map((o) => <option key={o} value={o}>{o}</option>)}
                     </select>
                   </label>
                 ) : (
-                  <TextInput key={q.key} label={q.label} maxLength={500} value={answers[q.key] ?? ""} onChange={(e) => setAnswers({ ...answers, [q.key]: e.target.value })} />
+                  <TextInput key={q.key} label={q.label} required maxLength={500} value={answers[q.key] ?? ""} onChange={(e) => setAnswers({ ...answers, [q.key]: e.target.value })} />
                 )
               )}
               <TextArea label="Anything else we should know?" maxLength={2000} value={brief} onChange={(e) => setBrief(e.target.value)} />

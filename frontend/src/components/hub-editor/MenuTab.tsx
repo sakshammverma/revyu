@@ -85,7 +85,13 @@ export function MenuTab({ api, state, reload, toast }: TabProps) {
     }
   }
 
+  // The item whose availability switch is mid-save; a second tap on it is ignored.
+  const [toggling, setToggling] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   async function quickToggle(i: MenuItemData) {
+    if (toggling) return;
+    setToggling(i.id);
     try {
       await api.editItem(i.id, {
         category_id: i.category_id, name: i.name, description: i.description, amount_minor: i.amount_minor,
@@ -93,7 +99,7 @@ export function MenuTab({ api, state, reload, toast }: TabProps) {
         dietary: i.dietary, photo_url: i.photo_url, available: !i.available,
       });
       await reload();
-    } catch (err) { fail(err); }
+    } catch (err) { fail(err); } finally { setToggling(null); }
   }
 
   async function upload(file?: File) {
@@ -153,7 +159,7 @@ export function MenuTab({ api, state, reload, toast }: TabProps) {
                       {i.price_on_request || i.amount_minor === null ? "Price on request" : formatMoney(i.amount_minor, i.currency_code)}
                     </span>
                   </button>
-                  <Switch label={`${i.name} available`} checked={i.available} onChange={() => quickToggle(i)} />
+                  <Switch label={`${i.name} available`} checked={i.available} disabled={toggling !== null} onChange={() => quickToggle(i)} />
                 </li>
               ))}
             </ul>
@@ -228,9 +234,12 @@ export function MenuTab({ api, state, reload, toast }: TabProps) {
                 <Btn
                   type="button"
                   variant="danger"
+                  busy={deleting}
                   onClick={async () => {
+                    if (deleting) return;
                     if (!confirmDel) { setConfirmDel(true); return; }
-                    try { await api.deleteItem(draft.id!); setDraft(null); await reload(); toast("Item deleted"); } catch (err) { fail(err); }
+                    setDeleting(true);
+                    try { await api.deleteItem(draft.id!); setDraft(null); await reload(); toast("Item deleted"); } catch (err) { fail(err); } finally { setDeleting(false); }
                   }}
                 >{confirmDel ? "Tap again to delete" : "Delete"}</Btn>
               )}

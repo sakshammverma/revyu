@@ -6,6 +6,7 @@ import { useState } from "react";
 
 import { Card, ErrorState, Skeleton } from "@/components/ui";
 import { Btn, TextArea } from "@/components/ui/kit";
+import { formatDate } from "@/lib/format";
 import { HubApiError, formatMoney, growthApi, type ServiceRequest } from "@/lib/hub/api";
 import { useAsync } from "@/lib/useAsync";
 import { CheckoutCancelled, runCheckout } from "@/lib/signup/checkout";
@@ -77,7 +78,7 @@ export default function RequestPage() {
       <Link href="/app/grow" className="text-sm font-semibold text-text-2 min-h-[44px] inline-flex items-center">← All services</Link>
       <div>
         <h1 className="font-display text-2xl sm:text-3xl text-ink">{req.service_name}</h1>
-        <p className="text-sm text-text-2 mt-1">Requested {new Date(req.created_at).toLocaleDateString()}</p>
+        <p className="text-sm text-text-2 mt-1">Requested {formatDate(req.created_at)}</p>
       </div>
 
       <Card>
@@ -98,7 +99,7 @@ export default function RequestPage() {
       {req.status === "quoted" && req.quoted_amount_minor !== null && (
         <Card title="Your quote">
           <p className="text-3xl font-bold text-ink">{formatMoney(req.quoted_amount_minor, req.currency_code)}</p>
-          <p className="text-sm text-text-2 mt-1">Accept to confirm. We&rsquo;ll then get in touch to arrange payment and start work.</p>
+          <p className="text-sm text-text-2 mt-1">Accept to confirm. You can then pay securely here and work starts.</p>
           {error && <p className="text-sm text-alert mt-2" role="alert">{error}</p>}
           <div className="flex gap-2 mt-4">
             <Btn busy={busy} onClick={() => run(() => growthApi.accept(req.id))}>Accept quote</Btn>
@@ -134,7 +135,7 @@ export default function RequestPage() {
         <ul className="flex flex-col gap-3">
           {(req.events ?? []).map((e) =>
             e.kind === "status_changed" ? (
-              <li key={e.id} className="text-xs text-text-2 text-center">{e.body} · {new Date(e.created_at).toLocaleDateString()}</li>
+              <li key={e.id} className="text-xs text-text-2 text-center">{e.body} · {formatDate(e.created_at)}</li>
             ) : (
               <li key={e.id} className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${e.actor === "owner" ? "self-end bg-[#2f68db] text-white" : "self-start bg-paper-subtle text-ink"}`}>
                 {e.body}

@@ -57,12 +57,11 @@ export function FeedbackInbox({ items: initialItems }: { items: FeedbackItem[] }
       title="Private customer feedback"
       description="Messages customers sent only to you, at any rating."
       action={
-        <div role="tablist" aria-label="Filter feedback" className="inline-flex rounded-[var(--r-control)] bg-paper-subtle p-1 shrink-0">
+        <div role="group" aria-label="Filter feedback" className="inline-flex rounded-[var(--r-control)] bg-paper-subtle p-1 shrink-0">
           {(["open", "resolved", "all"] as Filter[]).map((f) => (
             <button
               key={f}
-              role="tab"
-              aria-selected={filter === f}
+              aria-pressed={filter === f}
               onClick={() => setFilter(f)}
               className={`px-3 min-h-[36px] rounded-md text-xs font-semibold capitalize cursor-pointer ${
                 filter === f ? "bg-sheet text-ink shadow-v2-rest" : "text-text-2"

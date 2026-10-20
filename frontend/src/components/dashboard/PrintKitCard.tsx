@@ -54,6 +54,11 @@ export function PrintKitCard() {
 
   async function order(e: React.FormEvent) {
     e.preventDefault();
+    if (busy) return;
+    if (phone.replace(/\D/g, "").length < 8) {
+      setError("Enter a phone number we can call to confirm delivery.");
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -92,7 +97,7 @@ export function PrintKitCard() {
           {error && <p className="text-sm text-alert" role="alert">{error}</p>}
           <div className="flex gap-2">
             <Btn type="submit" busy={busy}>Request delivery</Btn>
-            <Btn type="button" variant="light" onClick={() => setOpen(false)}>Cancel</Btn>
+            <Btn type="button" variant="light" disabled={busy} onClick={() => setOpen(false)}>Cancel</Btn>
           </div>
         </form>
       ) : (
