@@ -25,9 +25,9 @@ export function Footer() {
                 />
               </Link>
 
-              <h3 className="heading-h3 font-display text-white text-2xl sm:text-3xl leading-snug">
+              <p className="heading-h3 font-display text-white text-2xl sm:text-3xl leading-snug">
                 A printed QR that helps your customers write their own Google reviews.
-              </h3>
+              </p>
               <p className="mt-3 text-sm text-text-on-dark leading-relaxed">
                 For any local shop or business. No app, no gating, no incentives.
               </p>
@@ -44,6 +44,9 @@ export function Footer() {
               >
                 <input
                   type="email"
+                  name="email"
+                  autoComplete="email"
+                  aria-label="Your business email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -65,7 +68,7 @@ export function Footer() {
           </div>
 
           {/* Right Columns: Links */}
-          <div className="lg:col-span-6 grid grid-cols-2 sm:grid-cols-3 gap-8">
+          <nav aria-label="Footer" className="lg:col-span-6 grid grid-cols-2 sm:grid-cols-3 gap-8">
             {/* Column 1: Platform */}
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-text-on-dark mb-4">
@@ -172,7 +175,7 @@ export function Footer() {
                 </li>
               </ul>
             </div>
-          </div>
+          </nav>
         </div>
 
         {/* Bottom Bar: Copyright & Policy Guarantee */}

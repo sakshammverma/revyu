@@ -112,6 +112,8 @@ export function Hero() {
           className="relative w-full aspect-[21/9] sm:aspect-[2.8/1] min-h-[420px] sm:min-h-[520px] overflow-hidden group"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
+          onFocus={() => setIsPaused(true)}
+          onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setIsPaused(false); }}
         >
           {/* Stack of Cinematic Landscape Photos with Cross-fade (Non-cartoonish, expansive natural landscapes) */}
           {STORIES.map((story, idx) => (
@@ -149,10 +151,13 @@ export function Hero() {
             >
               <input
                 type="email"
+                name="email"
+                autoComplete="email"
+                aria-label="Your business email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Your business email"
-                className="flex-1 px-4 py-2.5 text-sm text-ink placeholder-[#9aa1a3] bg-transparent focus:outline-none"
+                className="flex-1 px-4 py-2.5 text-sm text-ink placeholder-text-muted bg-transparent focus:outline-none"
               />
               <button
                 type="submit"
@@ -215,6 +220,8 @@ export function Hero() {
           className="w-full border-t border-line bg-[#ffffff] grid grid-cols-2 sm:grid-cols-6 divide-x divide-y sm:divide-y-0 divide-line text-xs"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
+          onFocus={() => setIsPaused(true)}
+          onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setIsPaused(false); }}
         >
           <div className="p-3.5 sm:p-4 flex items-center justify-center font-semibold text-text-muted bg-[#fcfcfc] col-span-2 sm:col-span-1">
             Tap one ↓

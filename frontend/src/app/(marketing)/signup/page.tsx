@@ -14,8 +14,10 @@ export default async function SignupPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const { email, ref, place, name } = await searchParams;
+  const { email, ref, place, name, plan } = await searchParams;
   const initialEmail = typeof email === "string" ? email : "";
+  // The pricing page links here with the plan the visitor clicked.
+  const initialPlan = plan === "annual" ? "annual" : "monthly";
   const referralCode = typeof ref === "string" ? ref.slice(0, 16) : "";
   // From the gap report: the place is already known, so preselect it.
   const initialPlace =
@@ -43,7 +45,7 @@ export default async function SignupPage({
             A fellow business owner invited you. Thank you for trying Revyu.
           </p>
         )}
-        <SignupForm initialEmail={initialEmail} referralCode={referralCode} initialPlace={initialPlace} />
+        <SignupForm initialEmail={initialEmail} referralCode={referralCode} initialPlace={initialPlace} initialPlan={initialPlan} />
       </Section>
     </MarketingPage>
   );

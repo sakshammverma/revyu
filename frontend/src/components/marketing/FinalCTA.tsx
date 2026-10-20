@@ -15,7 +15,7 @@ export function FinalCTA() {
         <div className="absolute inset-0 opacity-15 pointer-events-none flex items-center justify-center">
           <Image
             src="/assets/contour-lines.svg"
-            alt="Contour lines background pattern"
+            alt=""
             width={1200}
             height={600}
             className="w-full h-full object-cover"
@@ -42,14 +42,17 @@ export function FinalCTA() {
               e.preventDefault();
               router.push(email.trim() ? `/signup?email=${encodeURIComponent(email.trim())}` : "/signup");
             }}
-            className="mt-8 sm:mt-10 w-full max-w-md bg-white border border-line p-1.5 rounded-full shadow-v2-elevated flex items-center gap-2 hover:border-[#cbd5e1] transition-colors"
+            className="mt-8 sm:mt-10 w-full max-w-md bg-white border border-line p-1.5 rounded-full shadow-v2-elevated flex items-center gap-2 hover:border-[#cbd5e1] focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/25 transition-colors"
           >
             <input
               type="email"
+              name="email"
+              autoComplete="email"
+              aria-label="Your business email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Your business email"
-              className="flex-1 bg-transparent px-4 py-2.5 text-xs sm:text-sm text-ink placeholder-[#9aa1a3] outline-hidden"
+              className="flex-1 min-w-0 bg-transparent px-4 py-2.5 text-xs sm:text-sm text-ink placeholder-text-muted outline-hidden"
             />
             <button
               type="submit"

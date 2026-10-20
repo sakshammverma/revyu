@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useRef, useState } from "react";
 
 import { GhostHand, InteractiveTag, TryHint, useCountUp, useInView, usePlayground } from "./interact";
@@ -81,9 +83,14 @@ export function Google3PackVisualizer() {
               only the ones you happen to remember.
             </p>
 
-            <a href="/signup" className="btn-primary text-xs py-2.5 px-5 self-start">
-              <span>Stop being the quiet one →</span>
-            </a>
+            <div className="flex flex-wrap items-center gap-3 self-start">
+              <Link href="/signup" className="btn-primary text-xs py-2.5 px-5">
+                <span>Stop being the quiet one →</span>
+              </Link>
+              <Link href="/gap-report" className="text-xs font-semibold text-accent-hover underline underline-offset-2">
+                Check your real numbers
+              </Link>
+            </div>
           </div>
 
           {/* Right Column: search-result mockup (7 cols) */}

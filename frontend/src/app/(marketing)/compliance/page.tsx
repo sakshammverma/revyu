@@ -83,7 +83,7 @@ export function CompliancePage() {
       {/* What We Never Claim Card */}
       <section className="max-w-[1024px] mx-auto px-4 pb-20">
         <div className="v2-card-elevated p-8 sm:p-10 border border-line bg-white">
-          <h3 className="font-display text-2xl text-ink">What we never claim</h3>
+          <h2 className="font-display text-2xl text-ink">What we never claim</h2>
           <p className="text-sm text-text-muted mt-2">
             Claims we will never make:
           </p>

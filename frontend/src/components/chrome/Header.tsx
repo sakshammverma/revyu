@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Logo } from "@/components/ui/Logo";
 import Image from "next/image";
 import { Price } from "@/lib/pricing";
@@ -10,6 +11,26 @@ export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [megaMenuOpen, setMegaMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Any navigation closes both menus (a hash link on the same page doesn't change the pathname, but those links close the menu themselves).
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset UI state when the route changes
+    setMegaMenuOpen(false);
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  // Escape closes whichever menu is open.
+  useEffect(() => {
+    if (!megaMenuOpen && !mobileMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setMegaMenuOpen(false);
+      setMobileMenuOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [megaMenuOpen, mobileMenuOpen]);
 
   useEffect(() => {
     function handleScroll() {
@@ -29,6 +50,12 @@ export function Header() {
 
   return (
     <>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60] focus:bg-white focus:text-ink focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-v2-elevated"
+      >
+        Skip to content
+      </a>
       {/* Dim overlay when mega menu is open */}
       {megaMenuOpen && (
         <div
@@ -84,6 +111,8 @@ export function Header() {
             <div className="relative">
               <button
                 type="button"
+                aria-expanded={megaMenuOpen}
+                aria-controls="resources-menu"
                 onClick={() => setMegaMenuOpen(!megaMenuOpen)}
                 className={`text-sm transition-colors flex items-center gap-1 cursor-pointer ${
                   megaMenuOpen ? "text-ink font-medium" : "text-text-2 hover:text-ink"
@@ -152,8 +181,10 @@ export function Header() {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="w-9 h-9 rounded-lg bg-bg border border-line flex items-center justify-center text-ink hover:bg-[#e2e6e6] transition-colors"
+              className="w-11 h-11 rounded-lg bg-bg border border-line flex items-center justify-center text-ink hover:bg-[#e2e6e6] transition-colors"
               aria-label="Toggle navigation"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-menu"
             >
               {mobileMenuOpen ? (
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -170,7 +201,7 @@ export function Header() {
 
         {/* Mega Menu Dropdown Panel */}
         {megaMenuOpen && (
-          <div className="pointer-events-auto absolute top-full left-0 right-0 max-w-[1272px] mx-auto px-4 mt-2 transition-all duration-300">
+          <div id="resources-menu" className="pointer-events-auto absolute top-full left-0 right-0 max-w-[1272px] mx-auto px-4 mt-2 transition-all duration-300">
             <div className="bg-white rounded-2xl border border-[#e2e4e5] shadow-v2-elevated p-8 grid grid-cols-1 md:grid-cols-12 divide-y md:divide-y-0 md:divide-x divide-line">
               {/* Column 1: Featured Case Study */}
               <div className="md:col-span-5 pr-0 md:pr-8 pb-6 md:pb-0">
@@ -188,9 +219,9 @@ export function Header() {
                     Printed QR
                   </div>
                 </div>
-                <h4 className="font-display text-lg text-ink leading-snug">
+                <p className="font-display text-lg text-ink leading-snug">
                   Scan, tap what stood out, edit the draft, paste it on Google. See all five screens.
-                </h4>
+                </p>
                 <Link
                   href="/#mechanism"
                   onClick={() => setMegaMenuOpen(false)}
@@ -257,7 +288,7 @@ export function Header() {
                     onClick={() => setMegaMenuOpen(false)}
                     className="flex items-center gap-2 p-2 rounded hover:bg-bg hover:text-ink transition-colors"
                   >
-                    <span className="text-accent">🛡️</span>
+                    <span aria-hidden className="text-accent">🛡️</span>
                     <span>Our five compliance rules</span>
                   </Link>
                   <Link
@@ -265,7 +296,7 @@ export function Header() {
                     onClick={() => setMegaMenuOpen(false)}
                     className="flex items-center gap-2 p-2 rounded hover:bg-bg hover:text-ink transition-colors"
                   >
-                    <span className="text-accent">📱</span>
+                    <span aria-hidden className="text-accent">📱</span>
                     <span>Interactive demo</span>
                   </Link>
                   <Link
@@ -273,7 +304,7 @@ export function Header() {
                     onClick={() => setMegaMenuOpen(false)}
                     className="flex items-center gap-2 p-2 rounded hover:bg-bg hover:text-ink transition-colors"
                   >
-                    <span className="text-accent">🏷️</span>
+                    <span aria-hidden className="text-accent">🏷️</span>
                     <span><Price plan="monthly" suffix="/month, flat" fallback="One flat monthly price" /></span>
                   </Link>
                   <Link
@@ -291,7 +322,7 @@ export function Header() {
 
         {/* Mobile Flyout Drawer */}
         {mobileMenuOpen && (
-          <div className="pointer-events-auto md:hidden mt-2 mx-auto max-w-[360px] bg-ink-dark text-white rounded-2xl p-6 shadow-v2-elevated border border-[#2b3239] flex flex-col gap-4 text-right">
+          <div id="mobile-menu" className="pointer-events-auto md:hidden mt-2 mx-auto max-w-[360px] bg-ink-dark text-white rounded-2xl p-6 shadow-v2-elevated border border-[#2b3239] flex flex-col gap-4 text-right">
             <Link
               href="/how-it-works"
               onClick={() => setMobileMenuOpen(false)}
@@ -326,6 +357,13 @@ export function Header() {
               className="text-lg font-medium hover:text-accent transition-colors"
             >
               Pricing
+            </Link>
+            <Link
+              href="/gap-report"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-lg font-semibold text-white hover:text-accent transition-colors"
+            >
+              Free gap report
             </Link>
             <Link
               href="/app"

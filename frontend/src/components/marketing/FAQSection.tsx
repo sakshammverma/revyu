@@ -68,6 +68,7 @@ export function FAQSection() {
             const isOpen = openIndex === idx;
             return (
               <div key={idx} className="py-5 sm:py-6">
+                <h3>
                 <button
                   type="button"
                   onClick={() => toggleFAQ(idx)}
@@ -86,6 +87,7 @@ export function FAQSection() {
                     +
                   </span>
                 </button>
+                </h3>
                 {isOpen && (
                   <p id={`faq-answer-${idx}`} className="mt-4 text-sm sm:text-base text-text-2 leading-relaxed pr-8 animate-[chatBubbleIn_0.25s_ease]">
                     {faq.a}

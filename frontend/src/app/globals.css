@@ -294,6 +294,9 @@ body {
 
 /* Animations */
 /* Customer flow: a short fade between steps (the global reduced-motion rule turns it off). */
+/* In-page anchors (#faq, #specialties...) must not land under the sticky header. */
+[id] { scroll-margin-top: 6rem; }
+
 @keyframes flowStepIn {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: none; }

@@ -77,6 +77,7 @@ export function ROICalculatorSection() {
                   step="100"
                   value={pos}
                   onChange={(e) => touch(Number(e.target.value))}
+                  aria-valuetext={pricing.ready ? showMajor(avgBill) : undefined}
                   style={{ "--fill": `${fill}%` } as React.CSSProperties}
                   className={`range-fill w-full ${tried ? "" : "afford-ring"}`}
                 />

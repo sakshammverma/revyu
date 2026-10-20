@@ -86,7 +86,9 @@ export function TestimonialMarquee() {
         <div className="relative w-full overflow-hidden mb-6 flex">
           <div className="flex gap-6 animate-marquee shrink-0">
             {[...ROW_1, ...ROW_1].map((item, idx) => (
-              <MarqueeCard key={`row1-${idx}`} item={item} />
+              <div key={`row1-${idx}`} aria-hidden={idx >= ROW_1.length || undefined}>
+                <MarqueeCard item={item} />
+              </div>
             ))}
           </div>
         </div>
@@ -95,7 +97,9 @@ export function TestimonialMarquee() {
         <div className="relative w-full overflow-hidden mb-12 flex">
           <div className="flex gap-6 animate-marquee-reverse shrink-0">
             {[...ROW_2, ...ROW_2].map((item, idx) => (
-              <MarqueeCard key={`row2-${idx}`} item={item} />
+              <div key={`row2-${idx}`} aria-hidden={idx >= ROW_2.length || undefined}>
+                <MarqueeCard item={item} />
+              </div>
             ))}
           </div>
         </div>

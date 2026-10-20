@@ -56,24 +56,24 @@ export function ComparisonMatrix() {
         </div>
 
         <div className="overflow-x-auto rounded-2xl border border-line bg-white shadow-v2-rest">
-          <table className="w-full text-left border-collapse text-xs sm:text-sm">
+          <table className="w-full min-w-[640px] text-left border-collapse text-xs sm:text-sm">
             <thead>
               <tr className="border-b border-line bg-[#f8fafc]">
-                <th className="p-4 sm:p-5 font-semibold text-ink w-1/4">&nbsp;</th>
-                <th className="p-4 sm:p-5 font-bold text-ink bg-accent-50/60 border-x border-accent/20 w-1/4">
+                <th scope="col" className="p-4 sm:p-5 font-semibold text-ink w-1/4"><span className="sr-only">Feature</span></th>
+                <th scope="col" className="p-4 sm:p-5 font-bold text-ink bg-accent-50/60 border-x border-accent/20 w-1/4">
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-accent" />
                     <span>A code on your counter</span>
                   </div>
                 </th>
-                <th className="p-4 sm:p-5 font-semibold text-text-2 w-1/4">A message days later</th>
-                <th className="p-4 sm:p-5 font-semibold text-text-2 w-1/4">Asking by memory</th>
+                <th scope="col" className="p-4 sm:p-5 font-semibold text-text-2 w-1/4">A message days later</th>
+                <th scope="col" className="p-4 sm:p-5 font-semibold text-text-2 w-1/4">Asking by memory</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-line">
               {ROWS.map((row) => (
                 <tr key={row.feature} className={row.highlight ? "bg-[#f8fafc]/50" : ""}>
-                  <td className="p-4 sm:p-5 font-semibold text-ink">{row.feature}</td>
+                  <th scope="row" className="p-4 sm:p-5 font-semibold text-ink">{row.feature}</th>
                   <td className="p-4 sm:p-5 font-bold text-accent bg-accent-50/40 border-x border-accent/20">
                     {row.revyu}
                   </td>

@@ -123,6 +123,8 @@ export function PlatformTabs() {
         className="v2-sheet max-w-[1296px] mx-auto border border-line p-6 sm:p-12 lg:p-16"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
+        onFocus={() => setIsPaused(true)}
+        onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setIsPaused(false); }}
       >
         {/* Section Heading */}
         <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   confirmSignup,
@@ -40,7 +40,9 @@ export function SignupForm({
   initialEmail = "",
   referralCode = "",
   initialPlace,
+  initialPlan = "monthly",
 }: {
+  initialPlan?: "monthly" | "annual";
   initialEmail?: string;
   referralCode?: string;
   /** Preselected Google place (the gap report's "Start free trial" link). */
@@ -69,7 +71,7 @@ export function SignupForm({
   const [searching, setSearching] = useState(false);
 
   const [placementAck, setPlacementAck] = useState(false);
-  const [plan, setPlan] = useState<"monthly" | "annual">("monthly");
+  const [plan, setPlan] = useState<"monthly" | "annual">(initialPlan);
 
   async function handleSearch() {
     if (!query.trim() || searching) return;
@@ -142,8 +144,24 @@ export function SignupForm({
 
   const currentStepIndex = STEPS.findIndex((s) => s.key === step);
 
+  // Each step replaces the last one's content, so the focused button disappears:
+  // move focus to the new step's heading so keyboard and screen-reader users aren't dropped at the top of the page.
+  const root = useRef<HTMLDivElement>(null);
+  const firstStep = useRef(true);
+  useEffect(() => {
+    if (firstStep.current) {
+      firstStep.current = false;
+      return;
+    }
+    const heading = root.current?.querySelector<HTMLElement>("h2");
+    if (heading) {
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: false });
+    }
+  }, [step]);
+
   return (
-    <div className="v2-sheet p-6 sm:p-8 max-w-2xl mx-auto border border-line shadow-v2-rest">
+    <div ref={root} className="v2-sheet p-6 sm:p-8 max-w-2xl mx-auto border border-line shadow-v2-rest">
       {/* Progress Steps Header */}
       <div className="mb-8 pb-5 border-b border-line">
         <div className="flex items-center justify-between">
@@ -151,7 +169,7 @@ export function SignupForm({
             const isCompleted = idx < currentStepIndex;
             const isCurrent = s.key === step;
             return (
-              <div key={s.key} className="flex items-center gap-2">
+              <div key={s.key} aria-current={isCurrent ? "step" : undefined} className="flex items-center gap-2">
                 <div
                   className={`w-7 h-7 rounded-full text-xs font-bold flex items-center justify-center transition-colors ${
                     isCurrent
@@ -165,7 +183,7 @@ export function SignupForm({
                 </div>
                 <span
                   className={`hidden sm:inline text-xs font-semibold ${
-                    isCurrent ? "text-ink" : "text-ink-disabled"
+                    isCurrent ? "text-ink" : "text-ink-muted"
                   }`}
                 >
                   {s.label}
@@ -196,28 +214,29 @@ export function SignupForm({
             </p>
           </div>
 
-          <Field label="Business name" value={businessName} onChange={setBusinessName} placeholder="e.g. Sharma General Store" />
+          <Field label="Business name" autoComplete="organization" value={businessName} onChange={setBusinessName} placeholder="e.g. Sharma General Store" />
           
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5">
+            <label htmlFor="business-type" className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5">
               Business type
             </label>
             <select
+              id="business-type"
               value={vertical}
               onChange={(e) => setVertical(e.target.value)}
               className="w-full rounded-xl border border-line bg-paper-subtle/50 px-3.5 py-2.5 text-sm text-ink focus:border-brand focus:bg-white transition-colors"
             >
               {VERTICALS.map((v) => (
                 <option key={v} value={v}>
-                  {v === "general" ? "Shop / other business" : v.charAt(0).toUpperCase() + v.slice(1)}
+                  {v === "general" ? "Shop, café, boutique or other" : v.charAt(0).toUpperCase() + v.slice(1)}
                 </option>
               ))}
             </select>
           </div>
 
-          <Field label="Owner / Manager name" value={ownerName} onChange={setOwnerName} placeholder="e.g. S. Sharma" />
-          <Field label="Phone number" value={ownerPhone} onChange={setOwnerPhone} type="tel" placeholder="+91 98765 43210" />
-          <Field label="Work email" value={ownerEmail} onChange={setOwnerEmail} type="email" placeholder="you@yourbusiness.in" />
+          <Field label="Owner / Manager name" autoComplete="name" value={ownerName} onChange={setOwnerName} placeholder="e.g. S. Sharma" />
+          <Field label="Phone number" autoComplete="tel" value={ownerPhone} onChange={setOwnerPhone} type="tel" placeholder="+91 98765 43210" />
+          <Field label="Work email" autoComplete="email" value={ownerEmail} onChange={setOwnerEmail} type="email" placeholder="you@yourbusiness.in" />
 
           <div className="mt-4 pt-4 border-t border-line flex justify-end">
             <button
@@ -244,6 +263,7 @@ export function SignupForm({
 
           <div className="flex gap-2">
             <input
+              aria-label="Search for your business on Google"
               className="flex-1 rounded-xl border border-line bg-paper-subtle/50 px-4 py-2.5 text-sm text-ink focus:bg-white focus:border-brand transition-colors"
               placeholder="Search by business name or location"
               value={query}
@@ -446,7 +466,9 @@ function Field({
   onChange,
   type = "text",
   placeholder,
+  autoComplete,
 }: {
+  autoComplete?: string;
   label: string;
   value: string;
   onChange: (v: string) => void;
@@ -462,6 +484,7 @@ function Field({
       <input
         id={id}
         type={type}
+        autoComplete={autoComplete}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}

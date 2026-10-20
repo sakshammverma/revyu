@@ -36,9 +36,9 @@ export default function PricingPage() {
           <div className="v2-sheet p-8 sm:p-10 border border-line flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between border-b border-line pb-4">
-                <span className="text-sm font-semibold text-ink">
+                <h2 className="text-sm font-semibold text-ink">
                   Monthly Flexibility
-                </span>
+                </h2>
                 <span className="text-xs px-2.5 py-1 rounded-full bg-bg border border-line text-text-2 font-medium">
                   Cancel anytime
                 </span>
@@ -77,7 +77,7 @@ export default function PricingPage() {
 
             <div className="mt-10 pt-6 border-t border-line">
               <Link
-                href="/signup"
+                href="/signup?plan=monthly"
                 className="w-full inline-flex items-center justify-center gap-2 py-3 px-6 rounded-lg bg-bg hover:bg-line text-ink border border-line font-semibold text-sm transition-all"
               >
                 <span>Start 15-day free trial</span>
@@ -97,9 +97,9 @@ export default function PricingPage() {
             </IfPriced>
             <div>
               <div className="flex items-center justify-between border-b border-line pb-4">
-                <span className="text-sm font-semibold text-accent">
+                <h2 className="text-sm font-semibold text-accent">
                   Annual Commitment
-                </span>
+                </h2>
                 <span className="text-xs px-2.5 py-1 rounded-full bg-accent-50 text-accent font-semibold">
                   Most Popular
                 </span>
@@ -138,7 +138,7 @@ export default function PricingPage() {
 
             <div className="mt-10 pt-6 border-t border-line">
               <Link
-                href="/signup"
+                href="/signup?plan=annual"
                 className="btn-primary w-full py-3.5 text-sm justify-center"
               >
                 <span>Start 15-day free trial</span>
@@ -153,14 +153,14 @@ export default function PricingPage() {
       <section className="max-w-[1024px] mx-auto px-4 pb-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="v2-sheet p-6 sm:p-8 border border-line">
-            <h3 className="font-display text-xl text-ink">15 days free, first charge after the trial</h3>
+            <h2 className="font-display text-xl text-ink">15 days free, first charge after the trial</h2>
             <p className="mt-3 text-sm text-text-muted leading-relaxed">
               You set up UPI AutoPay or a card when you sign up, but nothing is charged until your 15-day trial ends, and the trial only starts once we verify your business. Cancel before then and you pay nothing. If that first payment doesn’t go through, your QR keeps working for 10 more customer reviews while you sort it out.
             </p>
           </div>
 
           <div className="v2-sheet p-6 sm:p-8 border border-line">
-            <h3 className="font-display text-xl text-ink">One new customer can cover a whole year</h3>
+            <h2 className="font-display text-xl text-ink">One new customer can cover a whole year</h2>
             <p className="mt-3 text-sm text-text-muted leading-relaxed">
               <Price plan="annual" /> a year is less than what many shops earn from a single new regular customer. We don’t promise reviews, ratings or rankings — we make sure every customer is asked.
             </p>

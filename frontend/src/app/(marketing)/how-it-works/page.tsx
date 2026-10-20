@@ -95,13 +95,15 @@ export default function HowItWorksPage() {
             <span className="text-sm font-medium text-ink">
               Ready to test it for your business?
             </span>
-            <Link
-              href="/#mechanism"
-              className="btn-primary"
-            >
-              <span>Try the demo</span>
-              <span className="font-bold">→</span>
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-3 items-center">
+              <Link href="/#mechanism" className="text-sm font-semibold text-accent-hover underline underline-offset-2">
+                Try the demo
+              </Link>
+              <Link href="/signup" className="btn-primary">
+                <span>Start free trial</span>
+                <span className="font-bold">→</span>
+              </Link>
+            </div>
           </div>
         </div>
       </section>

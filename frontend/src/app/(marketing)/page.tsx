@@ -27,7 +27,7 @@ export default function Home() {
       <Header />
 
       {/* Main Page Flow following design-system.md sequence */}
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
         {/* 3. Hero — one example flow per vertical */}
         <Hero />
 
