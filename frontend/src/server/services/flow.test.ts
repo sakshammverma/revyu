@@ -166,6 +166,23 @@ describe("submitFeedback", () => {
       expect(sent.map((n) => n.template)).toContain("private_feedback_received");
     }));
 
+  it("defers the owner alert when asked, and runs it exactly once", () =>
+    inRolledBackTx(async (db) => {
+      const outlet = await makeOutlet(db, await makeAccount(db));
+      const s = await makeSession(db, outlet);
+      const deferred: (() => Promise<void>)[] = [];
+      const input = { sessionId: s.id, rating: 2, message: "slow", contact: null, feedbackId: crypto.randomUUID(), defer: (t: () => Promise<void>) => void deferred.push(t) };
+      await submitFeedback(db, outlet, input);
+      // Saved, but the email has not been sent yet: the customer's request is already free to finish.
+      expect(await db.select().from(notifications).where(eq(notifications.outletId, outlet.id))).toHaveLength(0);
+      expect(deferred).toHaveLength(1);
+      await deferred[0]();
+      expect((await db.select().from(notifications).where(eq(notifications.outletId, outlet.id))).map((n) => n.template)).toContain("private_feedback_received");
+      // A retry of the same message queues no second alert.
+      await submitFeedback(db, outlet, input);
+      expect(deferred).toHaveLength(1);
+    }));
+
   it("returns no instruction to hide the Google link (CR-3)", () =>
     inRolledBackTx(async (db) => {
       const outlet = await makeOutlet(db, await makeAccount(db));

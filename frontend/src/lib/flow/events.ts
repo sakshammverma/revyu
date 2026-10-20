@@ -72,9 +72,52 @@ function bufferForRetry(ctx: EventContext, events: QueuedEvent[]) {
   }
 }
 
+// One customer fires ~7 events in a minute. Sending each separately cost a request
+// (and a rate-limit hit, and a database round trip) apiece, so they ride together:
+// flushed after a short pause, when the page is hidden or closed, and immediately
+// on `handoff` because the redirect to Google is about to unload the page.
+const FLUSH_DELAY_MS = 1500;
+let pending: { ctx: EventContext; event: QueuedEvent }[] = [];
+let timer: ReturnType<typeof setTimeout> | null = null;
+let listening = false;
+
+function flush() {
+  if (timer) {
+    clearTimeout(timer);
+    timer = null;
+  }
+  const batch = pending;
+  pending = [];
+  // Group by outlet+session, keeping order; in practice that is a single group.
+  const groups = new Map<string, { ctx: EventContext; events: QueuedEvent[] }>();
+  for (const { ctx, event } of batch) {
+    const key = `${ctx.outletId}:${ctx.sessionId}`;
+    const group = groups.get(key) ?? { ctx, events: [] };
+    group.events.push(event);
+    groups.set(key, group);
+  }
+  for (const { ctx, events } of groups.values()) {
+    try {
+      sendBatch(ctx, events);
+    } catch {
+      // Event loss is acceptable; blocking the customer is not.
+    }
+  }
+}
+
 export function track(ctx: EventContext, type: EventType, payload?: Record<string, unknown>) {
   try {
-    sendBatch(ctx, [{ type, payload }]);
+    pending.push({ ctx, event: { type, payload } });
+    if (typeof window !== "undefined" && !listening) {
+      listening = true;
+      window.addEventListener("pagehide", flush);
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "hidden") flush();
+      });
+    }
+    // The server accepts 50 per request.
+    if (type === "handoff" || pending.length >= 40) flush();
+    else if (!timer) timer = setTimeout(flush, FLUSH_DELAY_MS);
   } catch {
     // Event loss is acceptable; blocking the customer is not.
   }

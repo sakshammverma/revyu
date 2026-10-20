@@ -6,7 +6,7 @@ const lora = Lora({
   variable: "--font-lora",
   subsets: ["latin"],
   weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
+  // No italic file: the only italic Lora text is one 11px demo quote, and the file is 40KB on the customer flow's budget.
   display: "swap",
 });
 

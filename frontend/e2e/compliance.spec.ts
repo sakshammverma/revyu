@@ -157,7 +157,7 @@ test.describe("private screen keeps Google above the fold", () => {
       }
       await page.getByLabel(/your private message/i).fill("Automated compliance test message");
       await page.getByRole("button", { name: /send privately to the owner/i }).click();
-      await expect(page.getByRole("alert")).toBeVisible();
+      await expect(page.getByText(/couldn.t send that/i)).toBeVisible();
       await assertGoogleOption(page, `${stars}★ private screen with error`);
     });
   }

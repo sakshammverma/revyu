@@ -165,15 +165,18 @@ export interface ResolvedHub {
  * always falls back to the review flow (FR-77).
  */
 export async function resolveHub(db: DbLike, outlet: Outlet): Promise<ResolvedHub> {
+  // Direct mode can never become a hub, so skip the module queries entirely: this
+  // runs before the first byte of every scan of a default-configured QR.
+  if (outlet.hubMode !== "menu") return { mode: "direct", modules: [] };
+  const rows = (await ensureModules(db, outlet)).filter((row) => row.enabled && row.available && MODULE_BY_KEY.has(row.module));
+  const reasons = await Promise.all(rows.map((row) => contentReason(db, outlet, row.module)));
   const shown: ResolvedHub["modules"] = [];
-  for (const row of await ensureModules(db, outlet)) {
-    if (!(row.enabled && row.available)) continue;
-    const mod = MODULE_BY_KEY.get(row.module);
-    if (!mod) continue;
-    if ((await contentReason(db, outlet, row.module)) !== null) continue;
+  rows.forEach((row, i) => {
+    if (reasons[i] !== null) return;
+    const mod = MODULE_BY_KEY.get(row.module)!;
     shown.push({ key: mod.key, label: labelFor(mod.key, outlet.vertical), blurb: mod.blurb, icon: mod.icon, route: mod.route });
-  }
-  return { mode: outlet.hubMode === "menu" && shown.length >= 2 ? "hub" : "direct", modules: shown };
+  });
+  return { mode: shown.length >= 2 ? "hub" : "direct", modules: shown };
 }
 
 /* ------------------------------------------------------------- profile */
@@ -289,8 +292,7 @@ function header(outlet: Outlet) {
 
 export async function getHubPayload(db: DbLike, outlet: Outlet) {
   if (!isLive(outlet)) return { collecting: false, outlet: header(outlet), mode: "direct" as const, modules: [] };
-  const resolved = await resolveHub(db, outlet);
-  const profile = await loadProfile(db, outlet.id);
+  const [resolved, profile] = await Promise.all([resolveHub(db, outlet), loadProfile(db, outlet.id)]);
   return {
     collecting: true,
     outlet: header(outlet),

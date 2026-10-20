@@ -6,9 +6,9 @@ import { StarRating } from "@/components/flow/StarRating";
 import { TagChips } from "@/components/flow/TagChips";
 import { copyToClipboard } from "@/lib/flow/clipboard";
 import { assembleDraft } from "@/lib/flow/draft";
-import { submitFeedback, type FlowConfig } from "@/lib/flow/api";
+import { submitFeedback, type FeedbackResult, type FlowConfig } from "@/lib/flow/api";
 import { createSession } from "@/lib/flow/api";
-import { getDeviceHash, getOrCreateSessionId } from "@/lib/flow/identity";
+import { getDeviceHash, getOrCreateSessionId, newId } from "@/lib/flow/identity";
 import { retryBuffered, track, type EventType } from "@/lib/flow/events";
 
 type Step =
@@ -53,7 +53,7 @@ export function CustomerFlow({ slug, config }: Props) {
   const [feedbackText, setFeedbackText] = useState("");
   const [contact, setContact] = useState("");
   const [feedbackBusy, setFeedbackBusy] = useState(false);
-  const [feedbackError, setFeedbackError] = useState(false);
+  const [feedbackError, setFeedbackError] = useState<"failed" | "limited" | null>(null);
   const feedbackRef = useRef<HTMLTextAreaElement>(null);
   const feedbackId = useRef<string | null>(null);
   // Where "Back" returns to from the private-feedback screen.
@@ -146,31 +146,44 @@ export function CustomerFlow({ slug, config }: Props) {
   async function handleSendFeedback() {
     if (!feedbackText.trim() || feedbackBusy) return;
     setFeedbackBusy(true);
-    setFeedbackError(false);
+    setFeedbackError(null);
     // One id per message: a retry after a timeout can't store it twice.
-    feedbackId.current ??= crypto.randomUUID();
-    let ok = true;
+    feedbackId.current ??= newId();
+    let result: FeedbackResult = "ok";
     if (!preview) {
-      // The session is created fire-and-forget on load; if the customer was
-      // offline then, create it now (idempotent) or the feedback is refused.
-      await createSession(slug, sessionId, deviceHash);
-      ok = await submitFeedback(slug, {
-        session_id: sessionId,
-        rating,
-        message: feedbackText,
-        contact: contact.trim() || undefined,
-        feedback_id: feedbackId.current,
-      });
+      const send = () =>
+        submitFeedback(slug, {
+          session_id: sessionId,
+          rating,
+          message: feedbackText,
+          contact: contact.trim() || undefined,
+          feedback_id: feedbackId.current ?? undefined,
+        });
+      result = await send();
+      if (result === "session") {
+        // The session is created fire-and-forget on load; if the customer was
+        // offline then, create it now (idempotent) and send again.
+        await createSession(slug, sessionId, deviceHash);
+        result = await send();
+      }
     }
     setFeedbackBusy(false);
-    if (ok) {
+    if (result === "ok") {
       feedbackId.current = null;
       emit("private_feedback_submitted", { rating });
       setStep("private_sent");
     } else {
-      setFeedbackError(true);
+      setFeedbackError(result === "limited" ? "limited" : "failed");
     }
   }
+
+  // Back online after a failed send: try again once, without another tap.
+  useEffect(() => {
+    if (feedbackError !== "failed") return;
+    window.addEventListener("online", handleSendFeedback, { once: true });
+    return () => window.removeEventListener("online", handleSendFeedback);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [feedbackError]);
 
   if (!config.collecting && !preview) {
     return <NeutralScreen businessName={config.outlet.business_name} />;
@@ -427,7 +440,7 @@ function PrivateScreen({
 }: {
   positive: boolean;
   busy: boolean;
-  error: boolean;
+  error: "failed" | "limited" | null;
   feedbackText: string;
   onFeedbackChange: (v: string) => void;
   contact: string;
@@ -475,7 +488,9 @@ function PrivateScreen({
       </div>
       {error && (
         <p role="alert" className="text-sm text-alert">
-          We couldn&rsquo;t send that. Please check your connection and try again.
+          {error === "limited"
+            ? "Many people are using this network right now. Please try again in a few minutes."
+            : "We couldn’t send that. Check your connection and try again; we’ll also retry when you’re back online."}
         </p>
       )}
       <FlowButton variant="primary" onClick={onSend} disabled={!feedbackText.trim() || busy}>

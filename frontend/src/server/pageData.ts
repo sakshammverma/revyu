@@ -2,6 +2,7 @@
  * Data loaders for the server-rendered customer pages (/r/[slug]/...). These
  * call the services directly instead of looping back through HTTP to the API.
  */
+import { cache } from "react";
 import { after, connection } from "next/server";
 
 import type { FlowConfig as ClientFlowConfig } from "@/lib/flow/api";
@@ -22,9 +23,12 @@ import {
  * did, so connection() makes that explicit: menus, tags and state must never
  * be served stale.
  */
+// The page and the review flow both resolve the same outlet in one render; look it up once.
+const outletForRequest = cache((slug: string) => findOutletBySlug(getDb(), slug));
+
 async function load<T>(slug: string, build: (outlet: Outlet) => Promise<T>): Promise<T | null> {
   await connection();
-  const outlet = await findOutletBySlug(getDb(), slug);
+  const outlet = await outletForRequest(slug);
   return outlet ? build(outlet) : null;
 }
 

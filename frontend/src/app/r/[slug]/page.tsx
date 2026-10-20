@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 
 import { FlowFrame } from "@/components/flow/Frame";
 import { ReviewEntry } from "@/components/flow/ReviewEntry";
-import { HubView } from "@/components/hub/HubView";
+import { HubViewLazy } from "@/components/hub/HubViewLazy";
 import type { HubPayload } from "@/lib/hub/api";
 import { loadHub, recordScan } from "@/server/pageData";
 
@@ -40,7 +40,7 @@ export default async function FlowPage({ params, searchParams }: Props) {
     if (!quiet) recordScan(hub.outlet.id);
     return (
       <FlowFrame>
-        <HubView slug={slug} hub={hub} quiet={quiet} />
+        <HubViewLazy slug={slug} hub={hub} quiet={quiet} />
       </FlowFrame>
     );
   }

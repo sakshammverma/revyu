@@ -131,7 +131,19 @@ export async function createSession(
 export async function submitFeedback(
   db: DbLike,
   outlet: Outlet,
-  input: { sessionId: string; rating: number | null; message: string; contact: string | null; feedbackId?: string | null },
+  input: {
+    sessionId: string;
+    rating: number | null;
+    message: string;
+    contact: string | null;
+    feedbackId?: string | null;
+    /**
+     * Runs the owner alert email. A route passes `after` so the customer's request
+     * ends as soon as the message is saved instead of waiting on the mail provider
+     * (10-15s timeouts). Without it the email is sent before returning.
+     */
+    defer?: (task: () => Promise<void>) => void;
+  },
 ): Promise<{ id: string; created_at: string }> {
   const [session] = await db
     .select({ id: customerSessions.id, outletId: customerSessions.outletId })
@@ -143,7 +155,7 @@ export async function submitFeedback(
   const message = input.message.trim();
   if (!message) throw new HttpError(400, "EMPTY_MESSAGE");
 
-  return db.transaction(async (tx) => {
+  const saved = await db.transaction(async (tx) => {
     const id = input.feedbackId ?? crypto.randomUUID();
     const createdAt = new Date();
     const inserted = await tx
@@ -168,20 +180,30 @@ export async function submitFeedback(
         .where(eq(privateFeedback.id, id))
         .limit(1);
       if (!prior || prior.outletId !== outlet.id) throw new HttpError(409, "CONFLICT");
-      return { id: prior.id, created_at: prior.createdAt.toISOString() };
+      return { id: prior.id, created_at: prior.createdAt.toISOString(), fresh: false };
     }
-    const [account] = await tx.select().from(accounts).where(eq(accounts.id, outlet.accountId)).limit(1);
-    if (account) {
-      await notify(tx, {
+    return { id, created_at: createdAt.toISOString(), fresh: true };
+  });
+
+  if (saved.fresh) {
+    const alertOwner = async () => {
+      const [account] = await db.select().from(accounts).where(eq(accounts.id, outlet.accountId)).limit(1);
+      if (!account) return;
+      await notify(db, {
         accountId: account.id,
         outletId: outlet.id,
         toEmail: account.ownerEmail,
         template: "private_feedback_received",
         data: { business_name: outlet.businessName, rating: input.rating ?? "n/a" },
       });
+    };
+    if (input.defer) {
+      input.defer(() => alertOwner().catch((e) => console.error("private feedback alert failed:", e)));
+    } else {
+      await alertOwner();
     }
-    // CR-3 / SRS-7.5: submitting feedback never suppresses the Google link.
-    // Nothing here instructs the client to hide anything, by design.
-    return { id, created_at: createdAt.toISOString() };
-  });
+  }
+  // CR-3 / SRS-7.5: submitting feedback never suppresses the Google link.
+  // Nothing here instructs the client to hide anything, by design.
+  return { id: saved.id, created_at: saved.created_at };
 }

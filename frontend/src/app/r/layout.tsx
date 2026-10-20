@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 
 // Per-outlet pages: no extra DB round-trip just for a title (NFR-2 budget), and
 // kept out of search results (robots.ts disallows /r/ too).
@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   title: "Welcome",
   robots: { index: false, follow: false },
 };
+
+// Lets env(safe-area-inset-bottom) work, so the sticky Google bar clears the home indicator on notched phones.
+export const viewport: Viewport = { viewportFit: "cover" };
 
 // Customer flow layout (/r/{slug}). Deliberately adds nothing: the flow uses
 // the root layout's design-system faces (Plus Jakarta Sans for text, Lora for

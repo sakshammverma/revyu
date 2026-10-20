@@ -7,7 +7,7 @@ import { createSession, requireOutlet } from "@/server/services/flow";
 export const POST = handler(async (request: Request, { params }: SlugContext) => {
   const { slug } = await params;
   const db = getDb();
-  await rateLimit(request, "session", 60, 3600, db);
+  await rateLimit(request, "session", 600, 3600, db);
   const outlet = await requireOutlet(db, slug);
   const body = await parseJson(request, sessionBody);
   const session = await createSession(db, outlet, {
