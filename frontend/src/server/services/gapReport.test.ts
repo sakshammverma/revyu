@@ -68,6 +68,6 @@ describe("health", () => {
   it("reports the database as reachable", async () => {
     const res = await getHealth();
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ status: "ok", db: true });
+    expect(await res.json()).toEqual({ status: "ok", config: true, db: true });
   });
 });

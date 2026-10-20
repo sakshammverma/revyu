@@ -92,6 +92,21 @@ const EMPTY: PricingView = {
 /** Outside a provider (e.g. a page rendered without the marketing layout) this stays "loading". */
 export const usePricing = (): PricingView => useContext(PricingContext) ?? EMPTY;
 
+// Words that read naturally in the sentence if the price could not be loaded; never a "-" or a guess.
+const DEFAULT_FALLBACK: Record<"monthly" | "annual" | "annualPerMonth" | "saving", string> = {
+  monthly: "one flat price",
+  annual: "one yearly price",
+  annualPerMonth: "a lower monthly rate",
+  saving: "",
+};
+
+/** Renders children unless pricing loaded and has no value for `plan` (e.g. no annual saving), so "Save - a year" can't appear. */
+export function IfPriced({ plan, children }: { plan: "monthly" | "annual" | "annualPerMonth" | "saving"; children: React.ReactNode }) {
+  const p = usePricing();
+  if (!p.loading && !p[plan]) return null;
+  return <>{children}</>;
+}
+
 /** Inline price for copy: `<Price plan="monthly" />`. Reserves its width until loaded so text doesn't jump. */
 export function Price({
   plan,
@@ -108,6 +123,6 @@ export function Price({
   const text = p[plan];
   if (text) return <>{text}{suffix}</>;
   // load failed: no price rather than a guessed one
-  if (!p.loading) return <>{fallback !== undefined ? fallback : suffix ? null : "-"}</>;
-  return <span aria-hidden className="inline-block w-[3ch] animate-pulse rounded bg-line align-middle">&nbsp;</span>;
+  if (!p.loading) return <>{fallback !== undefined ? fallback : suffix ? null : DEFAULT_FALLBACK[plan]}</>;
+  return <span aria-hidden className="inline-block w-[6ch] animate-pulse rounded bg-line align-middle">&nbsp;</span>;
 }

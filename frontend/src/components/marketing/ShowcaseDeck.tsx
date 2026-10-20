@@ -217,7 +217,7 @@ export function ShowcaseDeck() {
             <div
               onClick={() => go(0)}
               {...sidePhone(0)}
-              className={`absolute transition-all duration-500 cursor-pointer hidden md:block ${
+              className={`absolute transition-all duration-500 cursor-pointer ${activeCenter === 0 ? "block" : "hidden md:block"} ${
                 activeCenter === 0
                   ? "z-30 scale-100 opacity-100 shadow-v2-phone"
                   : "z-10 -translate-x-[360px] scale-[0.82] opacity-75 hover:opacity-95"
@@ -440,7 +440,7 @@ export function ShowcaseDeck() {
                         e.stopPropagation();
                         handleCopySimulation();
                       }}
-                      className="w-full py-2.5 bg-[#397dff] hover:bg-[#2f68db] text-white rounded-lg text-xs font-semibold shadow-v2-button flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-98"
+                      className="w-full py-2.5 bg-[#397dff] hover:bg-[#2f68db] text-white rounded-lg text-xs font-semibold shadow-v2-btn flex items-center justify-center gap-1.5 transition-all cursor-pointer active:scale-98"
                     >
                       <span>📋</span>
                       <span>{copiedToast ? "Copied — opening Google…" : "Copy & open Google"}</span>
@@ -535,7 +535,7 @@ export function ShowcaseDeck() {
             <div
               onClick={() => go(4)}
               {...sidePhone(4)}
-              className={`absolute transition-all duration-500 cursor-pointer hidden md:block ${
+              className={`absolute transition-all duration-500 cursor-pointer ${activeCenter === 4 ? "block" : "hidden md:block"} ${
                 activeCenter === 4
                   ? "z-30 scale-100 opacity-100 shadow-v2-phone"
                   : "z-10 translate-x-[360px] scale-[0.82] opacity-75 hover:opacity-95"

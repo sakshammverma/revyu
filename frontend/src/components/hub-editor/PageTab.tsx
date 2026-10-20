@@ -24,7 +24,7 @@ function toDays(hours: ProfileData["hours"]): Record<string, Day> {
 export interface TabProps {
   api: HubApi;
   state: EditorState;
-  reload: () => Promise<void>;
+  reload: (resetForm?: "page" | "connect") => Promise<void>;
   toast: (text: string, kind?: "ok" | "error", undo?: () => void) => void;
   isAdmin: boolean;
 }
@@ -84,7 +84,7 @@ export function PageTab({ api, state, reload, toast, isAdmin }: TabProps) {
         ? Object.fromEntries(DAYS.map(([k]) => [k, days[k].closed ? [] : [[days[k].open, days[k].close]]]))
         : null;
       await api.saveProfile({ ...profile, hours });
-      await reload();
+      await reload("page");
       toast("Business details saved");
     } catch (err) {
       toast(errText(err), "error");

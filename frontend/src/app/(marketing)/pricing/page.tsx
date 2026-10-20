@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MarketingPage } from "@/components/chrome/MarketingPage";
 import { CountryPicker } from "@/components/marketing/CountryPicker";
-import { Price } from "@/lib/pricing";
+import { IfPriced, Price } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "Pricing — Revyu",
@@ -88,11 +88,13 @@ export default function PricingPage() {
 
           {/* Annual Card */}
           <div className="v2-card-elevated p-8 sm:p-10 border-2 border-[#397dff] flex flex-col justify-between relative">
-            <div className="absolute -top-3.5 right-6">
-              <span className="bg-[#397dff] text-white text-xs px-3.5 py-1 rounded-full font-semibold shadow-sm">
-                Save <Price plan="saving" /> a year
-              </span>
-            </div>
+            <IfPriced plan="saving">
+              <div className="absolute -top-3.5 right-6">
+                <span className="bg-[#2f6df0] text-white text-xs px-3.5 py-1 rounded-full font-semibold shadow-sm">
+                  Save <Price plan="saving" /> a year
+                </span>
+              </div>
+            </IfPriced>
             <div>
               <div className="flex items-center justify-between border-b border-[#e8ecec] pb-4">
                 <span className="text-sm font-semibold text-[#397dff]">
@@ -128,7 +130,7 @@ export default function PricingPage() {
                     <span className="text-[#449127] font-bold">✓</span> QR + 4 print-ready PDFs
                   </li>
                   <li className="flex items-center gap-2.5">
-                    <span className="text-[#449127] font-bold">✓</span> Two months free versus paying monthly
+                    <span className="text-[#449127] font-bold">✓</span> <Price plan="saving" suffix=" saved versus paying monthly" fallback="Costs less than paying monthly" />
                   </li>
                 </ul>
               </div>

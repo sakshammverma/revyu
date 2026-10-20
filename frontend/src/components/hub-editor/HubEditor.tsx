@@ -17,13 +17,18 @@ export function HubEditor({ api, isAdmin = false, initialTab = "page" }: { api: 
   const [state, setState] = useState<EditorState | null>(null);
   const [tab, setTab] = useState<TabKey>(initialTab);
   const [error, setError] = useState<string | null>(null);
-  const [nonce, setNonce] = useState(0);
+  // previewNonce refreshes the iframe on every reload. The form tabs only remount
+  // (reset their local form state) when asked to, so toggling a module or the scan
+  // mode never wipes unsaved edits in the same tab.
+  const [previewNonce, setPreviewNonce] = useState(0);
+  const [formNonce, setFormNonce] = useState({ page: 0, connect: 0 });
   const { push, node } = useToasts();
 
-  const reload = useCallback(async () => {
+  const reload = useCallback(async (resetForm?: "page" | "connect") => {
     try {
       setState(await api.state());
-      setNonce((n) => n + 1);
+      setPreviewNonce((n) => n + 1);
+      if (resetForm) setFormNonce((f) => ({ ...f, [resetForm]: f[resetForm] + 1 }));
       setError(null);
     } catch {
       setError("We couldn't load your page settings.");
@@ -48,7 +53,7 @@ export function HubEditor({ api, isAdmin = false, initialTab = "page" }: { api: 
     return (
       <div className="v2-sheet border border-[#e8ecec] p-6 text-center">
         <p className="text-[#c62445] font-semibold">{error}</p>
-        <button className="btn-primary mt-4 min-h-[44px] px-5" onClick={reload}>Retry</button>
+        <button className="btn-primary mt-4 min-h-[44px] px-5" onClick={() => reload()}>Retry</button>
       </div>
     );
   if (!state) return <div className="flex flex-col gap-3"><div className="ui-skeleton h-24 rounded-2xl" /><div className="ui-skeleton h-64 rounded-2xl" /></div>;
@@ -79,8 +84,9 @@ export function HubEditor({ api, isAdmin = false, initialTab = "page" }: { api: 
           ))}
         </div>
 
-        {tab === "page" && <PageTab key={`p${nonce}`} {...props} />}
-        {tab === "connect" && <ConnectTab key={`c${nonce}`} {...props} />}
+        {/* Page and Connect stay mounted (hidden) so unsaved edits survive a tab switch. */}
+        <div hidden={tab !== "page"}><PageTab key={`p${formNonce.page}`} {...props} /></div>
+        <div hidden={tab !== "connect"}><ConnectTab key={`c${formNonce.connect}`} {...props} /></div>
         {tab === "menu" && <MenuTab {...props} />}
         {tab === "rewards" && <RewardsTab {...props} />}
       </div>
@@ -97,7 +103,7 @@ export function HubEditor({ api, isAdmin = false, initialTab = "page" }: { api: 
       <aside className="hidden lg:block sticky top-20">
         <p className="vf-section-label mb-2">Live preview</p>
         <div className="rounded-[2rem] border-[6px] border-[#1f2429] overflow-hidden bg-[#f2f7f7] shadow-v2-phone">
-          <iframe key={nonce} title="Customer view preview" src={previewSrc} className="w-full h-[560px] border-0" />
+          <iframe key={previewNonce} title="Customer view preview" src={previewSrc} className="w-full h-[560px] border-0" />
         </div>
         <a href={`/r/${state.slug}`} target="_blank" rel="noreferrer" className="btn-pill-light w-full mt-3 min-h-[44px] inline-flex items-center justify-center">Open on your phone ↗</a>
       </aside>

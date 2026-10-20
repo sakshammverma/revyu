@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalPage title="Privacy Policy">
+    <LegalPage title="Privacy Policy" subtitle="How we handle your data">
       <p>
         Revyu collects the minimum data needed to run the product. This page
         describes what we hold today; it is not final legal copy and should

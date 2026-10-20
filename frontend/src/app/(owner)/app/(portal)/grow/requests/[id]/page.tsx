@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import { Card } from "@/components/ui";
+import { Card, ErrorState, Skeleton } from "@/components/ui";
 import { Btn, TextArea } from "@/components/ui/kit";
 import { HubApiError, formatMoney, growthApi, type ServiceRequest } from "@/lib/hub/api";
+import { useAsync } from "@/lib/useAsync";
 import { CheckoutCancelled, runCheckout } from "@/lib/signup/checkout";
 
 const STEPS = ["requested", "quoted", "accepted", "in_progress", "delivered"];
@@ -17,16 +18,16 @@ const LABEL: Record<string, string> = {
 
 export default function RequestPage() {
   const { id } = useParams<{ id: string }>();
-  const [req, setReq] = useState<ServiceRequest | null | undefined>(undefined);
+  const loaded = useAsync(() => growthApi.request(id), [id]);
+  // After an action the server returns the updated request; show that without a refetch.
+  const [updated, setReq] = useState<ServiceRequest | null>(null);
+  const req = updated ?? loaded.data;
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    growthApi.request(id).then(setReq).catch(() => setReq(null));
-  }, [id]);
-
   async function run(fn: () => Promise<ServiceRequest>) {
+    if (busy) return;
     setBusy(true);
     setError(null);
     try {
@@ -61,8 +62,12 @@ export default function RequestPage() {
     }
   }
 
-  if (req === undefined) return <div className="ui-skeleton h-64 rounded-2xl" />;
-  if (req === null) return <p className="text-sm text-text-2">Request not found. <Link className="underline" href="/app/grow">Back</Link></p>;
+  if (!req) {
+    if (loaded.loading) return <Skeleton className="h-64 rounded-2xl" />;
+    if (loaded.error instanceof HubApiError && loaded.error.status === 404)
+      return <p className="text-sm text-text-2">Request not found. <Link className="underline" href="/app/grow">Back</Link></p>;
+    return <ErrorState message="We couldn't load this request." onRetry={loaded.reload} />;
+  }
 
   const step = STEPS.indexOf(req.status);
   const closed = step === -1;
@@ -97,7 +102,15 @@ export default function RequestPage() {
           {error && <p className="text-sm text-alert mt-2" role="alert">{error}</p>}
           <div className="flex gap-2 mt-4">
             <Btn busy={busy} onClick={() => run(() => growthApi.accept(req.id))}>Accept quote</Btn>
-            <Btn variant="light" disabled={busy} onClick={() => run(() => growthApi.cancel(req.id))}>Not now</Btn>
+            <Btn
+              variant="light"
+              disabled={busy}
+              onClick={() => {
+                if (window.confirm("Decline this quote? The request will be closed.")) run(() => growthApi.cancel(req.id));
+              }}
+            >
+              Decline quote
+            </Btn>
           </div>
         </Card>
       )}
@@ -138,7 +151,15 @@ export default function RequestPage() {
       </Card>
 
       {!closed && ["requested"].includes(req.status) && (
-        <button className="text-sm text-text-2 underline self-start min-h-[44px]" onClick={() => run(() => growthApi.cancel(req.id))}>Cancel this request</button>
+        <button
+          className="text-sm text-text-2 underline self-start min-h-[44px] disabled:opacity-50"
+          disabled={busy}
+          onClick={() => {
+            if (window.confirm("Cancel this request?")) run(() => growthApi.cancel(req.id));
+          }}
+        >
+          Cancel this request
+        </button>
       )}
     </>
   );

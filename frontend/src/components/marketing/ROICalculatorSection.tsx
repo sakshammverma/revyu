@@ -125,17 +125,17 @@ export function ROICalculatorSection() {
           <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Stat
               label="Customers to cover the annual plan"
-              value={`${customersPerYearAnnual}`}
+              value={pricing.ready ? `${customersPerYearAnnual}` : "…"}
               note={customersPerYearAnnual === 1 ? "One visit pays for the year" : "New customers, across a whole year"}
               tone="green"
             />
             <Stat
               label="Customers to cover the monthly plan"
-              value={`${customersPerYearMonthly}`}
+              value={pricing.ready ? `${customersPerYearMonthly}` : "…"}
               note="Over twelve months"
             />
             <Stat label="Annual plan, per day" value={show(Math.round(annualMinor / 365))} note="Less than a daily cup of tea or coffee" tone="blue" />
-            <Stat label="Free before you pay" value="15 days" note="Then 10 review credits" />
+            <Stat label="Free before you pay" value="15 days" note="First charge comes after the trial" />
           </div>
         </div>
 

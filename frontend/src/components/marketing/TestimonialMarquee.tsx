@@ -17,7 +17,7 @@ interface Card {
 
 const ROW_1: Card[] = DEMO_VERTICALS.map((v) => ({
   eyebrow: v.label,
-  title: `What a ${v.label.toLowerCase().replace(/s$/, "")} customer can tap`,
+  title: `What a ${v.singular} customer can tap`,
   chips: v.tags.map((t) => t.label),
   footer: "Default tags · you can edit them for your business",
 }));
@@ -75,7 +75,7 @@ export function TestimonialMarquee() {
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto px-4 mb-12 sm:mb-16">
           <p className="vf-section-label uppercase tracking-wider mb-2 text-[#515a63]">
-            Five kinds of business. One quiet problem.
+            Six kinds of business. One quiet problem.
           </p>
           <h2 className="heading-h2 font-display text-[#1a1e23]">
             Every day you don&rsquo;t ask, the shop next door pulls a little further ahead.
@@ -103,7 +103,7 @@ export function TestimonialMarquee() {
         {/* Bottom line & Dark Pill CTA */}
         <div className="text-center px-4 flex flex-col sm:flex-row items-center justify-center gap-4">
           <p className="text-sm font-medium text-[#515a63]">
-            Kirana, café, boutique, repair shop or studio —{" "}
+            Shop, clinic, salon, gym or coaching centre —{" "}
             <span className="font-semibold text-[#1a1e23]">one product, one price</span>.
           </p>
           <Link href="/signup" className="btn-pill-dark text-xs sm:text-sm py-2 px-5">

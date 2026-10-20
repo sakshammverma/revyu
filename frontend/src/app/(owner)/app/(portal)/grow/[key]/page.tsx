@@ -2,24 +2,22 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import { Card } from "@/components/ui";
+import { Card, ErrorState, Skeleton } from "@/components/ui";
 import { Btn, TextArea, TextInput } from "@/components/ui/kit";
-import { HubApiError, growthApi, type Service } from "@/lib/hub/api";
+import { HubApiError, growthApi } from "@/lib/hub/api";
+import { useAsync } from "@/lib/useAsync";
 
 export default function ServiceDetailPage() {
   const { key } = useParams<{ key: string }>();
   const router = useRouter();
-  const [service, setService] = useState<Service | null | undefined>(undefined);
+  const services = useAsync(() => growthApi.services(), []);
+  const service = services.data?.items.find((s) => s.key === key) ?? null;
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [brief, setBrief] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    growthApi.services().then((r) => setService(r.items.find((s) => s.key === key) ?? null)).catch(() => setService(null));
-  }, [key]);
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -39,8 +37,11 @@ export default function ServiceDetailPage() {
     }
   }
 
-  if (service === undefined) return <div className="ui-skeleton h-64 rounded-2xl" />;
-  if (service === null) return <p className="text-sm text-text-2">Service not found. <Link className="underline" href="/app/grow">Back</Link></p>;
+  if (!service) {
+    if (services.loading) return <Skeleton className="h-64 rounded-2xl" />;
+    if (services.error) return <ErrorState message="We couldn't load this service." onRetry={services.reload} />;
+    return <p className="text-sm text-text-2">Service not found. <Link className="underline" href="/app/grow">Back</Link></p>;
+  }
 
   return (
     <>

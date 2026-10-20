@@ -71,12 +71,12 @@ async function assertGoogleOption(page: Page, where: string) {
   expect(APPROVED_LABELS, `(g) label "${label}" approved at ${where}`).toContain(label);
 }
 
-async function startAndRate(page: Page, stars: number) {
+async function startAndRate(page: Page, stars: number, query = "") {
   // Stop the real Google page from loading; we only need to see the request.
   await page.route(/google\.com|goo\.gl/, (route) => route.fulfill({ status: 200, body: "stub" }));
   // The review flow is served at /review in both hub modes, so these
   // assertions also hold on the hub -> review path (SRS-20.4).
-  await page.goto(`/r/${SLUG}/review`);
+  await page.goto(`/r/${SLUG}/review${query}`);
   await page.getByRole("button", { name: /start review/i }).click();
   await page.getByRole("radio", { name: new RegExp(`^${stars} stars?$`) }).click();
 }
@@ -134,4 +134,31 @@ test.describe("positive path keeps the option on every step", () => {
     await draft.fill("My own words");
     await expect(draft).toHaveValue("My own words");
   });
+});
+
+// The private screen is the tallest one. Extra chrome (the back-to-hub link) and
+// the send-error alert must never push the Google option below the fold.
+test.describe("private screen keeps Google above the fold", () => {
+  for (const stars of [1, 3, 5]) {
+    test(`${stars}★ arriving from the hub`, async ({ page }) => {
+      await startAndRate(page, stars, "?from=hub");
+      if (stars >= 4) {
+        await page.getByRole("button", { name: /send private feedback to the owner/i }).click();
+      }
+      await expect(page.getByLabel(/your private message/i)).toBeVisible();
+      await assertGoogleOption(page, `${stars}★ private screen from hub`);
+    });
+
+    test(`${stars}★ with the send-error alert showing`, async ({ page }) => {
+      await page.route("**/api/flow/*/feedback", (route) => route.fulfill({ status: 500, body: "{}" }));
+      await startAndRate(page, stars);
+      if (stars >= 4) {
+        await page.getByRole("button", { name: /send private feedback to the owner/i }).click();
+      }
+      await page.getByLabel(/your private message/i).fill("Automated compliance test message");
+      await page.getByRole("button", { name: /send privately to the owner/i }).click();
+      await expect(page.getByRole("alert")).toBeVisible();
+      await assertGoogleOption(page, `${stars}★ private screen with error`);
+    });
+  }
 });

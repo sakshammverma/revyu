@@ -38,7 +38,7 @@ export function ConnectTab({ api, state, reload, toast }: TabProps) {
     setError(null);
     try {
       await api.saveLinks(links.filter((l) => l.url.trim()));
-      await reload();
+      await reload("connect");
       toast("Links saved");
     } catch (e) {
       setError(e instanceof HubApiError ? e.message : "Couldn't save your links.");

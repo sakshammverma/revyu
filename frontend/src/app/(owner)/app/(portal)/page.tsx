@@ -32,7 +32,7 @@ export default function OverviewPage() {
 
       {locked && billing && (
         <UnlockCard
-          scans={overview.data?.scans ?? 0}
+          scans={overview.data?.scans ?? null}
           completed={billing.scans_waiting}
           feedbackCount={overview.data?.feedback_count ?? 0}
           creditsLeft={billing.credits_left}
@@ -143,7 +143,7 @@ function UnlockCard({
   suspended,
   price,
 }: {
-  scans: number;
+  scans: number | null; // null until the overview request answers; never show a made-up 0
   completed: number;
   feedbackCount: number;
   creditsLeft: number | null;
@@ -156,7 +156,9 @@ function UnlockCard({
         {suspended ? "Collection paused" : "Dashboard locked"}
       </p>
       <h2 className="font-display text-2xl sm:text-3xl text-ink mt-2">
-        {scans} scans and {completed} completed reviews are waiting for you
+        {scans === null
+          ? `${completed} completed ${completed === 1 ? "review is" : "reviews are"} waiting for you`
+          : `${scans} ${scans === 1 ? "scan" : "scans"} and ${completed} completed ${completed === 1 ? "review" : "reviews"} are waiting for you`}
       </h2>
       {feedbackCount > 0 && (
         <p className="mt-1 font-semibold text-ink">

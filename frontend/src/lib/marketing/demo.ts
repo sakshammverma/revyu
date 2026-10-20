@@ -16,6 +16,8 @@ export interface DemoTag extends DraftTag {
 export interface DemoVertical {
   key: string;
   label: string;
+  /** Singular noun phrase for "What a ___ customer can tap". */
+  singular: string;
   exampleBusiness: string;
   exampleLocality: string;
   tags: DemoTag[];
@@ -25,6 +27,7 @@ export const DEMO_VERTICALS: DemoVertical[] = [
   {
     key: "general",
     label: "Shops & local businesses",
+    singular: "shop or local business",
     exampleBusiness: "Sharma General Store",
     exampleLocality: "Indiranagar, Bengaluru",
     tags: [
@@ -41,6 +44,7 @@ export const DEMO_VERTICALS: DemoVertical[] = [
   {
     key: "dental",
     label: "Dental clinics",
+    singular: "dental clinic",
     exampleBusiness: "Sharma Dental Care",
     exampleLocality: "Indiranagar, Bengaluru",
     tags: [
@@ -57,6 +61,7 @@ export const DEMO_VERTICALS: DemoVertical[] = [
   {
     key: "salon",
     label: "Salons",
+    singular: "salon",
     exampleBusiness: "Studio Nine Salon",
     exampleLocality: "Koregaon Park, Pune",
     tags: [
@@ -73,6 +78,7 @@ export const DEMO_VERTICALS: DemoVertical[] = [
   {
     key: "gym",
     label: "Gyms",
+    singular: "gym",
     exampleBusiness: "IronHouse Fitness",
     exampleLocality: "Sector 18, Noida",
     tags: [
@@ -89,6 +95,7 @@ export const DEMO_VERTICALS: DemoVertical[] = [
   {
     key: "physiotherapy",
     label: "Physiotherapy",
+    singular: "physiotherapy",
     exampleBusiness: "MoveWell Physio",
     exampleLocality: "Anna Nagar, Chennai",
     tags: [
@@ -105,6 +112,7 @@ export const DEMO_VERTICALS: DemoVertical[] = [
   {
     key: "coaching",
     label: "Coaching centres",
+    singular: "coaching centre",
     exampleBusiness: "Pathway Classes",
     exampleLocality: "Vijay Nagar, Indore",
     tags: [

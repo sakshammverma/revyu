@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function RefundPolicyPage() {
   return (
-    <LegalPage title="Refund Policy">
+    <LegalPage title="Refund Policy" subtitle="When you pay, when you don’t, and how refunds work">
       <p>
         This page is not final legal copy and should be reviewed by counsel
         before relying on it.
@@ -16,12 +16,13 @@ export default function RefundPolicyPage() {
 
       <h2>Signup rejected or unverifiable</h2>
       <p>
-        Payment is taken at signup, before we verify your business against
-        Google&rsquo;s records. If we cannot confirm the match — for example,
-        we can&rsquo;t locate your business on Google Places, or the details
-        don&rsquo;t line up — your outlet is rejected and you receive a full
-        refund, processed to your original payment method within 5–7
-        business days.
+        You set up autopay at signup, but nothing is charged until your
+        15-day trial ends, and the trial only starts once we verify your
+        business against Google&rsquo;s records. If we cannot confirm the
+        match — for example, we can&rsquo;t locate your business on Google
+        Places, or the details don&rsquo;t line up — your outlet is rejected
+        and you pay nothing. If any payment was taken, you receive a full
+        refund to your original payment method within 5–7 business days.
       </p>
 
       <h2>Cancelling an active subscription</h2>

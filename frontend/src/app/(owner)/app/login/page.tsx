@@ -70,11 +70,11 @@ function LoginForm() {
     }
   }
 
-  async function verify() {
+  async function verify(entered = code) {
     setBusy(true);
     setCodeError(null);
     try {
-      await verifyOtp(email.trim(), code);
+      await verifyOtp(email.trim(), entered);
       router.replace(next);
     } catch (e) {
       const c = e instanceof DashboardApiError ? e.code : "";
@@ -150,10 +150,14 @@ function LoginForm() {
               inputMode="numeric"
               autoComplete="one-time-code"
               autoFocus
-              maxLength={6}
               value={code}
               error={codeError}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+              onChange={(e) => {
+                // No maxLength: a pasted "123 456" must survive until the non-digits are stripped.
+                const digits = e.target.value.replace(/\D/g, "").slice(0, 6);
+                setCode(digits);
+                if (digits.length === 6 && !busy) verify(digits);
+              }}
               className="font-mono tabular-nums text-lg tracking-[0.5em]"
             />
             <Button type="submit" loading={busy} disabled={code.length !== 6} full>

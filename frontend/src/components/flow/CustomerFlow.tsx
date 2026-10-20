@@ -178,7 +178,7 @@ export function CustomerFlow({ slug, config }: Props) {
 
   const progressIndex = PROGRESS_STEPS.indexOf(step);
   // Steps where the always-available alternatives live in a sticky bar.
-  const showStickyOptions = step === "rating" || step === "tags" || step === "draft";
+  const showStickyOptions = step === "rating" || step === "tags" || step === "draft" || step === "private";
 
   return (
     <>
@@ -241,7 +241,6 @@ export function CustomerFlow({ slug, config }: Props) {
             onContactChange={setContact}
             feedbackRef={feedbackRef}
             onSend={handleSendFeedback}
-            onGoogle={googleUrl ? goToGoogle : undefined}
             onBack={() => setStep(returnStep.current)}
           />
         )}
@@ -314,13 +313,15 @@ export function CustomerFlow({ slug, config }: Props) {
                 {GOOGLE_LABEL}
               </FlowButton>
             )}
-            <button
-              type="button"
-              onClick={() => openPrivate(step)}
-              className="min-h-[44px] text-sm font-semibold text-accent-hover underline underline-offset-2 cursor-pointer"
-            >
-              {PRIVATE_LABEL}
-            </button>
+            {step !== "private" && (
+              <button
+                type="button"
+                onClick={() => openPrivate(step)}
+                className="min-h-[44px] text-sm font-semibold text-accent-hover underline underline-offset-2 cursor-pointer"
+              >
+                {PRIVATE_LABEL}
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -422,7 +423,6 @@ function PrivateScreen({
   onContactChange,
   feedbackRef,
   onSend,
-  onGoogle,
   onBack,
 }: {
   positive: boolean;
@@ -434,7 +434,6 @@ function PrivateScreen({
   onContactChange: (v: string) => void;
   feedbackRef: React.RefObject<HTMLTextAreaElement | null>;
   onSend: () => void;
-  onGoogle?: () => void;
   onBack: () => void;
 }) {
   return (
@@ -482,17 +481,7 @@ function PrivateScreen({
       <FlowButton variant="primary" onClick={onSend} disabled={!feedbackText.trim() || busy}>
         {busy ? "Sending…" : "Send privately to the owner"}
       </FlowButton>
-      {onGoogle && (
-        <>
-          <div className="relative flex items-center justify-center py-1">
-            <div className="w-full h-px bg-line" />
-            <span className="absolute bg-white px-3 text-xs font-medium tracking-wider text-text-2 uppercase">or</span>
-          </div>
-          <FlowButton variant="outline" onClick={onGoogle}>
-            {GOOGLE_LABEL}
-          </FlowButton>
-        </>
-      )}
+      {/* The Google option lives in the sticky bar (CR-3), so it can never fall below the fold here. */}
       {/* Every rating can go back, e.g. to fix a mis-tapped star. */}
       <BackLink onClick={onBack} />
     </div>
