@@ -77,8 +77,7 @@ async function startAndRate(page: Page, stars: number, query = "") {
   // The review flow is served at /review in both hub modes, so these
   // assertions also hold on the hub -> review path (SRS-20.4).
   await page.goto(`/r/${SLUG}/review${query}`);
-  await page.getByRole("button", { name: /start review/i }).click();
-  await page.getByRole("radio", { name: new RegExp(`^${stars} stars?$`) }).click();
+  await page.getByRole("button", { name: `Rate ${stars} out of 5 stars` }).click();
 }
 
 for (const stars of [1, 2, 3, 4, 5]) {
@@ -121,14 +120,14 @@ test.describe("positive path keeps the option on every step", () => {
     await startAndRate(page, 5);
     await assertGoogleOption(page, "tags screen");
 
-    await page.getByRole("button", { name: /assemble my review/i }).click();
+    await page.getByRole("button", { name: /skip|write my draft/i }).click();
     await expect(page.getByLabel(/your review draft/i)).toBeVisible();
     await assertGoogleOption(page, "draft screen");
   });
 
   test("CR-2: the draft is disclosed and editable", async ({ page }) => {
     await startAndRate(page, 5);
-    await page.getByRole("button", { name: /assemble my review/i }).click();
+    await page.getByRole("button", { name: /skip|write my draft/i }).click();
     await expect(page.getByText(/we.ve written this from what you selected/i)).toBeVisible();
     const draft = page.getByLabel(/your review draft/i);
     await draft.fill("My own words");
@@ -161,4 +160,24 @@ test.describe("private screen keeps Google above the fold", () => {
       await assertGoogleOption(page, `${stars}★ private screen with error`);
     });
   }
+});
+
+test.describe("steps behave like pages", () => {
+  test("the back gesture returns to the previous step instead of leaving", async ({ page }) => {
+    await startAndRate(page, 5);
+    await expect(page.getByRole("heading", { name: /what stood out/i })).toBeVisible();
+    await page.goBack();
+    await expect(page.getByRole("heading", { name: /how was your visit/i })).toBeVisible();
+    await expect(page).toHaveURL(/\/review/);
+  });
+
+  test("a reload mid-flow resumes at the same step with the draft intact", async ({ page }) => {
+    await startAndRate(page, 5);
+    await page.getByRole("button", { name: /skip|write my draft/i }).click();
+    await page.getByLabel(/your review draft/i).fill("My own words");
+    // The save effect runs after the state update; give it a tick before navigating away.
+    await page.waitForTimeout(200);
+    await page.reload();
+    await expect(page.getByLabel(/your review draft/i)).toHaveValue("My own words");
+  });
 });

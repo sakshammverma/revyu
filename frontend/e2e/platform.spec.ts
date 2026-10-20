@@ -40,12 +40,10 @@ test("cross-origin cookie writes are refused", async ({ request }) => {
 
 test("a low rating can go back and change the rating (mis-tapped star)", async ({ page }) => {
   await page.goto(`/r/${SLUG}/review`);
-  const start = page.getByRole("button", { name: /Start review/ });
-  if (await start.isVisible()) await start.click();
-  await page.getByRole("radio", { name: /1 star/i }).click();
+  await page.getByRole("button", { name: "Rate 1 out of 5 stars" }).click();
   await expect(page.getByRole("button", { name: "Post publicly on Google" })).toBeVisible();
   await page.getByRole("button", { name: "← Back" }).click();
   await expect(page.getByRole("heading", { name: "How was your visit?" })).toBeVisible();
-  await page.getByRole("radio", { name: /5 stars/i }).click();
+  await page.getByRole("button", { name: "Rate 5 out of 5 stars" }).click();
   await expect(page.getByRole("heading", { name: "What stood out?" })).toBeVisible();
 });

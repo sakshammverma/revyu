@@ -18,7 +18,7 @@ export function TagChips({ tags, selected, onToggle }: Props) {
             type="button"
             aria-pressed={active}
             onClick={() => onToggle(tag.id)}
-            className={`min-h-[44px] px-4 py-2 text-sm font-medium rounded-full border transition-colors duration-150 cursor-pointer flex items-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#397dff] focus-visible:ring-offset-1 ${
+            className={`min-h-[44px] px-4 py-2 text-sm font-medium rounded-full border transition-colors duration-150 cursor-pointer flex items-center gap-1.5 active:scale-95 [-webkit-tap-highlight-color:transparent] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#397dff] focus-visible:ring-offset-1 ${
               active
                 ? "bg-[#e7f5fd] text-[#1a1e23] border-[#397dff] ring-1 ring-[#397dff] font-semibold"
                 : "bg-white text-[#1a1e23] border-[#d5dcdc] hover:border-[#397dff]/60 hover:bg-[#f7fafa]"

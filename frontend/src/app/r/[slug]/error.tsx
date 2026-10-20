@@ -7,6 +7,18 @@ import { useEffect } from "react";
 export default function FlowError({ error, retry }: { error: Error & { digest?: string }; retry: () => void }) {
   useEffect(() => {
     console.error(error);
+    // Errors caught by a boundary never reach window.onerror, so report them here
+    // (same endpoint and bounds as src/instrumentation-client.ts).
+    try {
+      const body = JSON.stringify({
+        message: (error.message || "render error").slice(0, 500),
+        stack: error.stack?.slice(0, 2000),
+        path: window.location.pathname.slice(0, 200),
+      });
+      navigator.sendBeacon?.("/api/client-errors", new Blob([body], { type: "application/json" }));
+    } catch {
+      // reporting must never break the error screen
+    }
   }, [error]);
 
   return (

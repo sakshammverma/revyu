@@ -5,6 +5,7 @@ import { FlowButton } from "@/components/flow/Button";
 import { StarRating } from "@/components/flow/StarRating";
 import { TagChips } from "@/components/flow/TagChips";
 import { copyToClipboard } from "@/lib/flow/clipboard";
+import { clearSavedFlow, loadSavedFlow, saveFlow } from "@/lib/flow/resume";
 import { assembleDraft } from "@/lib/flow/draft";
 import { submitFeedback, type FeedbackResult, type FlowConfig } from "@/lib/flow/api";
 import { createSession } from "@/lib/flow/api";
@@ -12,7 +13,6 @@ import { getDeviceHash, getOrCreateSessionId, newId } from "@/lib/flow/identity"
 import { retryBuffered, track, type EventType } from "@/lib/flow/events";
 
 type Step =
-  | "landing"
   | "rating"
   | "tags"
   | "draft"
@@ -38,13 +38,20 @@ export function CustomerFlow({ slug, config }: Props) {
   // (SRS-19.2) run the full flow but record nothing: no session, no events,
   // no feedback rows, no trial metering.
   const preview = config.preview === true;
+  // SRS-2.5: flow_start means the customer's first interaction, not the page load.
+  const started = useRef(false);
   const emit = (type: EventType, payload?: Record<string, unknown>) => {
-    if (!preview) track(ctx, type, payload);
+    if (preview) return;
+    if (!started.current) {
+      started.current = true;
+      track(ctx, "flow_start");
+    }
+    track(ctx, type, payload);
   };
 
   const googleUrl = config.outlet.google_review_url;
 
-  const [step, setStep] = useState<Step>("landing");
+  const [step, setStepState] = useState<Step>("rating");
   const [rating, setRating] = useState<number | null>(null);
   const [selectedTagIds, setSelectedTagIds] = useState<Set<string>>(new Set());
   const [draft, setDraft] = useState("");
@@ -63,9 +70,49 @@ export function CustomerFlow({ slug, config }: Props) {
     if (preview) return;
     createSession(slug, sessionId, deviceHash);
     retryBuffered();
-    track(ctx, "flow_start");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Every step is a history entry, so the system back gesture goes to the previous
+  // step instead of leaving the page.
+  function setStep(next: Step) {
+    window.history.pushState({ revyuStep: next }, "");
+    setStepState(next);
+  }
+
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => setStepState((e.state?.revyuStep as Step | undefined) ?? "rating");
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  // Coming back from Google reloads the page (it is served no-store, so the browser
+  // can't restore it). Pick the customer up where they left off for 30 minutes (FR-19).
+  const restored = useRef(false);
+  useEffect(() => {
+    const saved = loadSavedFlow(slug, sessionId);
+    if (saved && saved.step !== "rating") {
+      started.current = true;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- restore from sessionStorage once on mount (not available during SSR)
+      setRating(saved.rating);
+      setSelectedTagIds(new Set(saved.tagIds));
+      setDraft(saved.draft);
+      setDraftEdited(saved.draftEdited);
+      window.history.replaceState({ revyuStep: saved.step }, "");
+      setStepState(saved.step as Step);
+    }
+    restored.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (preview || !restored.current) return;
+    if (step === "private_sent") {
+      clearSavedFlow(slug);
+      return;
+    }
+    saveFlow(slug, sessionId, { step, rating, tagIds: Array.from(selectedTagIds), draft, draftEdited });
+  }, [preview, slug, sessionId, step, rating, selectedTagIds, draft, draftEdited]);
 
   // Keep each new screen at the top so the primary action is in view, and move
   // focus to its heading: the button that was pressed has just unmounted, and
@@ -73,7 +120,7 @@ export function CustomerFlow({ slug, config }: Props) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const firstStep = useRef(true);
   useEffect(() => {
-    window.scrollTo({ top: 0 });
+    window.scrollTo({ top: 0, behavior: "instant" });
     if (firstStep.current) {
       firstStep.current = false;
       return;
@@ -86,6 +133,7 @@ export function CustomerFlow({ slug, config }: Props) {
   }, [step]);
 
   const positive = rating !== null && rating >= 4;
+  const hasDraft = draft.trim().length > 0;
 
   function handleRate(value: number) {
     setRating(value);
@@ -94,6 +142,11 @@ export function CustomerFlow({ slug, config }: Props) {
       returnStep.current = "rating";
       setStep("private");
       emit("private_feedback_opened", { rating: value });
+    } else if (config.tags.length === 0) {
+      // Nothing to pick from: skip the empty tags screen.
+      setDraft("");
+      setStep("draft");
+      emit("draft_viewed", { tag_count: 0 });
     } else {
       setStep("tags");
     }
@@ -143,6 +196,16 @@ export function CustomerFlow({ slug, config }: Props) {
     if (googleUrl) window.location.href = googleUrl;
   }
 
+  // The sticky "Post publicly on Google" on the draft step: still one tap to Google,
+  // but the customer's draft goes on the clipboard first instead of being left behind.
+  async function stickyGoogle() {
+    if (step === "draft" && draft.trim()) {
+      setCopied(await copyToClipboard(draft));
+      emit("copy_tapped", { length: draft.length });
+    }
+    goToGoogle();
+  }
+
   async function handleSendFeedback() {
     if (!feedbackText.trim() || feedbackBusy) return;
     setFeedbackBusy(true);
@@ -170,6 +233,7 @@ export function CustomerFlow({ slug, config }: Props) {
     setFeedbackBusy(false);
     if (result === "ok") {
       feedbackId.current = null;
+      setFeedbackText("");
       emit("private_feedback_submitted", { rating });
       setStep("private_sent");
     } else {
@@ -201,14 +265,14 @@ export function CustomerFlow({ slug, config }: Props) {
           <div className="flex items-center gap-2 min-w-0">
             {config.outlet.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={config.outlet.logo_url} alt="" className="w-7 h-7 rounded-md object-cover shrink-0" />
+              <img src={config.outlet.logo_url} alt="" width={28} height={28} decoding="async" className="w-7 h-7 rounded-md object-cover shrink-0" />
             ) : (
               <span aria-hidden className="w-2 h-2 rounded-full bg-accent shrink-0" />
             )}
             <span className="text-sm font-semibold text-ink truncate">{config.outlet.business_name}</span>
           </div>
           {progressIndex >= 0 && (
-            <span className="text-xs text-text-2 shrink-0" aria-label={`Step ${progressIndex + 1} of 3`}>
+            <span className="text-xs text-text-2 shrink-0">
               Step {progressIndex + 1} of 3
             </span>
           )}
@@ -229,12 +293,13 @@ export function CustomerFlow({ slug, config }: Props) {
           </p>
         )}
 
-        {step === "landing" && <Landing businessName={config.outlet.business_name} onStart={() => setStep("rating")} />}
-
+        <div key={step} className="flow-step">
         {step === "rating" && (
           <div className="flex flex-col gap-5 text-center">
             <div>
-              <h1 className="font-display text-[26px] sm:text-[28px] leading-tight tracking-tight text-ink">How was your visit?</h1>
+              <h1 className="font-display text-[26px] sm:text-[28px] leading-tight tracking-tight text-ink">
+                <span className="sr-only">Step 1 of 3. </span>How was your visit?
+              </h1>
               <p className="text-sm text-text-2 mt-1.5">Tap a star to rate your experience</p>
             </div>
             <div className="py-3 px-2 bg-paper-subtle/50 rounded-2xl border border-line">
@@ -263,8 +328,10 @@ export function CustomerFlow({ slug, config }: Props) {
         {step === "tags" && (
           <div className="flex flex-col gap-5">
             <div>
-              <h1 className="font-display text-[26px] sm:text-[28px] leading-tight tracking-tight text-ink">What stood out?</h1>
-              <p className="text-sm text-text-2 mt-1.5">Tap whatever applies, or skip to continue.</p>
+              <h1 className="font-display text-[26px] sm:text-[28px] leading-tight tracking-tight text-ink">
+                <span className="sr-only">Step 2 of 3. </span>What stood out?
+              </h1>
+              <p className="text-sm text-text-2 mt-1.5">Tap whatever applies, or skip this step.</p>
             </div>
             <div className="py-1">
               <TagChips
@@ -279,7 +346,7 @@ export function CustomerFlow({ slug, config }: Props) {
               />
             </div>
             <FlowButton variant="primary" onClick={handleTagsNext}>
-              Assemble my review →
+              {selectedTagIds.size > 0 ? "Write my draft →" : "Skip, I’ll write my own →"}
             </FlowButton>
             <BackLink onClick={() => setStep("rating")} />
           </div>
@@ -288,7 +355,9 @@ export function CustomerFlow({ slug, config }: Props) {
         {step === "draft" && (
           <div className="flex flex-col gap-4">
             <div>
-              <h1 className="font-display text-[26px] sm:text-[28px] leading-tight tracking-tight text-ink">Your review draft</h1>
+              <h1 className="font-display text-[26px] sm:text-[28px] leading-tight tracking-tight text-ink">
+                <span className="sr-only">Step 3 of 3. </span>Your review draft
+              </h1>
               <div className="mt-3 px-3.5 py-2.5 rounded-xl bg-accent-50 border border-accent/25 text-sm font-medium leading-snug text-[#1e4fae]">
                 We&rsquo;ve written this from what you selected. Edit anything. It&rsquo;s your review.
               </div>
@@ -300,16 +369,19 @@ export function CustomerFlow({ slug, config }: Props) {
               id="draft-text"
               className="w-full min-h-[140px] rounded-xl border border-line-strong bg-white p-4 text-base leading-relaxed text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/25 transition-colors"
               value={draft}
+              enterKeyHint="done"
+              placeholder="Add a few words in your own words (optional)"
               onChange={(e) => handleDraftChange(e.target.value)}
             />
-            <FlowButton variant="primary" onClick={handleCopyAndHandoff} disabled={!googleUrl && !draft.trim()}>
-              {googleUrl ? <>Copy &amp; Continue to Google →</> : "Copy my review"}
+            <FlowButton variant="primary" onClick={hasDraft ? handleCopyAndHandoff : goToGoogle} disabled={!googleUrl && !hasDraft}>
+              {googleUrl ? (hasDraft ? <>Copy &amp; Continue to Google →</> : <>Continue to Google →</>) : "Copy my review"}
             </FlowButton>
-            <BackLink onClick={() => setStep("tags")} />
+            <BackLink onClick={() => setStep(config.tags.length === 0 ? "rating" : "tags")} />
           </div>
         )}
 
         {step === "handoff" && <HandoffScreen copied={copied} onContinue={googleUrl ? goToGoogle : undefined} draft={draft} />}
+        </div>
       </div>
 
       {/*
@@ -319,10 +391,10 @@ export function CustomerFlow({ slug, config }: Props) {
         phone no matter how long the page content is.
       */}
       {showStickyOptions && (
-        <div className="fixed bottom-0 inset-x-0 z-30 bg-sheet/95 backdrop-blur border-t border-line px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div className="fixed bottom-0 inset-x-0 z-30 bg-sheet border-t border-line px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           <div className="max-w-md mx-auto flex flex-col gap-1">
             {googleUrl && (
-              <FlowButton variant="outline" onClick={goToGoogle}>
+              <FlowButton variant="outline" onClick={stickyGoogle}>
                 {GOOGLE_LABEL}
               </FlowButton>
             )}
@@ -350,31 +422,15 @@ function BackLink({ onClick }: { onClick: () => void }) {
   );
 }
 
-function Landing({ businessName, onStart }: { businessName: string; onStart: () => void }) {
-  return (
-    <div className="flex flex-col gap-5 text-center py-2">
-      <div aria-hidden className="w-14 h-14 rounded-2xl bg-[#fff7e6] border border-[#f5a524]/25 flex items-center justify-center mx-auto text-2xl">
-        ⭐
-      </div>
-      <div>
-        <h1 className="font-display text-[26px] sm:text-[28px] leading-tight tracking-tight text-ink">How was your visit today?</h1>
-        <p className="text-sm text-text-2 leading-relaxed mt-2 max-w-xs mx-auto">
-          Share quick feedback for <strong className="font-semibold text-ink">{businessName}</strong>. Takes less than 30 seconds.
-        </p>
-      </div>
-      <FlowButton variant="primary" onClick={onStart}>
-        Start review →
-      </FlowButton>
-    </div>
-  );
-}
-
 function HandoffScreen({ copied, draft, onContinue }: { copied: boolean; draft: string; onContinue?: () => void }) {
   return (
     <div className="flex flex-col gap-4">
-      <div className="p-3.5 rounded-xl bg-success-50 border border-success/25 flex items-center gap-3">
-        <span aria-hidden className="w-9 h-9 shrink-0 rounded-full bg-success text-white flex items-center justify-center text-base font-bold">
-          ✓
+      <div className={`p-3.5 rounded-xl border flex items-center gap-3 ${copied ? "bg-success-50 border-success/25" : "bg-paper-subtle/60 border-line"}`}>
+        <span
+          aria-hidden
+          className={`w-9 h-9 shrink-0 rounded-full flex items-center justify-center text-base font-bold ${copied ? "bg-success text-white" : "bg-line text-ink"}`}
+        >
+          {copied ? "✓" : "✎"}
         </span>
         <div role="status">
           <h2 className="text-base font-semibold text-ink">{copied ? "Copied to your clipboard!" : "Select and copy your review"}</h2>
@@ -390,7 +446,7 @@ function HandoffScreen({ copied, draft, onContinue }: { copied: boolean; draft: 
 
       {onContinue && (
         <p className="text-sm text-text-2 leading-relaxed">
-          Next step: paste your draft into Google Maps. You may need to sign in with your Google account first.
+          Next step: on Google, choose your own star rating, then press and hold in the review box and tap Paste. You may need to sign in with your Google account first.
         </p>
       )}
 
@@ -458,10 +514,10 @@ function PrivateScreen({
         <p className="text-sm text-text-2 mt-1.5">
           {positive
             ? "Only the owner sees this. It’s separate from your Google review."
-            : "Tell them directly. The owner sees private feedback today."}
+            : "Tell them directly. Only the owner will see this."}
         </p>
       </div>
-      <label htmlFor="private-message" className="sr-only">
+      <label htmlFor="private-message" className="text-sm font-semibold text-ink -mb-2">
         Your private message
       </label>
       <textarea
@@ -471,10 +527,11 @@ function PrivateScreen({
         className="w-full min-h-[104px] rounded-xl border border-line-strong bg-white p-4 text-base leading-relaxed text-ink placeholder:text-text-muted outline-none focus:border-accent focus:ring-2 focus:ring-accent/25 transition-colors"
         placeholder={positive ? "Your message to the owner" : "What went wrong with your visit?"}
         value={feedbackText}
+        enterKeyHint="done"
         onChange={(e) => onFeedbackChange(e.target.value)}
       />
       <div>
-        <label htmlFor="private-contact" className="text-xs font-semibold text-text-2">
+        <label htmlFor="private-contact" className="text-sm font-semibold text-text-2">
           Phone or email (optional, only if you&rsquo;d like a reply)
         </label>
         <input
@@ -482,6 +539,7 @@ function PrivateScreen({
           value={contact}
           maxLength={200}
           autoComplete="off"
+          enterKeyHint="send"
           onChange={(e) => onContactChange(e.target.value)}
           className="mt-1 w-full min-h-[44px] rounded-xl border border-line-strong bg-white px-3.5 text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/25"
         />
@@ -493,7 +551,8 @@ function PrivateScreen({
             : "We couldn’t send that. Check your connection and try again; we’ll also retry when you’re back online."}
         </p>
       )}
-      <FlowButton variant="primary" onClick={onSend} disabled={!feedbackText.trim() || busy}>
+      {/* aria-disabled, not disabled: a disabled button drops keyboard focus mid-send. */}
+      <FlowButton variant="primary" onClick={onSend} aria-disabled={!feedbackText.trim() || busy} aria-busy={busy}>
         {busy ? "Sending…" : "Send privately to the owner"}
       </FlowButton>
       {/* The Google option lives in the sticky bar (CR-3), so it can never fall below the fold here. */}
@@ -506,7 +565,7 @@ function PrivateScreen({
 function NeutralScreen({ businessName }: { businessName: string }) {
   return (
     <div className="v2-sheet border border-line px-6 py-10 sm:px-8 text-center flex flex-col items-center gap-3 before:block before:w-10 before:h-1 before:rounded-full before:bg-accent before:mb-3">
-      <span className="font-display text-2xl leading-tight text-ink">{businessName}</span>
+      <h1 className="font-display text-2xl leading-tight text-ink">{businessName}</h1>
       <p className="text-sm text-text-2 leading-relaxed max-w-xs">Not currently collecting feedback. Thank you for stopping by!</p>
     </div>
   );

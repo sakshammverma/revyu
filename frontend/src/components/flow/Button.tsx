@@ -22,7 +22,7 @@ const VARIANT_CLASSES: Record<Variant, string> = {
 export function FlowButton({ variant = "primary", className = "", ...rest }: Props) {
   return (
     <button
-      className={`w-full min-h-[48px] px-5 py-3 rounded-xl font-semibold text-base leading-snug tracking-tight transition-colors duration-150 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99] flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#397dff] focus-visible:ring-offset-2 ${VARIANT_CLASSES[variant]} ${className}`}
+      className={`w-full min-h-[48px] px-5 py-3 rounded-xl font-semibold text-base leading-snug tracking-tight transition-colors duration-150 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed aria-disabled:opacity-40 aria-disabled:cursor-not-allowed active:scale-[0.99] [-webkit-tap-highlight-color:transparent] flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#397dff] focus-visible:ring-offset-2 ${VARIANT_CLASSES[variant]} ${className}`}
       {...rest}
     />
   );

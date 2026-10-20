@@ -291,6 +291,13 @@ body {
 }
 
 /* Animations */
+/* Customer flow: a short fade between steps (the global reduced-motion rule turns it off). */
+@keyframes flowStepIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.flow-step { animation: flowStepIn 0.18s ease-out; }
+
 @keyframes heroWordIn {
   from {
     opacity: 0;
