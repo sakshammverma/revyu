@@ -20,7 +20,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="min-h-screen bg-bg">
       <nav aria-label="Admin" className="bg-sheet border-b border-line">
-        <div className="max-w-5xl mx-auto px-3 sm:px-8 h-14 flex items-center gap-1 overflow-x-auto">
+        {/* Wraps on phones so every section is visible; one scrollable row from sm up. */}
+        <div className="max-w-5xl mx-auto px-3 sm:px-8 py-1.5 sm:py-0 sm:h-14 flex flex-wrap sm:flex-nowrap items-center gap-x-1 sm:overflow-x-auto">
           <Logo label="Revyu Admin" className="text-ink mr-3 shrink-0" markClassName="w-5 h-5" />
           {LINKS.map((l) => (
             <Link

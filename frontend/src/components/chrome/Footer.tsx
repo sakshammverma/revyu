@@ -51,7 +51,7 @@ export function Footer() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter business email"
-                  className="flex-1 px-3 py-1.5 text-sm text-white placeholder-[#9aa1a3] bg-transparent focus:outline-none"
+                  className="flex-1 min-w-0 px-3 py-1.5 text-sm text-white placeholder-[#9aa1a3] bg-transparent focus:outline-none"
                 />
                 <button
                   type="submit"

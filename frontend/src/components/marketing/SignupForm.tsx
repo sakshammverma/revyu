@@ -36,6 +36,10 @@ function phoneProblem(raw: string): string | null {
 
 const VERTICALS = ["general", "dental", "physiotherapy", "gym", "salon", "coaching"];
 
+/** Step-1 answers survive a reload in this tab (sessionStorage), and are dropped after checkout. */
+const DRAFT_KEY = "revyu:signup-draft";
+type Draft = { businessName: string; vertical: string; ownerName: string; ownerPhone: string; ownerEmail: string };
+
 export function SignupForm({
   initialEmail = "",
   referralCode = "",
@@ -73,6 +77,32 @@ export function SignupForm({
   const [placementAck, setPlacementAck] = useState(false);
   const [plan, setPlan] = useState<"monthly" | "annual">(initialPlan);
 
+  // Restore after a reload; values from the link (?email=, a gap-report place) win.
+  const draftRestored = useRef(false);
+  useEffect(() => {
+    try {
+      const draft = JSON.parse(sessionStorage.getItem(DRAFT_KEY) ?? "null") as Partial<Draft> | null;
+      if (draft) {
+        /* eslint-disable react-hooks/set-state-in-effect -- read a browser-only draft after hydration */
+        if (!initialPlace && draft.businessName) setBusinessName(draft.businessName);
+        if (draft.vertical && VERTICALS.includes(draft.vertical)) setVertical(draft.vertical);
+        if (draft.ownerName) setOwnerName(draft.ownerName);
+        if (draft.ownerPhone) setOwnerPhone(draft.ownerPhone);
+        if (!initialEmail && draft.ownerEmail) setOwnerEmail(draft.ownerEmail);
+        /* eslint-enable react-hooks/set-state-in-effect */
+      }
+    } catch {}
+    draftRestored.current = true;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, on mount
+  }, []);
+  useEffect(() => {
+    if (!draftRestored.current) return;
+    try {
+      const draft: Draft = { businessName, vertical, ownerName, ownerPhone, ownerEmail };
+      sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+    } catch {}
+  }, [businessName, vertical, ownerName, ownerPhone, ownerEmail]);
+
   async function handleSearch() {
     if (!query.trim() || searching) return;
     setSearching(true);
@@ -109,6 +139,9 @@ export function SignupForm({
       // and moves the signup into the approval queue (SRS-18.7).
       const result = await runCheckout(res.checkout, businessName);
       await confirmSignup(res.signup_id, result);
+      try {
+        sessionStorage.removeItem(DRAFT_KEY);
+      } catch {}
       router.push(`/signup/status/${res.signup_id}`);
     } catch (e) {
       if (e instanceof CheckoutCancelled) {

@@ -44,18 +44,12 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Secondary links collapse once the header shrinks to a pill; they stay
-  // reachable through the Resources menu.
-  const secondary = isScrolled ? "hidden" : "";
+  // Secondary links collapse once the header shrinks to a pill, and below xl
+  // where the full row doesn't fit; they stay reachable through the Resources menu.
+  const secondary = isScrolled ? "hidden" : "hidden xl:inline";
 
   return (
     <>
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[60] focus:bg-white focus:text-ink focus:px-4 focus:py-2 focus:rounded-lg focus:shadow-v2-elevated"
-      >
-        Skip to content
-      </a>
       {/* Dim overlay when mega menu is open */}
       {megaMenuOpen && (
         <div
@@ -85,7 +79,7 @@ export function Header() {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className={`hidden md:flex items-center ${isScrolled ? "gap-5 lg:gap-6" : "gap-7 lg:gap-9"}`}>
+          <nav className={`hidden lg:flex items-center whitespace-nowrap ${isScrolled ? "gap-5 xl:gap-6" : "gap-6 xl:gap-9"}`}>
             <Link
               href="/how-it-works"
               className="text-sm text-text-2 hover:text-ink transition-colors"
@@ -155,7 +149,7 @@ export function Header() {
           </nav>
 
           {/* Right Action Buttons */}
-          <div className={`hidden md:flex items-center ${isScrolled ? "gap-4" : "gap-5"}`}>
+          <div className={`hidden lg:flex items-center whitespace-nowrap ${isScrolled ? "gap-4" : "gap-5"}`}>
             <Link
               href="/app"
               className="text-sm text-text-2 hover:text-ink transition-colors"
@@ -171,7 +165,7 @@ export function Header() {
           </div>
 
           {/* Mobile Menu Burger */}
-          <div className="flex md:hidden items-center gap-2">
+          <div className="flex lg:hidden items-center gap-2">
             <Link
               href="/signup"
               className="btn-primary text-xs py-2 px-3.5"
@@ -323,7 +317,7 @@ export function Header() {
 
         {/* Mobile Flyout Drawer */}
         {mobileMenuOpen && (
-          <div id="mobile-menu" className="pointer-events-auto md:hidden mt-2 mx-auto max-w-[360px] bg-ink-dark text-white rounded-2xl p-6 shadow-v2-elevated border border-[#2b3239] flex flex-col gap-4 text-right">
+          <div id="mobile-menu" className="pointer-events-auto lg:hidden mt-2 mx-auto max-w-[360px] bg-ink-dark text-white rounded-2xl p-6 shadow-v2-elevated border border-[#2b3239] flex flex-col gap-4 text-right">
             <Link
               href="/how-it-works"
               onClick={() => setMobileMenuOpen(false)}

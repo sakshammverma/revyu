@@ -26,7 +26,7 @@ const FAQS = [
     q: "What does it cost?",
     a: (
       <>
-        <Price plan="monthly" /> a month or <Price plan="annual" /> a year, one price for every kind of business. The first 15 days are free: you set up autopay at signup, the first charge comes after the trial, and if you cancel before then you pay nothing.
+        <Price plan="monthly" suffix=" a month or " fallback="A flat monthly or yearly plan, " /><Price plan="annual" suffix=" a year, " fallback="" />one price for every kind of business. The first 15 days are free: you set up autopay at signup, the first charge comes after the trial, and if you cancel before then you pay nothing.
       </>
     ),
   },

@@ -1,11 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Price } from "@/lib/pricing";
 
+const DISMISS_KEY = "revyu:promo-dismissed";
+
 export function PromoBar() {
   const [dismissed, setDismissed] = useState(false);
+
+  // Stay dismissed across pages and reloads (storage can be blocked; then it just reappears).
+  useEffect(() => {
+    try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- read a browser-only preference after hydration
+      if (localStorage.getItem(DISMISS_KEY)) setDismissed(true);
+    } catch {}
+  }, []);
+
+  function dismiss() {
+    setDismissed(true);
+    try {
+      localStorage.setItem(DISMISS_KEY, "1");
+    } catch {}
+  }
 
   if (dismissed) return null;
 
@@ -22,11 +39,11 @@ export function PromoBar() {
       {/* Center Row Content */}
       <div className="relative z-10 mx-auto flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
         <span className="font-semibold text-white tracking-tight"><Price plan="monthly" suffix="/month, flat" fallback="One flat monthly price" /></span>
-        <span className="text-text-on-dark hidden sm:inline">·</span>
-        <span className="text-text-on-dark hidden sm:inline">
+        <span className="text-text-on-dark hidden lg:inline">·</span>
+        <span className="text-text-on-dark hidden lg:inline">
           Ask every customer before the shop next door does · 15 days free
         </span>
-        <span className="text-[#2b3239] hidden md:inline">|</span>
+        <span className="text-[#2b3239] hidden lg:inline">|</span>
         <Link
           href="/signup"
           className="btn-pill-light text-xs font-semibold px-3 py-1 flex items-center gap-1.5 ml-2"
@@ -39,7 +56,7 @@ export function PromoBar() {
       {/* Close button */}
       <button
         type="button"
-        onClick={() => setDismissed(true)}
+        onClick={dismiss}
         className="relative z-10 text-text-on-dark hover:text-white p-1.5 rounded hover:bg-white/10 transition-colors ml-2 cursor-pointer"
         aria-label="Dismiss banner"
       >

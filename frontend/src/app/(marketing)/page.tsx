@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { pageMetadata, siteUrl } from "@/lib/seo";
 import { PromoBar } from "@/components/chrome/PromoBar";
+import { SkipLink } from "@/components/chrome/SkipLink";
 import { Header } from "@/components/chrome/Header";
 import { Hero } from "@/components/marketing/Hero";
 import { BuildCards } from "@/components/marketing/BuildCards";
@@ -40,6 +41,7 @@ export default function Home() {
     <PlaygroundProvider>
     <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd).replace(/</g, "\u003c") }} />
     <div className="min-h-screen flex flex-col bg-bg text-ink selection:bg-accent/15 selection:text-ink">
+      <SkipLink />
       {/* 1. Top Announcement Bar */}
       <PromoBar />
 

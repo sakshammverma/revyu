@@ -74,7 +74,9 @@ export function OutletManager() {
       {loading && <p className="text-sm text-text-2">Loading…</p>}
       {!loading && error != null && (
         <p role="alert" className="text-sm text-alert">
-          Couldn&rsquo;t load outlets. Check your connection and{" "}
+          {error instanceof TypeError
+            ? "Couldn’t load outlets. Check your connection and "
+            : "Couldn’t load outlets: the server returned an error. Check /api/health, then "}
           <button type="button" onClick={load} className="font-semibold underline">
             try again
           </button>

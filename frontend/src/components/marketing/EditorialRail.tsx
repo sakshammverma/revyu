@@ -26,7 +26,7 @@ const ARTICLES = [
   {
     title: (
       <>
-        <Price plan="monthly" /> a month. Less than one regular.
+        <Price plan="monthly" suffix=" a month" fallback="One flat monthly price" />. Less than one regular.
       </>
     ),
     category: "Pricing",

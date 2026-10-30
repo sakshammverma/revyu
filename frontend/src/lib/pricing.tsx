@@ -32,13 +32,15 @@ export interface PricingView {
   money: (amountMinor: number) => string;
   /** The visitor's own display choice. Never decides what is charged. */
   setCountry: (code: string | null) => void;
+  /** Fetch the price again after a failed load. */
+  retry: () => void;
 }
 
 const PricingContext = createContext<PricingView | null>(null);
 
 export function PricingProvider({ children }: { children: React.ReactNode }) {
   const [picked, setPicked] = useState<string | null>(null);
-  const { data, loading } = useAsync<PublicPricing | null>(async () => {
+  const { data, loading, reload } = useAsync<PublicPricing | null>(async () => {
     // Runs in the browser only. A ?country=XX in the page URL previews that market.
     const country = picked ?? new URLSearchParams(window.location.search).get("country");
     const res = await fetch(`${API_BASE}/api/pricing${country ? `?country=${encodeURIComponent(country)}` : ""}`);
@@ -67,7 +69,10 @@ export function PricingProvider({ children }: { children: React.ReactNode }) {
       saving: data && data.annual_saving_minor > 0 ? money(data.annual_saving_minor) : null,
       money,
       setCountry,
+      retry: reload,
     };
+    // reload is recreated each render; including it would rebuild the view every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, loading, setCountry]);
 
   return <PricingContext.Provider value={view}>{children}</PricingContext.Provider>;
@@ -87,7 +92,32 @@ const EMPTY: PricingView = {
   saving: null,
   money: (n) => String(n),
   setCountry: () => {},
+  retry: () => {},
 };
+
+/**
+ * A plan's headline price with its unit ("/ month"). If the price can't be loaded it says so and
+ * offers a retry, instead of placeholder words sitting where the number should be.
+ */
+export function PlanPrice({ plan, unit }: { plan: "monthly" | "annual"; unit: string }) {
+  const p = usePricing();
+  if (!p.loading && !p[plan]) {
+    return (
+      <p role="status" className="text-sm text-text-2">
+        We couldn&rsquo;t load the price.{" "}
+        <button type="button" onClick={p.retry} className="font-semibold text-accent underline underline-offset-2 cursor-pointer">
+          Try again
+        </button>
+      </p>
+    );
+  }
+  return (
+    <>
+      <span className="font-display text-5xl sm:text-6xl text-ink tracking-tight"><Price plan={plan} /></span>
+      <span className="text-sm text-text-muted font-medium">{unit}</span>
+    </>
+  );
+}
 
 /** Outside a provider (e.g. a page rendered without the marketing layout) this stays "loading". */
 export const usePricing = (): PricingView => useContext(PricingContext) ?? EMPTY;

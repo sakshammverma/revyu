@@ -78,7 +78,7 @@ const TABS = [
     features: [
       { title: "No pressure framing", text: "The printed prompt says “scan to share your experience” — never “give us 5 stars”." },
       { title: "Works for any shop or service", text: "Retail, food, repairs, salons, clinics, studios — change the tags to match." },
-      { title: "One flat price", text: <><Price plan="monthly" /> a month, the same for every kind of business. No tiers, no add-ons.</> },
+      { title: "One flat price", text: <><Price plan="monthly" suffix=" a month" fallback="One monthly price" />, the same for every kind of business. No tiers, no add-ons.</> },
     ],
   },
 ];

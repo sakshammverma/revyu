@@ -16,7 +16,15 @@ export function getAdminToken(): string | null {
   return window.sessionStorage.getItem(TOKEN_KEY);
 }
 
+// Set when the server rejects the token, so the gate can say why it is asking again.
+let tokenRejected = false;
+
+export function wasAdminTokenRejected(): boolean {
+  return tokenRejected;
+}
+
 export function setAdminToken(token: string) {
+  tokenRejected = false;
   window.sessionStorage.setItem(TOKEN_KEY, token);
   listeners.forEach((l) => l());
 }
@@ -40,6 +48,7 @@ async function adminFetch(path: string, init: RequestInit = {}) {
     },
   });
   if (res.status === 401) {
+    tokenRejected = true;
     clearAdminToken();
   }
   return res;

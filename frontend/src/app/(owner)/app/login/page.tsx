@@ -67,7 +67,9 @@ function LoginForm() {
       setEmailError(
         e instanceof DashboardApiError && e.code === "RATE_LIMITED"
           ? "Too many attempts. Please wait a few minutes and try again."
-          : "We couldn't send the code. Check your connection and try again."
+          : e instanceof DashboardApiError
+            ? "We couldn't send the code because of a problem on our side. Please try again in a few minutes."
+            : "We couldn't send the code. Check your connection and try again."
       );
     } finally {
       setBusy(false);

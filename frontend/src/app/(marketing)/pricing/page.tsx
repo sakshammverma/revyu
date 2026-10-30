@@ -3,7 +3,7 @@ import { pageMetadata } from "@/lib/seo";
 import Link from "next/link";
 import { MarketingPage } from "@/components/chrome/MarketingPage";
 import { CountryPicker } from "@/components/marketing/CountryPicker";
-import { IfPriced, Price } from "@/lib/pricing";
+import { IfPriced, PlanPrice, Price } from "@/lib/pricing";
 
 export const metadata: Metadata = pageMetadata({
   path: "/pricing",
@@ -47,8 +47,7 @@ export default function PricingPage() {
                 </span>
               </div>
               <div className="mt-6 flex items-baseline gap-2">
-                <span className="font-display text-5xl sm:text-6xl text-ink tracking-tight"><Price plan="monthly" /></span>
-                <span className="text-sm text-text-muted font-medium">/ month</span>
+                <PlanPrice plan="monthly" unit="/ month" />
               </div>
               <p className="mt-2 text-xs sm:text-sm text-text-muted">
                 Billed monthly. Cancel any time from your dashboard.
@@ -108,8 +107,7 @@ export default function PricingPage() {
                 </span>
               </div>
               <div className="mt-6 flex items-baseline gap-2">
-                <span className="font-display text-5xl sm:text-6xl text-ink tracking-tight"><Price plan="annual" /></span>
-                <span className="text-sm text-text-muted font-medium">/ year</span>
+                <PlanPrice plan="annual" unit="/ year" />
               </div>
               <p className="mt-2 text-xs sm:text-sm text-text-muted">
                 Works out to about <Price plan="annualPerMonth" suffix="/month" fallback="a lower monthly rate" />, versus <Price plan="monthly" fallback="the monthly price" /> paying monthly.
@@ -165,7 +163,7 @@ export default function PricingPage() {
           <div className="v2-sheet p-6 sm:p-8 border border-line">
             <h2 className="font-display text-xl text-ink">One new customer can cover a whole year</h2>
             <p className="mt-3 text-sm text-text-muted leading-relaxed">
-              <Price plan="annual" /> a year is less than what many shops earn from a single new regular customer. We don’t promise reviews, ratings or rankings — we make sure every customer is asked.
+              <Price plan="annual" suffix=" a year" fallback="A year of Revyu" /> is less than what many shops earn from a single new regular customer. We don’t promise reviews, ratings or rankings — we make sure every customer is asked.
             </p>
           </div>
         </div>

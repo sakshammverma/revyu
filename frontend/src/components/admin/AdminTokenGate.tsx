@@ -2,7 +2,7 @@
 
 import { useId, useState, useSyncExternalStore } from "react";
 
-import { getAdminToken, setAdminToken, subscribeAdminToken } from "@/lib/admin/api";
+import { getAdminToken, setAdminToken, subscribeAdminToken, wasAdminTokenRejected } from "@/lib/admin/api";
 
 // Shared gate so any admin page/component can require the bearer token
 // independently, rather than depending on another component happening to
@@ -37,8 +37,14 @@ export function AdminTokenGate({ children }: { children: React.ReactNode }) {
           placeholder="Enter token to continue"
           autoComplete="current-password"
           required
+          aria-describedby={wasAdminTokenRejected() ? `${tokenInputId}-error` : undefined}
           className="w-full rounded-lg border border-line bg-white px-3.5 py-3 text-base text-ink outline-none focus:border-accent focus:ring-2 focus:ring-accent/25 transition-colors"
         />
+        {wasAdminTokenRejected() && (
+          <p id={`${tokenInputId}-error`} role="alert" className="mt-2 text-sm text-alert">
+            That token was not accepted. Check it and try again.
+          </p>
+        )}
         <button type="submit" className="btn-primary mt-4 w-full min-h-[44px]">
           Continue →
         </button>

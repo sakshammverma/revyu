@@ -44,7 +44,9 @@ function Queue() {
 
       {error != null && (
         <div role="alert" className="p-3.5 rounded-xl bg-alert-50 border border-alert/25 text-alert text-sm">
-          Failed to load queue. Check your connection and refresh.
+          {error instanceof TypeError
+            ? "Failed to load queue. Check your connection and refresh."
+            : "Failed to load queue: the server returned an error. Check /api/health and the Vercel logs."}
         </div>
       )}
 

@@ -40,7 +40,7 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
           <main className="min-h-screen bg-bg flex items-center justify-center p-4">
             <div role="alert" className="v2-sheet border border-line p-8 text-center max-w-md w-full">
               <p className="font-display text-xl text-ink">We couldn&rsquo;t load your dashboard</p>
-              <p className="text-sm text-text-2 mt-1">Check your connection and try again. Your QR code keeps working.</p>
+              <p className="text-sm text-text-2 mt-1">Please try again in a moment. Your QR code keeps working.</p>
               <Button onClick={retry} className="mt-4">
                 Try again
               </Button>
