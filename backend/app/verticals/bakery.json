@@ -1,0 +1,14 @@
+{
+  "label": "Bakery / sweets",
+  "menu_label": "Menu",
+  "tags": [
+    {"label": "fresh baked", "phrases": ["everything was freshly baked", "fresh out of the oven", "fresh stock every day", "nothing tasted stale"]},
+    {"label": "tasty", "phrases": ["really tasty", "full of flavour", "everything we tried was delicious", "the taste was spot on"]},
+    {"label": "wide variety", "phrases": ["a wide variety to choose from", "lots of options", "a good range of items", "something for everyone"]},
+    {"label": "custom orders", "phrases": ["handled our custom order well", "the cake came out just as asked", "made to order without fuss", "delivered the order on time"]},
+    {"label": "friendly staff", "phrases": ["the staff were friendly", "helpful at the counter", "courteous team", "warm and welcoming"]},
+    {"label": "clean shop", "phrases": ["the shop was clean", "hygienic display counters", "neatly kept", "clean and well maintained"]},
+    {"label": "nice packaging", "phrases": ["neatly packed", "nice packaging", "packed well for travel", "good boxes for gifting"]},
+    {"label": "fair pricing", "phrases": ["fair prices", "good value for money", "reasonable rates", "worth the price"]}
+  ]
+}

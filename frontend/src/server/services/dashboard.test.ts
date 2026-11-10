@@ -315,7 +315,7 @@ describe("outlets/mine", () => {
       const res = await getMine(makeRequest("/api/app/outlets/mine", { session }), undefined as never);
       expect(await res.json()).toEqual({
         outlet_id: outlet.id,
-        business_name: "Test Clinic",
+        business_name: "Test Shop",
         state: "suspended",
         collecting: false,
         slug: outlet.slug,

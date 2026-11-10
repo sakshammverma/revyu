@@ -138,10 +138,10 @@ def _fetch(place_id: str) -> tuple[Business, list[Business]]:
 
 def _fake(place_id: str) -> tuple[Business, list[Business]]:
     """Deterministic local/dev data so the UI is buildable without a key."""
-    me = Business(place_id, "Your Clinic", 4.3, 47)
+    me = Business(place_id, "Your Business", 4.3, 47)
     comps = [
-        Business("local-c1", "Smile Care Dental", 4.6, 180),
-        Business("local-c2", "Bright Teeth Clinic", 4.5, 132),
-        Business("local-c3", "City Dental Studio", 4.4, 96),
+        Business("local-c1", "City Mart", 4.6, 180),
+        Business("local-c2", "Sharma Traders", 4.5, 132),
+        Business("local-c3", "Corner Cafe", 4.4, 96),
     ]
     return me, comps

@@ -13,7 +13,7 @@ const PAGES = [
   { name: "compliance", path: "/compliance" },
   { name: "signup", path: "/signup" },
   { name: "gap report", path: "/gap-report" },
-  { name: "customer flow", path: "/r/demo-dental/review" },
+  { name: "customer flow", path: "/r/demo-shop/review" },
 ];
 
 for (const p of PAGES) {

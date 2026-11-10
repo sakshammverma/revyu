@@ -19,7 +19,7 @@ const KIT_ITEMS = [
       { label: "Size", val: "80 × 60 mm" },
       { label: "Format", val: "Print-ready PDF" },
       { label: "Prompt", val: "“Scan to share your experience”" },
-      { label: "Placement", val: "Receipts, invoice copies, appointment slips" },
+      { label: "Placement", val: "Receipts, invoice copies, bill slips" },
     ],
   },
   {
@@ -32,7 +32,7 @@ const KIT_ITEMS = [
       { label: "Size", val: "A7 (74 × 105 mm)" },
       { label: "Format", val: "Print-ready PDF" },
       { label: "Prompt", val: "“Scan to share your experience”" },
-      { label: "Placement", val: "With the bill, in the appointment folder" },
+      { label: "Placement", val: "With the bill or in the delivery bag" },
     ],
   },
   {

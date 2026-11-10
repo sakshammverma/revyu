@@ -1,0 +1,14 @@
+{
+  "label": "Car / bike service",
+  "menu_label": "Services",
+  "tags": [
+    {"label": "quality work", "phrases": ["the work was done well", "the vehicle runs smoothly now", "careful workmanship", "fixed properly the first time"]},
+    {"label": "on-time delivery", "phrases": ["ready when promised", "delivered on time", "quick turnaround", "no long wait"]},
+    {"label": "honest pricing", "phrases": ["honest pricing", "no hidden charges", "estimate matched the bill", "fair labour charges"]},
+    {"label": "explained clearly", "phrases": ["explained the problem clearly", "showed me the old parts", "walked me through the work", "clear about what was needed"]},
+    {"label": "genuine parts", "phrases": ["genuine parts used", "original spares", "quality parts", "parts came with a bill"]},
+    {"label": "skilled mechanics", "phrases": ["skilled mechanics", "the team knew their job", "found the issue quickly", "experienced staff"]},
+    {"label": "pickup and drop", "phrases": ["convenient pickup and drop", "picked up from home", "easy doorstep service", "hassle-free pickup"]},
+    {"label": "friendly staff", "phrases": ["the staff were friendly", "courteous team", "helpful from start to finish", "felt well looked after"]}
+  ]
+}

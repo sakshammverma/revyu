@@ -27,8 +27,8 @@ def seed_pending_signup() -> None:
             id=uuid.uuid4(),
             account_id=account.id,
             slug=f"pending-{uuid.uuid4().hex[:10]}",
-            business_name="Bright Smile Dental",
-            vertical="dental",
+            business_name="Bright Corner Store",
+            vertical="general",
             state="pending_approval",
             source="self_serve",
             submitted_at=datetime.now(timezone.utc) - timedelta(hours=26),  # aged-out on purpose
@@ -39,7 +39,7 @@ def seed_pending_signup() -> None:
         )
         db.add(outlet)
         db.flush()
-        seed_tags_for_outlet(db, outlet.id, "dental")
+        seed_tags_for_outlet(db, outlet.id, "general")
         db.commit()
         print(f"Seeded pending_approval outlet: {outlet.id}")
     finally:

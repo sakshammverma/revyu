@@ -5,7 +5,7 @@
  */
 import { expect, test } from "@playwright/test";
 
-const SLUG = "demo-dental";
+const SLUG = "demo-shop";
 
 test("every page carries the security headers", async ({ request }) => {
   for (const path of ["/", `/r/${SLUG}`, "/api/health"]) {

@@ -1,0 +1,14 @@
+{
+  "label": "Clothing / retail store",
+  "menu_label": "Products",
+  "tags": [
+    {"label": "good collection", "phrases": ["a good collection", "lots of styles to choose from", "a wide range of options", "found exactly what I wanted"]},
+    {"label": "quality products", "phrases": ["good quality products", "the material is good", "well made items", "quality that lives up to the price"]},
+    {"label": "helpful staff", "phrases": ["the staff were helpful", "patient while I tried things", "honest suggestions", "friendly and courteous team"]},
+    {"label": "fair pricing", "phrases": ["fair prices", "good value for money", "reasonable rates", "transparent pricing"]},
+    {"label": "easy returns", "phrases": ["easy exchange process", "hassle-free returns", "exchange done without fuss", "clear return policy"]},
+    {"label": "trendy styles", "phrases": ["latest styles in stock", "trendy designs", "up-to-date collection", "new arrivals regularly"]},
+    {"label": "clean store", "phrases": ["the store was clean", "well organised racks", "neatly arranged", "pleasant place to shop"]},
+    {"label": "quick billing", "phrases": ["quick billing", "no long queue at the counter", "smooth checkout", "fast and easy payment"]}
+  ]
+}

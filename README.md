@@ -25,7 +25,7 @@ cp .env.example .env                                 # set DATABASE_URL
 alembic upgrade head
 python -m app.seeds.plans
 python -m app.seeds.service_catalog
-python -m app.seeds.dev_outlet                       # demo outlet at /r/demo-dental
+python -m app.seeds.dev_outlet                       # demo outlet at /r/demo-shop
 
 # 2. App (UI + API)
 cd ../frontend

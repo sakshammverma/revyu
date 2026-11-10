@@ -228,7 +228,7 @@ describe("staff routes", () => {
       const login = (slug: string, body: unknown) => postStaffLogin(makeRequest(`/api/staff/${slug}/login`, { body }), slugCtx(slug));
       const ok = await login(outlet.slug, { pin: "4821" });
       expect(ok.status).toBe(200);
-      expect(await ok.json()).toEqual({ token: expect.stringMatching(/^[0-9a-f-]{36}\.[0-9a-f-]{36}\.\d+\.[0-9a-f]{64}$/), label: "Desk", outlet_name: "Test Clinic" });
+      expect(await ok.json()).toEqual({ token: expect.stringMatching(/^[0-9a-f-]{36}\.[0-9a-f-]{36}\.\d+\.[0-9a-f]{64}$/), label: "Desk", outlet_name: "Test Shop" });
       const wrong = await login(outlet.slug, { pin: "0000" });
       expect(wrong.status).toBe(401);
       expect(await wrong.json()).toEqual({ detail: { error: { code: "BAD_PIN", message: "Wrong PIN." } } });

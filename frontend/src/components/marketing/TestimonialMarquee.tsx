@@ -107,7 +107,7 @@ export function TestimonialMarquee() {
         {/* Bottom line & Dark Pill CTA */}
         <div className="text-center px-4 flex flex-col sm:flex-row items-center justify-center gap-4">
           <p className="text-sm font-medium text-text-2">
-            Shop, clinic, salon, gym or coaching centre —{" "}
+            Shop, café, salon, repair centre or clinic —{" "}
             <span className="font-semibold text-ink">one product, one price</span>.
           </p>
           <Link href="/signup" className="btn-pill-dark text-xs sm:text-sm py-2 px-5">

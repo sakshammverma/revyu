@@ -149,7 +149,7 @@ function CreateOutletForm({ verticals, onDone }: { verticals: string[]; onDone: 
   const mapsId = useId();
 
   const [businessName, setBusinessName] = useState("");
-  const [vertical, setVertical] = useState(verticals[0] ?? "dental");
+  const [vertical, setVertical] = useState(verticals.includes("general") ? "general" : (verticals[0] ?? "general"));
   const [ownerPhone, setOwnerPhone] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
   const [mapsUrl, setMapsUrl] = useState("");

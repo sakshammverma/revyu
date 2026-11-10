@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 // Compliance + UX tests. They run against the real API (Next route handlers)
-// and the seeded demo outlet (slug demo-dental; seed with `python -m
+// and the seeded demo outlet (slug demo-shop; seed with `python -m
 // app.seeds.dev_outlet` from backend/, see CLAUDE.md).
 //   npm run test:e2e
 // There is no separate API process any more. Rate limits are disabled for the

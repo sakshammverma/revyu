@@ -35,8 +35,8 @@ def seed_auth_test_account() -> None:
             id=uuid.uuid4(),
             account_id=account.id,
             slug=f"auth-test-{uuid.uuid4().hex[:8]}",
-            business_name="Auth Test Clinic",
-            vertical="dental",
+            business_name="Auth Test Shop",
+            vertical="general",
             state="trial",
             source="admin",
             activated_at=datetime.now(timezone.utc) - timedelta(days=1),
@@ -45,7 +45,7 @@ def seed_auth_test_account() -> None:
         )
         db.add(outlet)
         db.flush()
-        seed_tags_for_outlet(db, outlet.id, "dental")
+        seed_tags_for_outlet(db, outlet.id, "general")
         db.commit()
         print(f"Seeded auth test account: {TEST_EMAIL}")
     finally:

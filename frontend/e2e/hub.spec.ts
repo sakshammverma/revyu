@@ -9,7 +9,7 @@ import path from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type APIRequestContext } from "@playwright/test";
 
-const SLUG = "demo-dental";
+const SLUG = "demo-shop";
 const PIN = "4321";
 
 function adminToken(): string {
@@ -31,7 +31,7 @@ async function configureHub(request: APIRequestContext) {
   };
 
   await ok(request.put(`${base}/links`, { headers: H(), data: { links: [
-    { kind: "instagram", url: "@demodental", enabled: true },
+    { kind: "instagram", url: "@demoshop", enabled: true },
     { kind: "whatsapp", url: "+91 98765 43210", enabled: true },
   ] } }));
 
@@ -103,9 +103,9 @@ test("hub has no serious accessibility violations", async ({ page }) => {
 test("review tile opens the unchanged review flow and back returns to the hub", async ({ page }) => {
   await page.goto(`/r/${SLUG}`);
   await page.getByRole("link", { name: /Share your experience/ }).click();
-  await expect(page).toHaveURL(/\/r\/demo-dental\/review\?from=hub/);
+  await expect(page).toHaveURL(/\/r\/demo-shop\/review\?from=hub/);
   await expect(page.getByRole("heading", { name: /How was your visit/i })).toBeVisible();
-  await page.getByRole("link", { name: /Dental|demo/i }).first().click();
+  await page.getByRole("link", { name: /Sharma|demo/i }).first().click();
   await expect(page).toHaveURL(new RegExp(`/r/${SLUG}$`));
 });
 
@@ -116,7 +116,7 @@ test("connect lists owner links that open safely in a new tab", async ({ page })
   await expect(wa).toHaveAttribute("target", "_blank");
   await expect(wa).toHaveAttribute("rel", /noopener/);
   await expect(page.locator('a[href^="https://instagram.com/"]')).toBeVisible();
-  await expect(page.getByRole("link", { name: /Hub|Dental|demo/i }).first()).toBeVisible(); // way back (FR-84)
+  await expect(page.getByRole("link", { name: /Hub|Sharma|demo/i }).first()).toBeVisible(); // way back (FR-84)
 });
 
 test("menu renders items with prices from minor units", async ({ page }) => {

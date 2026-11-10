@@ -1,0 +1,14 @@
+{
+  "label": "Café / restaurant",
+  "menu_label": "Menu",
+  "tags": [
+    {"label": "tasty food", "phrases": ["the food was delicious", "really tasty dishes", "full of flavour", "everything we ordered was good"]},
+    {"label": "fresh ingredients", "phrases": ["fresh ingredients", "food tasted freshly made", "nothing felt stale", "fresh and well prepared"]},
+    {"label": "friendly staff", "phrases": ["the staff were friendly", "warm and welcoming team", "courteous service", "made us feel at home"]},
+    {"label": "quick service", "phrases": ["food arrived quickly", "no long wait for the order", "quick and attentive service", "served on time"]},
+    {"label": "clean place", "phrases": ["the place was clean", "hygienic kitchen and tables", "tidy and well kept", "clean washrooms"]},
+    {"label": "good portions", "phrases": ["generous portions", "good quantity for the price", "filling meals", "plenty of food on the plate"]},
+    {"label": "nice ambience", "phrases": ["a pleasant ambience", "cosy seating", "a nice place to sit and relax", "comfortable atmosphere"]},
+    {"label": "value for money", "phrases": ["good value for money", "reasonable prices", "fair pricing for the food", "worth what we paid"]}
+  ]
+}

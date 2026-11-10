@@ -1,0 +1,14 @@
+{
+  "label": "Pharmacy / chemist",
+  "menu_label": "Products",
+  "tags": [
+    {"label": "medicines in stock", "phrases": ["had the medicines I needed", "well stocked", "rarely out of stock", "arranged a medicine quickly"]},
+    {"label": "helpful pharmacist", "phrases": ["the pharmacist was helpful", "explained the dosage clearly", "patient with my questions", "knowledgeable staff"]},
+    {"label": "quick service", "phrases": ["quick service", "no long wait", "prescription filled fast", "efficient at the counter"]},
+    {"label": "fair prices", "phrases": ["fair prices", "good discounts", "reasonable rates", "prices as marked"]},
+    {"label": "home delivery", "phrases": ["quick home delivery", "delivered on time", "easy to order on WhatsApp", "reliable delivery"]},
+    {"label": "clean store", "phrases": ["the store was clean", "neatly organised", "hygienic and tidy", "well maintained"]},
+    {"label": "open late", "phrases": ["open when I needed it", "convenient timings", "open late", "available on holidays"]},
+    {"label": "friendly staff", "phrases": ["the staff were friendly", "courteous team", "warm and welcoming", "felt well looked after"]}
+  ]
+}

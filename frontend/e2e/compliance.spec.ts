@@ -7,7 +7,7 @@
  */
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
-const SLUG = "demo-dental";
+const SLUG = "demo-shop";
 // SRS-17.1g: the approved neutral label set. Add to it only with policy review.
 const APPROVED_LABELS = ["Post publicly on Google"];
 

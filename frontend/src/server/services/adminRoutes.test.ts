@@ -364,7 +364,7 @@ describe("cockpit, detail, state override", () => {
 
       const res = await detail(req("/api/x", undefined, "GET"), ctx(outlet.id));
       const d = await res.json();
-      expect(d).toMatchObject({ business_name: "Test Clinic", scans_30d: 1, completed_30d: 0, hub_mode: "direct" });
+      expect(d).toMatchObject({ business_name: "Test Shop", scans_30d: 1, completed_30d: 0, hub_mode: "direct" });
       expect(d.tags).toEqual([expect.objectContaining({ label: "अच्छा", phrases: [], active: true })]);
       expect(d.payments).toEqual([expect.objectContaining({ amount_minor: 99900, currency_code: "INR", status: "captured" })]);
       expect((await detail(req("/api/x", undefined, "GET"), ctx(crypto.randomUUID()))).status).toBe(404);

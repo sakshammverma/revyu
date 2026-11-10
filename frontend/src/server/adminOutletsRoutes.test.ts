@@ -41,8 +41,8 @@ const err = async (res: Response) => (await res.json()).detail.error;
 const uid = () => crypto.randomUUID().replaceAll("-", "").slice(0, 8);
 
 const createBody = (over: Record<string, unknown> = {}) => ({
-  business_name: "Admin Test Clinic",
-  vertical: "dental",
+  business_name: "Admin Test Shop",
+  vertical: "general",
   owner_phone: `+91${uid()}`,
   owner_email: `adm-${uid()}@example.com`,
   place_id: `ChIJ_t_${uid()}`,
@@ -142,7 +142,7 @@ describe("auth and create", () => {
   it("verticals lists the configured set", () =>
     inTx(async () => {
       const res = await verticals(req("/api/admin/outlets/verticals"));
-      expect((await res.json()).verticals).toEqual(["coaching", "dental", "general", "gym", "physiotherapy", "salon"]);
+      expect((await res.json()).verticals).toEqual(["automotive", "bakery", "coaching", "dental", "electronics", "general", "grocery", "gym", "pharmacy", "physiotherapy", "restaurant", "retail", "salon"]);
     }));
 });
 
@@ -249,9 +249,9 @@ describe("bulk import", () => {
       const csv =
         String.fromCharCode(0xfeff) +
         "business_name,vertical,owner_phone,owner_email,google_maps_url\r\n" +
-        `"Clinic, One",dental,${phone},${email},ChIJ_bulk_${uid()}\r\n` +
+        `"Shop, One",general,${phone},${email},ChIJ_bulk_${uid()}\r\n` +
         "\r\n" +
-        `,dental,+91${uid()},,\r\n` +
+        `,general,+91${uid()},,\r\n` +
         `Two,gym,+91${uid()},${email},\r\n` +
         `Three,salon,+91${uid()},,some salon bengaluru\r\n` +
         `Four,salon,+91${uid()},,\r\n`;
@@ -268,7 +268,7 @@ describe("bulk import", () => {
       ]);
       expect(Object.keys(body.rows[0])).toEqual(["row", "outlet_id", "slug", "status", "error"]);
       const [one] = await tx.select().from(schema.outlets).where(eq(schema.outlets.id, body.rows[0].outlet_id));
-      expect([one.businessName, one.source, one.state]).toEqual(["Clinic, One", "bulk_import", "draft"]);
+      expect([one.businessName, one.source, one.state]).toEqual(["Shop, One", "bulk_import", "draft"]);
       const [four] = await tx.select().from(schema.outlets).where(eq(schema.outlets.id, body.rows[4].outlet_id));
       expect([four.googlePlaceId, four.googleReviewUrl]).toEqual([null, null]);
       const [acct] = await tx.select().from(schema.accounts).where(eq(schema.accounts.id, four.accountId));

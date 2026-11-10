@@ -1,0 +1,14 @@
+{
+  "label": "Grocery / kirana",
+  "menu_label": "Products",
+  "tags": [
+    {"label": "everything in stock", "phrases": ["found everything I needed", "well stocked shelves", "rarely out of stock", "a good range of items"]},
+    {"label": "fresh stock", "phrases": ["fresh fruits and vegetables", "fresh stock", "good quality produce", "nothing past its date"]},
+    {"label": "fair prices", "phrases": ["fair prices", "good value for money", "reasonable rates", "prices as marked"]},
+    {"label": "home delivery", "phrases": ["quick home delivery", "delivered on time", "easy to order on WhatsApp", "delivery was reliable"]},
+    {"label": "friendly owner", "phrases": ["the owner is friendly", "helpful and courteous", "always greets with a smile", "knows regular customers well"]},
+    {"label": "quick billing", "phrases": ["quick billing", "no long wait at the counter", "smooth checkout", "fast service"]},
+    {"label": "clean shop", "phrases": ["the shop was clean", "neatly arranged shelves", "well organised", "tidy and well kept"]},
+    {"label": "easy payment", "phrases": ["UPI and card accepted", "easy payment options", "payment was hassle-free", "smooth digital payment"]}
+  ]
+}

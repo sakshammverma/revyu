@@ -104,13 +104,13 @@ def test_high_value_notification_queues_whatsapp_tap(client, db):
     account.owner_phone = "+919876543210"
     db.flush()
     notify(db, account_id=account.id, outlet_id=outlet.id, to_email=account.owner_email,
-           template="collection_paused", data={"business_name": "Test Clinic", "payment_link": "http://x/pay"})
+           template="collection_paused", data={"business_name": "Test Shop", "payment_link": "http://x/pay"})
     # A routine template must NOT be queued.
     notify(db, account_id=account.id, outlet_id=outlet.id, to_email=account.owner_email,
-           template="first_scan", data={"business_name": "Test Clinic"})
+           template="first_scan", data={"business_name": "Test Shop"})
     db.flush()
 
-    items = [i for i in client.get("/api/admin/pending-sends").json() if i["business_name"] == "Test Clinic"]
+    items = [i for i in client.get("/api/admin/pending-sends").json() if i["business_name"] == "Test Shop"]
     assert len(items) == 1
     assert items[0]["link"].startswith("https://wa.me/919876543210?text=")
     sid = items[0]["id"]
@@ -177,7 +177,7 @@ def test_cockpit_endpoint_and_outlet_detail(client, db):
     mine = [o for o in data["outlets"] if o["outlet_id"] == str(outlet.id)][0]
     assert mine["scans"] == 1 and data["window_days"] == 30
     detail = client.get(f"/api/admin/outlets/{outlet.id}/detail").json()
-    assert detail["business_name"] == "Test Clinic" and detail["scans_30d"] == 1
+    assert detail["business_name"] == "Test Shop" and detail["scans_30d"] == 1
 
 
 def test_state_override_needs_reason_and_valid_state(client, db):

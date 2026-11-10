@@ -17,7 +17,7 @@ from pathlib import Path
 
 VERTICALS_DIR = Path(__file__).parent.parent / "verticals"
 
-DEFAULT_VERTICAL = "dental"
+DEFAULT_VERTICAL = "general"
 
 
 @lru_cache

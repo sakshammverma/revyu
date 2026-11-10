@@ -7,7 +7,7 @@ import path from "node:path";
 
 import { expect, test, type Page } from "@playwright/test";
 
-const SLUG = "demo-dental";
+const SLUG = "demo-shop";
 
 function adminToken(): string {
   if (process.env.ADMIN_TOKEN) return process.env.ADMIN_TOKEN;
@@ -75,7 +75,7 @@ test("connect tab rejects off-platform links and saves valid ones", async ({ pag
   await page.getByRole("button", { name: "Save links" }).click();
   await expect(page.getByText(/look like an Instagram link/)).toBeVisible();
 
-  await page.getByLabel("Link address").fill("@demodental");
+  await page.getByLabel("Link address").fill("@demoshop");
   await page.getByRole("button", { name: "Save links" }).click();
   await expect(page.getByText("Links saved")).toBeVisible();
   await page.getByRole("button", { name: "+ Add link" }).click();

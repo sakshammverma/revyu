@@ -1,4 +1,4 @@
-"""Creates one demo dental outlet for local development.
+"""Creates one demo shop outlet for local development.
 
 Not part of the v1 product — a dev convenience so the customer flow can be
 exercised against a real outlet+tags without going through admin onboarding.
@@ -12,7 +12,7 @@ from app.models.account import Account
 from app.models.outlet import Outlet
 from app.seeds.tags import seed_tags_for_outlet
 
-DEV_SLUG = "demo-dental"
+DEV_SLUG = "demo-shop"
 
 
 def seed_dev_outlet() -> None:
@@ -36,8 +36,8 @@ def seed_dev_outlet() -> None:
             id=uuid.uuid4(),
             account_id=account.id,
             slug=DEV_SLUG,
-            business_name="Smile Dental Care",
-            vertical="dental",
+            business_name="Sharma General Store",
+            vertical="general",
             state="trial",
             source="admin",
             activated_at=datetime.now(timezone.utc) - timedelta(days=1),
@@ -48,7 +48,7 @@ def seed_dev_outlet() -> None:
         db.add(outlet)
         db.flush()
 
-        seed_tags_for_outlet(db, outlet.id, "dental")
+        seed_tags_for_outlet(db, outlet.id, "general")
         db.commit()
         print(f"Seeded dev outlet: /r/{DEV_SLUG}")
     finally:

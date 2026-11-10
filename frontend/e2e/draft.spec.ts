@@ -10,7 +10,7 @@ const TAGS = [
   { id: "t1", phrases: ["the clinic was spotless", "spotlessly clean throughout", "very clean", "hygienic and tidy"] },
   { id: "t2", phrases: ["the treatment was painless", "no pain at all", "gentle throughout", "completely painless"] },
 ];
-const FACTS = { businessName: "Smile Dental Care", vertical: "dental" };
+const FACTS = { businessName: "Sharma General Store", vertical: "general" };
 
 test("SRS-17.2: zero tags produces an empty draft", () => {
   expect(assembleDraft([], FACTS, "session-1").trim()).toBe("");

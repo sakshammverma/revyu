@@ -130,11 +130,11 @@ async function fetchBusinesses(placeId: string): Promise<[Business, Business[]]>
 /** Deterministic local/dev data so the UI is buildable without a key. */
 function fake(placeId: string): [Business, Business[]] {
   return [
-    { place_id: placeId, name: "Your Clinic", rating: 4.3, review_count: 47 },
+    { place_id: placeId, name: "Your Business", rating: 4.3, review_count: 47 },
     [
-      { place_id: "local-c1", name: "Smile Care Dental", rating: 4.6, review_count: 180 },
-      { place_id: "local-c2", name: "Bright Teeth Clinic", rating: 4.5, review_count: 132 },
-      { place_id: "local-c3", name: "City Dental Studio", rating: 4.4, review_count: 96 },
+      { place_id: "local-c1", name: "City Mart", rating: 4.6, review_count: 180 },
+      { place_id: "local-c2", name: "Sharma Traders", rating: 4.5, review_count: 132 },
+      { place_id: "local-c3", name: "Corner Cafe", rating: 4.4, review_count: 96 },
     ],
   ] as [Business, Business[]];
 }

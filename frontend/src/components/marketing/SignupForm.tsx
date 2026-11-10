@@ -13,6 +13,7 @@ import { CountryPicker } from "@/components/marketing/CountryPicker";
 import { formatMoney } from "@/lib/format";
 import { usePricing } from "@/lib/pricing";
 import { CheckoutCancelled, runCheckout } from "@/lib/signup/checkout";
+import { VERTICAL_OPTIONS } from "@/lib/verticals";
 
 type Step = "details" | "place" | "placement" | "plan";
 
@@ -34,7 +35,7 @@ function phoneProblem(raw: string): string | null {
   return null;
 }
 
-const VERTICALS = ["general", "dental", "physiotherapy", "gym", "salon", "coaching"];
+const VERTICALS = VERTICAL_OPTIONS.map((o) => o.key);
 
 /** Step-1 answers survive a reload in this tab (sessionStorage), and are dropped after checkout. */
 const DRAFT_KEY = "revyu:signup-draft";
@@ -138,11 +139,14 @@ export function SignupForm({
       // SRS-18.6: authorise payment now; the backend verifies the signature
       // and moves the signup into the approval queue (SRS-18.7).
       const result = await runCheckout(res.checkout, businessName);
-      await confirmSignup(res.signup_id, result);
+      // Razorpay has the authorisation now. If our confirm call fails (a
+      // flaky mobile network), its webhook moves the signup on anyway, so go
+      // to the status page rather than telling the owner to pay again.
+      await confirmSignup(res.signup_id, result).catch(() => {});
       try {
         sessionStorage.removeItem(DRAFT_KEY);
       } catch {}
-      router.push(`/signup/status/${res.signup_id}`);
+      router.push(`/signup/status/${res.signup_id}?paid=1`);
     } catch (e) {
       if (e instanceof CheckoutCancelled) {
         setError("Payment window closed. Nothing was charged — you can try again.");
@@ -259,9 +263,9 @@ export function SignupForm({
               onChange={(e) => setVertical(e.target.value)}
               className="w-full rounded-xl border border-line bg-paper-subtle/50 px-3.5 py-2.5 text-sm text-ink focus:border-brand focus:bg-white transition-colors"
             >
-              {VERTICALS.map((v) => (
-                <option key={v} value={v}>
-                  {v === "general" ? "Shop, café, boutique or other" : v.charAt(0).toUpperCase() + v.slice(1)}
+              {VERTICAL_OPTIONS.map((o) => (
+                <option key={o.key} value={o.key}>
+                  {o.label}
                 </option>
               ))}
             </select>
@@ -390,7 +394,7 @@ export function SignupForm({
 
           <div className="p-4 rounded-xl bg-paper-subtle border border-line flex flex-col gap-2.5 text-xs sm:text-sm text-ink-muted leading-relaxed">
             <p>
-              <strong className="text-ink">Allowed:</strong> Counter tent cards, bill/receipt footers, window stickers, or appointment reminder cards.
+              <strong className="text-ink">Allowed:</strong> Counter tent cards, bill/receipt footers, window stickers, or packaging inserts.
             </p>
             <p>
               <strong className="text-ink">Prohibited:</strong> Company-owned tablets or kiosks handed to the customer, staff hovering over the customer while they complete it, and any discount, freebie or reward for leaving a review.

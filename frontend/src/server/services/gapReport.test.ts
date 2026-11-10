@@ -27,13 +27,13 @@ const inTx = (fn: (tx: DbLike) => Promise<void>) =>
 describe("buildReport (local fake data; ported from test_referrals_and_gap.py)", () => {
   it("ranks the business against the strongest three nearby", async () => {
     const r = await buildReport("ChIJ_me");
-    expect(r.business).toEqual({ place_id: "ChIJ_me", name: "Your Clinic", rating: 4.3, review_count: 47 });
+    expect(r.business).toEqual({ place_id: "ChIJ_me", name: "Your Business", rating: 4.3, review_count: 47 });
     expect(r.competitors.map((c) => c.review_count)).toEqual([180, 132, 96]);
     expect(r.review_gap).toBe(133);
     expect(r.rank_by_reviews).toBe(4);
     expect(r.group_size).toBe(4);
     expect(r.headline).toBe(
-      "Smile Care Dental has 180 reviews; you have 47. You rank 4 of 4 nearby by review count.",
+      "City Mart has 180 reviews; you have 47. You rank 4 of 4 nearby by review count.",
     );
   });
 });
@@ -57,7 +57,7 @@ describe("gap report endpoints", () => {
       expect(res.status).toBe(202);
       expect(await res.json()).toEqual({ status: "sent" });
       const [lead] = await tx.select().from(schema.leads).where(eq(schema.leads.email, email.toLowerCase()));
-      expect(lead).toMatchObject({ placeId: "ChIJabc", businessName: "Your Clinic", source: "gap_report" });
+      expect(lead).toMatchObject({ placeId: "ChIJabc", businessName: "Your Business", source: "gap_report" });
 
       const bad = await postEmail(makeRequest("/api/gap-report/email", { body: { place_id: "ChIJabc", email: "nope" } }));
       expect(bad.status).toBe(422);

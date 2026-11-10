@@ -1,0 +1,14 @@
+{
+  "label": "Mobile / electronics & repair",
+  "menu_label": "Products & services",
+  "tags": [
+    {"label": "genuine products", "phrases": ["genuine products", "original parts used", "authentic items with bill", "trustworthy stock"]},
+    {"label": "quick repair", "phrases": ["the repair was quick", "fixed the same day", "turnaround was fast", "ready when promised"]},
+    {"label": "honest advice", "phrases": ["gave honest advice", "no pushing of unnecessary upgrades", "explained the options clearly", "transparent about the problem"]},
+    {"label": "fair pricing", "phrases": ["fair prices", "reasonable repair charges", "good value for money", "no hidden charges"]},
+    {"label": "knowledgeable staff", "phrases": ["the team knew their stuff", "technically skilled staff", "knowledgeable about the products", "found the issue quickly"]},
+    {"label": "good range", "phrases": ["a good range of models", "lots of accessories", "latest models in stock", "plenty of options"]},
+    {"label": "warranty support", "phrases": ["warranty handled smoothly", "good after-sales support", "helped with the warranty claim", "stood by their work"]},
+    {"label": "friendly service", "phrases": ["friendly service", "courteous team", "patient with my questions", "helpful from start to finish"]}
+  ]
+}

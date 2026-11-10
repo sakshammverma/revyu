@@ -2,7 +2,7 @@
 
 Guidance for Claude Code when working in this repository.
 
-**Revyu** is a QR-code Google-review collection tool for single-outlet small businesses (launch market: India). Product docs live in `documents/` (start at `documents/INDEX.md`; current build status and plan: `documents/23-STATUS-AND-PLAN.md`). **Compliance rules CR-1 to CR-6 in `documents/03-COMPLIANCE.md` are non-negotiable**: no review gating, no incentives tied to reviews, Google link reachable at every rating, drafts built only from the customer's own tags.
+**Revyu** is a QR-code Google-review collection tool for single-outlet local shops and small businesses of any kind (launch market: India). Product docs live in `documents/` (start at `documents/INDEX.md`; current build status and plan: `documents/23-STATUS-AND-PLAN.md`). **Compliance rules CR-1 to CR-6 in `documents/03-COMPLIANCE.md` are non-negotiable**: no review gating, no incentives tied to reviews, Google link reachable at every rating, drafts built only from the customer's own tags.
 
 ## Layout
 
@@ -18,7 +18,7 @@ pip install -e .[dev]
 alembic upgrade head               # the ONLY way to change the schema
 python -m app.seeds.plans          # plans table (no prices in code, FR-71)
 python -m app.seeds.service_catalog
-python -m app.seeds.dev_outlet     # demo outlet at /r/demo-dental
+python -m app.seeds.dev_outlet     # demo outlet at /r/demo-shop
 pytest tests -q                    # legacy suite for the retired API; still green
 ```
 
@@ -32,7 +32,7 @@ pytest tests -q                    # legacy suite for the retired API; still gre
 npm run dev          # :3000, serves the UI and the API
 npx tsc --noEmit
 npx eslint src
-npm run test:e2e     # Playwright; starts/reuses the dev server, needs the seeded demo-dental outlet
+npm run test:e2e     # Playwright; starts/reuses the dev server, needs the seeded demo-shop outlet
 npm test             # Vitest for src/server/** against DATABASE_URL in .env.local (rolled-back transactions)
 ```
 
@@ -41,7 +41,7 @@ npm test             # Vitest for src/server/** against DATABASE_URL in .env.loc
 - Email goes out through `src/server/notifications/transport.ts`: Resend key, else SMTP login (`SMTP_HOST/PORT/USER/PASS`), else it only logs. Production needs one of them.
 - Tests are hermetic: `vitest.config.mts` blanks every provider key (Google, Razorpay, Resend, SMTP, Supabase) whatever is in `.env.local`. Local dev with real test keys in `.env.local` will use them (e.g. Razorpay test mode), so blank them to use the mock provider.
 
-- `e2e/compliance.spec.ts` is the CR-3 boundary (SRS-17.1a-g, ratings 1-5, 360x640). It must stay green. It targets `/r/demo-dental/review`, which works in both hub modes. The e2e run sets `DISABLE_RATE_LIMITS` (honoured only when `ENVIRONMENT=local`) and writes scans/sessions to the dev DB, so dev metrics are not real numbers.
+- `e2e/compliance.spec.ts` is the CR-3 boundary (SRS-17.1a-g, ratings 1-5, 360x640). It must stay green. It targets `/r/demo-shop/review`, which works in both hub modes. The e2e run sets `DISABLE_RATE_LIMITS` (honoured only when `ENVIRONMENT=local`) and writes scans/sessions to the dev DB, so dev metrics are not real numbers.
 
 - **This Next.js has breaking changes.** Read `frontend/node_modules/next/dist/docs/` before using a Next API. Example: `error.tsx` receives `retry`, not `reset`.
 - Route groups: `(marketing)` public site + `/admin/*`, `(owner)/app/(portal)` owner dashboard behind the app shell, `(owner)/app/login` and `auth/magic` outside it, `r/[slug]` the customer flow.

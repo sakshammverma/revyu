@@ -41,8 +41,8 @@ def make_outlet(db: Session, account: Account, state: str = "trial") -> Outlet:
         id=uuid.uuid4(),
         account_id=account.id,
         slug=f"t-{uuid.uuid4().hex[:10]}",
-        business_name="Test Clinic",
-        vertical="dental",
+        business_name="Test Shop",
+        vertical="general",
         state=state,
         source="admin",
     )

@@ -100,7 +100,7 @@ describe("competitor API", () => {
       expect(res.status).toBe(201);
       const body = await res.json();
       expect(body.limit).toBe(3);
-      expect(body.me).toEqual({ id: null, name: "Test Clinic", rating: 4.5, review_count: 60, delta: null });
+      expect(body.me).toEqual({ id: null, name: "Test Shop", rating: 4.5, review_count: 60, delta: null });
       expect(body.competitors).toHaveLength(1);
       expect(body.competitors[0]).toMatchObject({ name: "Rival X", rating: 4.9, review_count: 142, delta: null });
 
