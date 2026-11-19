@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 import type { TabProps } from "@/components/hub-editor/PageTab";
-import { Btn, Card, EmptyState, Switch } from "@/components/ui/kit";
+import { Btn, Card, EmptyState, STICKY_ACTIONS, Switch } from "@/components/ui/kit";
 import { HubApiError, type EditorLink } from "@/lib/hub/api";
 
 const KINDS: { value: string; label: string; placeholder: string }[] = [
@@ -128,7 +128,7 @@ export function ConnectTab({ api, state, reload, toast }: TabProps) {
           </ul>
         )}
         {error && <p className="text-sm text-alert mt-3" role="alert">{error}</p>}
-        <div className="flex gap-2 mt-4">
+        <div className={STICKY_ACTIONS}>
           <Btn variant="light" onClick={() => { setLinks([...links, { kind: "instagram", label: null, url: "", enabled: true }]); setKeys([...keys, crypto.randomUUID()]); }}>+ Add link</Btn>
           <Btn onClick={save} busy={busy} disabled={!dirty}>Save links</Btn>
         </div>

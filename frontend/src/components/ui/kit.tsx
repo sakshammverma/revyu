@@ -7,6 +7,14 @@ import { useToast } from "@/components/ui/Toast";
 /* Small shared primitives for the owner/admin editors. Website look: white
    sheets, #e8ecec hairlines, #2f68db actions (AA contrast). */
 
+/**
+ * A card's save row that stays on screen while its card does: long forms (opening
+ * hours, many links) no longer need a scroll to the bottom to save. It sits above
+ * the phone tab bar, and inside a Card it reaches the card's edges.
+ */
+export const STICKY_ACTIONS =
+  "sticky bottom-[calc(3.5rem+env(safe-area-inset-bottom))] lg:bottom-3 z-10 -mx-4 sm:-mx-5 -mb-4 sm:-mb-5 mt-4 px-4 sm:px-5 py-3 bg-sheet/95 backdrop-blur border-t border-line rounded-b-[var(--r-sheet)] flex flex-wrap gap-2";
+
 export function Card({ title, hint, action, children, className = "" }: {
   title?: string;
   hint?: string;

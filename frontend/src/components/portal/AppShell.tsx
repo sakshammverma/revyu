@@ -82,7 +82,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <div className="flex-1 min-w-0 flex flex-col">
         <header className="sticky top-0 z-30 bg-sheet/90 backdrop-blur-xl border-b border-line">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 h-14 lg:h-16 flex items-center justify-between gap-3">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 lg:h-16 flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <Link href="/app" aria-label="Revyu dashboard" className="lg:hidden text-ink shrink-0">
                 <Logo className="text-lg" markClassName="w-6 h-6" />
@@ -96,7 +96,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main id="main-content" tabIndex={-1} className="flex-1 w-full max-w-5xl mx-auto px-3 sm:px-6 py-4 sm:py-8 pb-28 lg:pb-10 flex flex-col gap-4 sm:gap-5 outline-none">
+        <main id="main-content" tabIndex={-1} className="flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-6 pb-28 lg:pb-10 flex flex-col gap-4 sm:gap-5 outline-none">
           {children}
         </main>
       </div>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Btn, Card, Segmented, Switch, TextArea, TextInput } from "@/components/ui/kit";
+import { Btn, Card, Segmented, STICKY_ACTIONS, Switch, TextArea, TextInput } from "@/components/ui/kit";
 import { HubApiError, type EditorState, type HubApi, type ProfileData } from "@/lib/hub/api";
 
 const DAYS = [
@@ -144,10 +144,11 @@ export function PageTab({ api, state, reload, toast, isAdmin }: TabProps) {
       <Card title="Modules" hint="Choose what customers can open, and in what order.">
         <ul className="flex flex-col divide-y divide-line">
           {state.modules.map((m, i) => (
-            <li key={m.key} className="py-3 flex items-center gap-3">
-              <div className="flex flex-col">
-                <button type="button" aria-label={`Move ${m.label} up`} disabled={i === 0 || saving} onClick={() => move(i, -1)} className="w-11 h-11 -my-1.5 text-text-2 disabled:opacity-25">▲</button>
-                <button type="button" aria-label={`Move ${m.label} down`} disabled={i === state.modules.length - 1 || saving} onClick={() => move(i, 1)} className="w-11 h-11 -my-1.5 text-text-2 disabled:opacity-25">▼</button>
+            <li key={m.key} className="py-2 flex items-center gap-3">
+              {/* Side by side, not stacked: each row stays one line tall. */}
+              <div className="flex rounded-lg border border-line overflow-hidden shrink-0">
+                <button type="button" aria-label={`Move ${m.label} up`} disabled={i === 0 || saving} onClick={() => move(i, -1)} className="w-10 h-10 text-xs text-text-2 hover:bg-paper-subtle disabled:opacity-25 cursor-pointer disabled:cursor-default">▲</button>
+                <button type="button" aria-label={`Move ${m.label} down`} disabled={i === state.modules.length - 1 || saving} onClick={() => move(i, 1)} className="w-10 h-10 text-xs text-text-2 border-l border-line hover:bg-paper-subtle disabled:opacity-25 cursor-pointer disabled:cursor-default">▼</button>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-ink">{m.label}</p>
@@ -212,16 +213,16 @@ export function PageTab({ api, state, reload, toast, isAdmin }: TabProps) {
               {hoursSet && (
                 <ul className="flex flex-col gap-2">
                   {DAYS.map(([k, label]) => (
-                    <li key={k} className="flex flex-wrap items-center gap-x-2 gap-y-1.5 text-sm">
-                      <span className="w-12 sm:w-20 text-text-2">{label.slice(0, 3)}</span>
-                      <label className="inline-flex items-center gap-1.5 w-20">
+                    <li key={k} className="flex items-center gap-1.5 sm:gap-2 text-sm min-h-[40px]">
+                      <span className="w-9 sm:w-20 shrink-0 text-text-2">{label.slice(0, 3)}</span>
+                      <label className="inline-flex items-center gap-1.5 w-[4.5rem] sm:w-20 shrink-0">
                         <input type="checkbox" checked={days[k].closed} onChange={(e) => setDays({ ...days, [k]: { ...days[k], closed: e.target.checked } })} /> Closed
                       </label>
                       {!days[k].closed && (
                         <>
-                          <input aria-label={`${label} opens`} type="time" value={days[k].open} onChange={(e) => setDays({ ...days, [k]: { ...days[k], open: e.target.value } })} className="rounded-lg border border-line-strong px-2 py-1.5" />
-                          <span>–</span>
-                          <input aria-label={`${label} closes`} type="time" value={days[k].close} onChange={(e) => setDays({ ...days, [k]: { ...days[k], close: e.target.value } })} className="rounded-lg border border-line-strong px-2 py-1.5" />
+                          <input aria-label={`${label} opens`} type="time" value={days[k].open} onChange={(e) => setDays({ ...days, [k]: { ...days[k], open: e.target.value } })} className="min-w-0 w-[5.75rem] sm:w-auto rounded-lg border border-line-strong px-1.5 sm:px-2 py-1.5" />
+                          <span aria-hidden>–</span>
+                          <input aria-label={`${label} closes`} type="time" value={days[k].close} onChange={(e) => setDays({ ...days, [k]: { ...days[k], close: e.target.value } })} className="min-w-0 w-[5.75rem] sm:w-auto rounded-lg border border-line-strong px-1.5 sm:px-2 py-1.5" />
                         </>
                       )}
                     </li>
@@ -229,7 +230,9 @@ export function PageTab({ api, state, reload, toast, isAdmin }: TabProps) {
                 </ul>
               )}
             </fieldset>
-            <Btn type="submit" busy={busy} className="self-start">Save details</Btn>
+            <div className={STICKY_ACTIONS}>
+              <Btn type="submit" busy={busy}>Save details</Btn>
+            </div>
           </div>
         </Card>
       </form>

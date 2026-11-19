@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { ageLabel, contactActions } from "@/components/dashboard/FeedbackInbox";
+import { Icon } from "@/components/hub/Icons";
 import { useToast } from "@/components/ui";
 import { resolveFeedback, type FeedbackItem } from "@/lib/dashboard/api";
 
@@ -45,26 +46,32 @@ export function FeedbackPeek({ items, openCount }: { items: FeedbackItem[]; open
 
   return (
     <section className="v2-sheet border border-warning/30 overflow-hidden">
-      <header className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 bg-warning-50 border-b border-warning/20">
-        <h2 className="font-semibold text-ink">
+      <header className="flex items-center gap-3 px-4 sm:px-5 py-2.5 bg-warning-50 border-b border-warning/20">
+        <span aria-hidden className="w-8 h-8 shrink-0 rounded-full bg-sheet text-warning flex items-center justify-center">
+          <Icon name="mail" className="w-4 h-4" />
+        </span>
+        <h2 className="flex-1 min-w-0 font-semibold text-ink">
           <span className="tabular-nums">{waiting}</span> private {waiting === 1 ? "message needs" : "messages need"} a reply
         </h2>
         <Link
           href="/app/feedback"
           className="shrink-0 inline-flex items-center min-h-[44px] -my-2 text-sm font-semibold text-accent-hover hover:underline underline-offset-2"
         >
-          Open inbox<span aria-hidden>&nbsp;→</span>
+          <span className="hidden sm:inline">Open inbox</span>
+          <span className="sm:hidden">Inbox</span>
+          <span aria-hidden>&nbsp;→</span>
         </Link>
       </header>
 
+      {/* The newest two (one on a phone), one line each: enough to act on, without pushing the numbers off screen. */}
       <ul className="divide-y divide-line">
-        {shown.map((item) => {
+        {shown.slice(0, 2).map((item, i) => {
           const actions = item.contact ? contactActions(item.contact) : [];
           return (
-            <li key={item.id} className="px-4 sm:px-6 py-3.5 flex flex-col sm:flex-row sm:items-center gap-3">
+            <li key={item.id} className={`px-4 sm:px-5 py-2.5 flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 ${i > 0 ? "hidden sm:flex" : "flex"}`}>
               <div className="min-w-0 flex-1">
-                <p className="text-sm text-ink leading-relaxed line-clamp-2 break-words">{item.message}</p>
-                <p className="text-xs text-text-2 mt-1 tabular-nums">
+                <p className="text-sm text-ink line-clamp-2 sm:line-clamp-1 break-words">{item.message}</p>
+                <p className="text-xs text-text-2 mt-0.5 tabular-nums truncate">
                   {item.rating ? `${item.rating}★ · ` : ""}
                   {ageLabel(item.created_at, now)}
                   {item.contact ? ` · ${item.contact}` : ""}
@@ -77,7 +84,7 @@ export function FeedbackPeek({ items, openCount }: { items: FeedbackItem[]; open
                     href={a.href}
                     target={a.href.startsWith("http") ? "_blank" : undefined}
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center min-h-[44px] sm:min-h-[36px] px-3 rounded-[var(--r-control)] bg-accent-50 text-accent-hover text-sm font-semibold hover:bg-accent/15"
+                    className="inline-flex items-center justify-center min-h-[40px] sm:min-h-[34px] px-3 rounded-[var(--r-control)] bg-accent-50 text-accent-hover text-sm font-semibold hover:bg-accent/15"
                   >
                     {a.label}
                   </a>
@@ -85,7 +92,7 @@ export function FeedbackPeek({ items, openCount }: { items: FeedbackItem[]; open
                 <button
                   type="button"
                   onClick={() => setResolved(item.id, true)}
-                  className="inline-flex items-center justify-center min-h-[44px] sm:min-h-[36px] px-3 rounded-[var(--r-control)] border border-line-strong bg-sheet text-sm font-semibold text-ink hover:bg-paper-subtle cursor-pointer"
+                  className="inline-flex items-center justify-center min-h-[40px] sm:min-h-[34px] px-3 rounded-[var(--r-control)] border border-line-strong bg-sheet text-sm font-semibold text-ink hover:bg-paper-subtle cursor-pointer"
                 >
                   Mark resolved
                 </button>
@@ -95,10 +102,8 @@ export function FeedbackPeek({ items, openCount }: { items: FeedbackItem[]; open
         })}
       </ul>
 
-      {elsewhere > 0 && (
-        <p className="px-4 sm:px-6 py-2.5 border-t border-line text-xs text-text-2">
-          {shown.length > 0 ? `${elsewhere} more in your inbox.` : `${elsewhere} waiting in your inbox.`}
-        </p>
+      {elsewhere > 0 && shown.length === 0 && (
+        <p className="px-4 sm:px-5 py-2.5 text-xs text-text-2">{elsewhere} waiting in your inbox.</p>
       )}
     </section>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 
 import { ConnectTab } from "@/components/hub-editor/ConnectTab";
 import { MenuTab } from "@/components/hub-editor/MenuTab";
@@ -38,6 +38,7 @@ export function HubEditor({ api, isAdmin = false, initialTab = "page" }: { api: 
   const [formNonce, setFormNonce] = useState({ page: 0, connect: 0 });
   const { push } = useToasts();
   const desktop = useDesktop();
+  const editorTop = useRef<HTMLDivElement>(null);
 
   const reload = useCallback(async (resetForm?: "page" | "connect") => {
     try {
@@ -86,10 +87,22 @@ export function HubEditor({ api, isAdmin = false, initialTab = "page" }: { api: 
   }
   const previewSrc = `/r/${state.slug}?preview=1`;
 
+  // The tab bar sticks under the app header, so it can be clicked from anywhere down a long form.
+  // Switching tabs then brings the new panel's top into view instead of leaving the owner mid-page.
+  function choose(next: TabKey) {
+    setTab(next);
+    const top = editorTop.current?.getBoundingClientRect().top;
+    if (top !== undefined && top < 64) {
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      editorTop.current?.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
+    }
+  }
+
   return (
-    <div className="grid lg:grid-cols-[minmax(0,1fr)_320px] gap-5 items-start">
-      <div className="flex flex-col gap-4 min-w-0">
-        <div role="tablist" aria-label="QR page sections" className="flex gap-1 p-1 rounded-xl bg-line overflow-x-auto no-scrollbar">
+    <div className="grid lg:grid-cols-[minmax(0,1fr)_340px] gap-5 lg:gap-6 items-start">
+      <div ref={editorTop} className="flex flex-col gap-4 min-w-0 scroll-mt-[4.5rem] lg:scroll-mt-20">
+        <div className="sticky top-14 lg:top-16 z-20 py-2 -my-2 bg-bg/90 backdrop-blur-xl flex items-center gap-2">
+        <div role="tablist" aria-label="QR page sections" className="flex-1 min-w-0 flex gap-1 p-1 rounded-xl bg-line overflow-x-auto no-scrollbar">
           {tabs.map((t, i) => (
             <button
               key={t.key}
@@ -99,7 +112,7 @@ export function HubEditor({ api, isAdmin = false, initialTab = "page" }: { api: 
               aria-controls={`hub-panel-${t.key}`}
               tabIndex={tab === t.key ? 0 : -1}
               onKeyDown={(e) => onTabKey(e, i)}
-              onClick={() => setTab(t.key)}
+              onClick={() => choose(t.key)}
               className={`flex-1 min-h-[42px] px-4 rounded-lg text-sm font-semibold whitespace-nowrap inline-flex items-center justify-center gap-2 transition-colors ${tab === t.key ? "bg-white text-ink shadow-sm" : "text-text-2"}`}
             >
               {t.label}
@@ -111,6 +124,21 @@ export function HubEditor({ api, isAdmin = false, initialTab = "page" }: { api: 
               )}
             </button>
           ))}
+        </div>
+        {/* Below lg there is no phone mock beside the form: the real page is one tap away, always in reach. */}
+        <a
+          href={`/r/${state.slug}?preview=1`}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Preview your page"
+          title="Preview your page"
+          className="lg:hidden shrink-0 inline-flex items-center justify-center w-[50px] h-[50px] rounded-xl bg-sheet border border-line text-ink"
+        >
+          <svg aria-hidden viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </a>
         </div>
 
         {/* Page and Connect stay mounted (hidden) so unsaved edits survive a tab switch. */}
@@ -132,23 +160,24 @@ export function HubEditor({ api, isAdmin = false, initialTab = "page" }: { api: 
         )}
       </div>
 
-      {/* Below lg the phone mock is hidden; owners on a phone can still open the real page. */}
-      <a
-        href={`/r/${state.slug}`}
-        target="_blank"
-        rel="noreferrer"
-        className="lg:hidden btn-pill-light w-full min-h-[44px] inline-flex items-center justify-center"
-      >
-        Preview your page ↗
-      </a>
-      {/* Mounted only on desktop: a display:none iframe would still load the whole customer page on a phone. */}
+      {/* Mounted only on desktop: a display:none iframe would still load the whole customer page on a phone.
+          It sticks beside the form and is sized to the window, so every change is visible without scrolling. */}
       {desktop && (
-      <aside className="sticky top-20">
-        <p className="vf-section-label mb-2">Live preview</p>
-        <div className="rounded-[2rem] border-[6px] border-ink-dark overflow-hidden bg-bg shadow-v2-phone">
-          <iframe key={previewNonce} title="Customer view preview" src={previewSrc} className="w-full h-[560px] border-0" />
+      <aside className="sticky top-20 flex flex-col">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <p className="vf-section-label">Live preview</p>
+          <a href={`/r/${state.slug}`} target="_blank" rel="noreferrer" className="text-sm font-semibold text-accent-hover hover:underline underline-offset-2">
+            Open full page<span aria-hidden>&nbsp;↗</span>
+          </a>
         </div>
-        <a href={`/r/${state.slug}`} target="_blank" rel="noreferrer" className="btn-pill-light w-full mt-3 min-h-[44px] inline-flex items-center justify-center">Open on your phone ↗</a>
+        <div className="rounded-[2rem] border-[6px] border-ink-dark overflow-hidden bg-bg shadow-v2-phone">
+          <iframe
+            key={previewNonce}
+            title="Customer view preview"
+            src={previewSrc}
+            className="w-full h-[clamp(420px,calc(100vh-9rem),680px)] border-0"
+          />
+        </div>
       </aside>
       )}
     </div>

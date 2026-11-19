@@ -157,25 +157,25 @@ export default function OverviewPage() {
 
 /** Days left, as a ring that empties. The sentence beside it says the same thing in words. */
 function TrialRing({ left, total }: { left: number; total: number }) {
-  const r = 24;
+  const r = 22;
   const c = 2 * Math.PI * r;
   const share = total > 0 ? Math.min(1, Math.max(0, left / total)) : 0;
   return (
-    <span aria-hidden className="relative w-16 h-16 shrink-0">
-      <svg viewBox="0 0 60 60" className="w-16 h-16 -rotate-90">
-        <circle cx="30" cy="30" r={r} fill="none" stroke="var(--sheet)" strokeWidth="6" />
+    <span aria-hidden className="relative w-12 h-12 shrink-0">
+      <svg viewBox="0 0 60 60" className="w-12 h-12 -rotate-90">
+        <circle cx="30" cy="30" r={r} fill="none" stroke="var(--sheet)" strokeWidth="7" />
         <circle
           cx="30"
           cy="30"
           r={r}
           fill="none"
           stroke="var(--accent)"
-          strokeWidth="6"
+          strokeWidth="7"
           strokeLinecap="round"
           strokeDasharray={`${share * c} ${c}`}
         />
       </svg>
-      <span className="absolute inset-0 flex items-center justify-center font-display text-xl text-ink">{left}</span>
+      <span className="absolute inset-0 flex items-center justify-center font-display text-lg text-ink">{left}</span>
     </span>
   );
 }
@@ -188,14 +188,14 @@ function StateBanner({ overview, price }: { overview: Overview | null; price: st
   if (outlet.state === "trial" && billing.trial_days_left !== null) {
     const left = billing.trial_days_left;
     return (
-      <section className="v2-sheet border border-accent/20 bg-gradient-to-r from-accent-50 to-sheet p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-        <div className="flex items-center gap-4 min-w-0 flex-1">
+      <section className="v2-sheet border border-accent/20 bg-gradient-to-r from-accent-50 to-sheet px-4 py-3 sm:px-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
           <TrialRing left={left} total={billing.trial_days_total} />
           <div className="min-w-0">
             <p className="font-semibold text-ink">
               {left} {left === 1 ? "day" : "days"} left in your free trial
             </p>
-            <p className="text-sm text-text-2 mt-0.5">
+            <p className="text-sm text-text-2 mt-0.5 leading-snug">
               {overview && overview.scans > 0 && (
                 <>
                   So far: <span className="font-semibold text-ink tabular-nums">{overview.scans.toLocaleString("en-IN")}</span>{" "}
@@ -208,11 +208,11 @@ function StateBanner({ overview, price }: { overview: Overview | null; price: st
             </p>
           </div>
         </div>
-        <div className="flex sm:flex-col items-center sm:items-end gap-x-3 gap-y-1 shrink-0">
-          <Button href="/app/billing" variant={left <= 3 ? "primary" : "secondary"} className="flex-1 sm:flex-none">
+        <div className="flex items-center gap-3 shrink-0">
+          {price && <p className="order-2 sm:order-1 text-xs text-text-2 tabular-nums">{price}/month</p>}
+          <Button href="/app/billing" variant={left <= 3 ? "primary" : "secondary"} className="order-1 sm:order-2 flex-1 sm:flex-none">
             Choose a plan
           </Button>
-          {price && <p className="text-xs text-text-2 tabular-nums">{price}/month</p>}
         </div>
       </section>
     );

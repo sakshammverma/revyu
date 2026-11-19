@@ -7,6 +7,9 @@ import { resolveFeedback, type FeedbackItem } from "@/lib/dashboard/api";
 
 type Filter = "open" | "resolved" | "all";
 
+/** Messages per screenful: a long backlog loads in steps instead of one very long page. */
+const PAGE = 20;
+
 export function ageLabel(iso: string, now: number): string {
   const hours = (now - new Date(iso).getTime()) / 3_600_000;
   if (hours < 1) return "Just now";
@@ -33,6 +36,7 @@ export function contactActions(contact: string) {
 export function FeedbackInbox({ items: initialItems }: { items: FeedbackItem[] }) {
   const [items, setItems] = useState(initialItems);
   const [filter, setFilter] = useState<Filter>("open");
+  const [limit, setLimit] = useState(PAGE);
   const { toast } = useToast();
   const [now] = useState(() => Date.now());
 
@@ -62,7 +66,10 @@ export function FeedbackInbox({ items: initialItems }: { items: FeedbackItem[] }
             <button
               key={f}
               aria-pressed={filter === f}
-              onClick={() => setFilter(f)}
+              onClick={() => {
+                setFilter(f);
+                setLimit(PAGE);
+              }}
               className={`px-3 min-h-[36px] rounded-md text-xs font-semibold capitalize cursor-pointer ${
                 filter === f ? "bg-sheet text-ink shadow-v2-rest" : "text-text-2"
               }`}
@@ -91,43 +98,38 @@ export function FeedbackInbox({ items: initialItems }: { items: FeedbackItem[] }
           }
         />
       ) : (
-        <ul className="flex flex-col gap-3">
-          {shown.map((item) => {
+        <>
+        <ul className="flex flex-col gap-2.5">
+          {shown.slice(0, limit).map((item) => {
             const actions = item.contact ? contactActions(item.contact) : [];
             const stale = !item.resolved && now - new Date(item.created_at).getTime() > 48 * 3_600_000;
             return (
               <li
                 key={item.id}
-                className={`p-4 sm:p-5 rounded-xl border transition-colors ${
+                className={`px-4 py-3 sm:px-5 rounded-xl border transition-colors flex gap-3 ${
                   item.resolved ? "bg-paper-subtle/50 border-line" : "bg-sheet border-line shadow-v2-rest"
                 }`}
               >
-                <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-line">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2 py-0.5 rounded-md bg-warning-50 border border-warning/25 text-warning tabular-nums text-xs font-bold">
-                      {item.rating ? `${item.rating}★` : "No rating"}
-                    </span>
-                    <span className={`text-xs tabular-nums ${stale ? "text-alert font-semibold" : "text-text-2"}`}>
+                <span className="self-start mt-0.5 shrink-0 min-w-[2.5rem] text-center px-1.5 py-0.5 rounded-md bg-warning-50 border border-warning/25 text-warning tabular-nums text-xs font-bold">
+                  {item.rating ? (
+                    `${item.rating}★`
+                  ) : (
+                    <>
+                      <span aria-hidden>–</span>
+                      <span className="sr-only">No rating</span>
+                    </>
+                  )}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className={`text-sm sm:text-[15px] leading-relaxed whitespace-pre-wrap break-words ${item.resolved ? "text-text-2" : "text-ink"}`}>
+                    {item.message}
+                  </p>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-text-2">
+                    <span className={`tabular-nums ${stale ? "text-alert font-semibold" : ""}`}>
                       {ageLabel(item.created_at, now)}
                       {stale && " · waiting 2+ days"}
                     </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setResolved(item.id, !item.resolved)}
-                    className="min-h-[44px] sm:min-h-[36px] text-xs font-semibold px-3 rounded-lg border border-line-strong bg-sheet text-text-2 hover:bg-paper-subtle hover:text-ink cursor-pointer"
-                  >
-                    {item.resolved ? "Reopen" : "Mark resolved"}
-                  </button>
-                </div>
-
-                <p className="text-sm sm:text-base text-ink mt-3 leading-relaxed whitespace-pre-wrap break-words">{item.message}</p>
-
-                {item.contact && (
-                  <div className="mt-3 pt-3 border-t border-line flex flex-wrap items-center gap-2 text-sm text-text-2">
-                    <span>
-                      <span className="font-semibold text-ink">Contact:</span> {item.contact}
-                    </span>
+                    {item.contact && <span className="break-all">{item.contact}</span>}
                     {actions.map((a) => (
                       <a
                         key={a.label}
@@ -139,13 +141,39 @@ export function FeedbackInbox({ items: initialItems }: { items: FeedbackItem[] }
                         {a.label}
                       </a>
                     ))}
+                    <ResolveButton resolved={item.resolved} onClick={() => setResolved(item.id, !item.resolved)} className="ml-auto sm:hidden" />
                   </div>
-                )}
+                </div>
+                <ResolveButton resolved={item.resolved} onClick={() => setResolved(item.id, !item.resolved)} className="hidden sm:inline-flex self-center" />
               </li>
             );
           })}
         </ul>
+        {shown.length > limit && (
+          <button
+            type="button"
+            onClick={() => setLimit((n) => n + PAGE)}
+            className="mt-3 w-full min-h-[44px] rounded-xl border border-dashed border-line-strong text-sm font-semibold text-ink hover:bg-paper-subtle cursor-pointer"
+          >
+            Show {Math.min(PAGE, shown.length - limit)} more
+            <span className="text-text-2 font-normal"> · {shown.length - limit} not shown</span>
+          </button>
+        )}
+        </>
       )}
     </Card>
+  );
+}
+
+/** One per row; on a phone it sits at the end of the meta line, wider screens give it its own column. */
+function ResolveButton({ resolved, onClick, className }: { resolved: boolean; onClick: () => void; className: string }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`shrink-0 items-center min-h-[36px] text-xs font-semibold px-3 rounded-lg border border-line-strong bg-sheet text-text-2 hover:bg-paper-subtle hover:text-ink cursor-pointer ${className}`}
+    >
+      {resolved ? "Reopen" : "Mark resolved"}
+    </button>
   );
 }
