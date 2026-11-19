@@ -1,121 +1,220 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 
+import { FeedbackPeek } from "@/components/dashboard/FeedbackPeek";
 import { FirstRunCard } from "@/components/dashboard/FirstRunCard";
-import { FunnelView } from "@/components/dashboard/FunnelView";
+import { JourneyCard } from "@/components/dashboard/JourneyCard";
+import { PerformanceCard } from "@/components/dashboard/PerformanceCard";
+import { QrStandeeCard } from "@/components/dashboard/QrStandeeCard";
+import { RatingCard } from "@/components/dashboard/RatingCard";
+import { Icon } from "@/components/hub/Icons";
 import { useOwner } from "@/components/portal/OwnerContext";
-import { Button, Card, ErrorState, Skeleton, StatTile } from "@/components/ui";
-import { getFunnel, getOverview, isDashboardLocked } from "@/lib/dashboard/api";
+import { Button, ErrorState, Skeleton, StatTile } from "@/components/ui";
+import { getHome, isDashboardLocked, type Overview, type PeriodTotals, type TrendRange } from "@/lib/dashboard/api";
 import { formatMoney } from "@/lib/format";
 import { useAsync } from "@/lib/useAsync";
+
+const RANGES: { value: TrendRange; label: string; days: number }[] = [
+  { value: "7d", label: "7 days", days: 7 },
+  { value: "30d", label: "30 days", days: 30 },
+];
+
+function greeting(): string {
+  const hour = new Date().getHours();
+  return hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+}
+
+const GRID = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-5";
 
 export default function OverviewPage() {
   const { outlet, billing } = useOwner();
   const locked = isDashboardLocked(outlet.state);
-  const overview = useAsync(() => getOverview(outlet.outlet_id), [outlet.outlet_id]);
-  // Detailed views answer 402 while locked; don't ask for them.
-  const funnel = useAsync(() => (locked ? Promise.resolve(null) : getFunnel(outlet.outlet_id)), [outlet.outlet_id, locked]);
-  const firstRun = !locked && overview.data?.scans === 0;
+  const [range, setRange] = useState<TrendRange>("30d");
+  const [hello] = useState(greeting);
+  // One request for the whole page; while locked it carries the all-time counts and nothing else.
+  const home = useAsync(() => getHome(outlet.outlet_id, range), [outlet.outlet_id, range]);
+  const data = home.data;
+  const overview = data?.overview ?? null;
+  const firstRun = !locked && overview?.scans === 0;
+  const days = RANGES.find((r) => r.value === (data?.range ?? range))!.days;
   const monthly = billing?.plans.find((p) => p.code === "monthly");
+  const price = monthly ? formatMoney(monthly.amount_minor, monthly.currency_code) : null;
 
   return (
     <>
-      <div>
-        <h1 className="font-display text-2xl sm:text-3xl text-ink">Overview</h1>
-        <p className="text-sm text-text-2 mt-1">How your QR code is performing, last 30 days.</p>
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="font-display text-2xl sm:text-3xl text-ink">{hello}</h1>
+          <p className="text-sm text-text-2 mt-1">
+            {locked
+              ? "Your numbers are waiting for you."
+              : firstRun
+                ? "Let’s get your QR code in front of customers."
+                : `Here’s how ${outlet.business_name} is doing.`}
+          </p>
+        </div>
+        {!locked && !firstRun && data?.trend && (
+          <div role="group" aria-label="Period" className="inline-flex rounded-[var(--r-control)] bg-paper-subtle p-1 self-start sm:self-auto">
+            {RANGES.map((r) => (
+              <button
+                key={r.value}
+                type="button"
+                aria-pressed={range === r.value}
+                onClick={() => setRange(r.value)}
+                className={`px-3.5 min-h-[40px] rounded-md text-sm font-semibold cursor-pointer ${
+                  range === r.value ? "bg-sheet text-ink shadow-v2-rest" : "text-text-2 hover:text-ink"
+                }`}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      <StateBanner />
+      <StateBanner overview={overview} price={price} />
 
       {locked && billing && (
         <UnlockCard
-          scans={overview.data?.scans ?? null}
+          scans={overview?.scans ?? null}
           completed={billing.scans_waiting}
-          feedbackCount={overview.data?.feedback_count ?? 0}
+          feedbackCount={overview?.feedback_count ?? 0}
           creditsLeft={billing.credits_left}
           suspended={outlet.state === "suspended"}
-          price={monthly ? formatMoney(monthly.amount_minor, monthly.currency_code) : null}
+          price={price}
         />
       )}
 
-      {overview.error ? (
-        <ErrorState message="We couldn't load your numbers." onRetry={overview.reload} />
+      {home.error && !data ? (
+        <ErrorState message="We couldn't load your numbers." onRetry={home.reload} />
+      ) : !data || !overview ? (
+        <div className={GRID} role="status" aria-busy="true" aria-label="Loading your numbers">
+          <Skeleton className="h-[26rem] md:col-span-2" />
+          <Skeleton className="h-64 xl:h-[26rem]" />
+        </div>
+      ) : locked || !data.trend ? (
+        <div className="blur-sm select-none pointer-events-none" aria-hidden>
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
+            <StatTile label="Total scans" value={overview.scans} note="QR opened" />
+            <StatTile label="Drafts copied" value={overview.completed_flows} note="Ready to post" />
+            <StatTile label="Conversion" value={`${(overview.conversion_rate * 100).toFixed(1)}%`} note="Scan to draft" highlight />
+          </div>
+        </div>
       ) : (
-        <div className={locked ? "blur-sm select-none pointer-events-none" : ""} aria-hidden={locked || undefined}>
-          {overview.loading || !overview.data ? (
-            <div className="grid grid-cols-3 gap-2 sm:gap-4">
-              <Skeleton className="h-24" />
-              <Skeleton className="h-24" />
-              <Skeleton className="h-24" />
+        // Switching period keeps the old numbers on screen, dimmed, until the new ones arrive.
+        <div
+          aria-busy={home.loading}
+          className={`flex flex-col gap-4 sm:gap-5 transition-opacity ${home.loading ? "opacity-60" : ""}`}
+        >
+          {home.error ? <ErrorState message="We couldn't refresh your numbers." onRetry={home.reload} /> : null}
+
+          {data.open_feedback && overview.unresolved_count > 0 && (
+            <FeedbackPeek items={data.open_feedback} openCount={overview.unresolved_count} />
+          )}
+
+          {firstRun ? (
+            <div className={GRID}>
+              {/* A new owner's first job is getting the QR on a counter, not reading zeros. */}
+              <div className="md:col-span-2 grid">
+                <FirstRunCard outletId={outlet.outlet_id} slug={outlet.slug} businessName={outlet.business_name} />
+              </div>
+              {data.rating && (
+                <div className="md:col-span-2 xl:col-span-1 grid xl:self-start">
+                  <RatingCard data={data.rating} />
+                </div>
+              )}
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-2 sm:gap-4">
-              <StatTile label="Total scans" value={overview.data.scans} note="QR opened" />
-              <StatTile label="Completed flows" value={overview.data.completed_flows} note="Copied their draft" />
-              <StatTile
-                label="Conversion"
-                value={`${(overview.data.conversion_rate * 100).toFixed(1)}%`}
-                note="Scan to complete"
-                highlight
-              />
-            </div>
+            <>
+              <div className={GRID}>
+                <div className="md:col-span-2 grid min-w-0">
+                  <PerformanceCard trend={data.trend} overview={overview} />
+                </div>
+                {data.rating && (
+                  <div className="grid">
+                    <RatingCard data={data.rating} />
+                  </div>
+                )}
+                {data.funnel && (
+                  <div className="md:col-span-2 md:order-last xl:order-none grid min-w-0">
+                    <JourneyCard funnel={data.funnel} days={days} />
+                  </div>
+                )}
+                <div className="grid">
+                  <QrStandeeCard outletId={outlet.outlet_id} slug={outlet.slug} businessName={outlet.business_name} />
+                </div>
+              </div>
+              {overview.unresolved_count === 0 && <Tip totals={data.trend.totals} days={days} />}
+            </>
           )}
         </div>
-      )}
-
-      {!locked && overview.data && !(firstRun && overview.data.unresolved_count === 0) && (
-        <NextBestAction
-          scans={overview.data.scans}
-          conversion={overview.data.conversion_rate}
-          unresolved={overview.data.unresolved_count}
-        />
-      )}
-
-      {firstRun ? (
-        <FirstRunCard outletId={outlet.outlet_id} slug={outlet.slug} />
-      ) : locked ? null : funnel.data ? (
-        <FunnelView funnel={funnel.data} />
-      ) : funnel.error ? (
-        <ErrorState message="We couldn't load the funnel." onRetry={funnel.reload} />
-      ) : (
-        <Skeleton className="h-64" />
       )}
     </>
   );
 }
 
+/** Days left, as a ring that empties. The sentence beside it says the same thing in words. */
+function TrialRing({ left, total }: { left: number; total: number }) {
+  const r = 24;
+  const c = 2 * Math.PI * r;
+  const share = total > 0 ? Math.min(1, Math.max(0, left / total)) : 0;
+  return (
+    <span aria-hidden className="relative w-16 h-16 shrink-0">
+      <svg viewBox="0 0 60 60" className="w-16 h-16 -rotate-90">
+        <circle cx="30" cy="30" r={r} fill="none" stroke="var(--sheet)" strokeWidth="6" />
+        <circle
+          cx="30"
+          cy="30"
+          r={r}
+          fill="none"
+          stroke="var(--accent)"
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeDasharray={`${share * c} ${c}`}
+        />
+      </svg>
+      <span className="absolute inset-0 flex items-center justify-center font-display text-xl text-ink">{left}</span>
+    </span>
+  );
+}
+
 /** Trial countdown / payment-failed strip. The locked state gets its own full card below. */
-function StateBanner() {
+function StateBanner({ overview, price }: { overview: Overview | null; price: string | null }) {
   const { outlet, billing } = useOwner();
   if (!billing) return null;
 
   if (outlet.state === "trial" && billing.trial_days_left !== null) {
-    const pct = Math.round(((billing.trial_days_total - billing.trial_days_left) / billing.trial_days_total) * 100);
+    const left = billing.trial_days_left;
     return (
-      <Card>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+      <section className="v2-sheet border border-accent/20 bg-gradient-to-r from-accent-50 to-sheet p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex items-center gap-4 min-w-0 flex-1">
+          <TrialRing left={left} total={billing.trial_days_total} />
           <div className="min-w-0">
             <p className="font-semibold text-ink">
-              {billing.trial_days_left} {billing.trial_days_left === 1 ? "day" : "days"} left in your free trial
+              {left} {left === 1 ? "day" : "days"} left in your free trial
             </p>
-            <p className="text-sm text-text-2">Then 10 review credits, then collection pauses. Your QR code never changes.</p>
-            <div
-              className="mt-3 h-2 rounded-full bg-paper-subtle overflow-hidden"
-              role="progressbar"
-              aria-valuenow={pct}
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-label="Trial progress"
-            >
-              <div className="h-full bg-accent rounded-full" style={{ width: `${pct}%` }} />
-            </div>
+            <p className="text-sm text-text-2 mt-0.5">
+              {overview && overview.scans > 0 && (
+                <>
+                  So far: <span className="font-semibold text-ink tabular-nums">{overview.scans.toLocaleString("en-IN")}</span>{" "}
+                  {overview.scans === 1 ? "scan" : "scans"} and{" "}
+                  <span className="font-semibold text-ink tabular-nums">{overview.completed_flows.toLocaleString("en-IN")}</span>{" "}
+                  {overview.completed_flows === 1 ? "draft" : "drafts"} copied.{" "}
+                </>
+              )}
+              Then 10 review credits, then collection pauses. Your QR code never changes.
+            </p>
           </div>
-          <Button href="/app/billing" variant="secondary" className="shrink-0">
+        </div>
+        <div className="flex sm:flex-col items-center sm:items-end gap-x-3 gap-y-1 shrink-0">
+          <Button href="/app/billing" variant={left <= 3 ? "primary" : "secondary"} className="flex-1 sm:flex-none">
             Choose a plan
           </Button>
+          {price && <p className="text-xs text-text-2 tabular-nums">{price}/month</p>}
         </div>
-      </Card>
+      </section>
     );
   }
 
@@ -182,44 +281,41 @@ function UnlockCard({
   );
 }
 
-function NextBestAction({ scans, conversion, unresolved }: { scans: number; conversion: number; unresolved: number }) {
+/** One suggestion, chosen from the period on screen. Hidden while private feedback is waiting: that comes first. */
+function Tip({ totals, days }: { totals: PeriodTotals; days: number }) {
   let title: string;
   let body: string;
   let cta: { href: string; label: string };
 
-  if (unresolved > 0) {
-    title = `${unresolved} customer${unresolved === 1 ? "" : "s"} left private feedback`;
-    body = "Replying quickly turns a bad visit into a returning customer.";
-    cta = { href: "/app/feedback", label: "Open inbox" };
-  } else if (scans === 0) {
-    title = "No scans yet. Move your QR where people are waiting.";
-    body = "The payment counter and the receipt footer get the most scans. Print the receipt footer and hand out cards at checkout.";
+  if (totals.scans === 0) {
+    title = `No scans in the last ${days} days`;
+    body = "Move your QR to where people pay or wait. The payment counter and the receipt footer get the most scans.";
     cta = { href: "/app/qr", label: "Get print files" };
-  } else if (scans >= 20 && conversion < 0.1) {
-    title = "People scan but few finish. Check your tags.";
-    body = "Short, specific compliments are easiest to tap. Look at which tags customers actually choose.";
+  } else if (totals.scans >= 20 && totals.conversion_rate < 0.1) {
+    title = "People scan but few finish";
+    body = "Short, specific compliments are easiest to tap. See which tags customers actually choose.";
     cta = { href: "/app/insights", label: "See insights" };
   } else {
-    title = "You're on track. Keep the QR visible.";
-    body = "Invite a colleague and get 70% off your next bill when they subscribe.";
+    title = "You’re on track. Keep the QR visible.";
+    body = "Invite another business owner and get 70% off your next bill when they subscribe.";
     cta = { href: "/app/referrals", label: "Refer & save" };
   }
 
   return (
-    <Card className="border-accent/20 bg-accent-50/40">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-wider text-accent-hover">Next best action</p>
-          <p className="font-semibold text-ink mt-1">{title}</p>
-          <p className="text-sm text-text-2 mt-0.5">{body}</p>
-        </div>
-        <Link
-          href={cta.href}
-          className="inline-flex items-center justify-center min-h-[44px] px-4 rounded-[var(--r-control)] bg-accent text-white text-sm font-semibold hover:bg-accent-hover shrink-0"
-        >
-          {cta.label}
-        </Link>
+    <section className="rounded-[var(--r-card)] border border-line bg-sheet/60 px-4 sm:px-5 py-3.5 flex flex-col sm:flex-row sm:items-center gap-3">
+      <span aria-hidden className="hidden sm:flex w-9 h-9 shrink-0 items-center justify-center rounded-full bg-accent-50 text-accent-hover">
+        <Icon name="sparkle" className="w-4 h-4" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="font-semibold text-ink">{title}</p>
+        <p className="text-sm text-text-2 mt-0.5">{body}</p>
       </div>
-    </Card>
+      <Link
+        href={cta.href}
+        className="inline-flex items-center justify-center min-h-[44px] px-4 rounded-[var(--r-control)] border border-line-strong bg-sheet text-sm font-semibold text-ink hover:bg-paper-subtle shrink-0"
+      >
+        {cta.label}
+      </Link>
+    </section>
   );
 }

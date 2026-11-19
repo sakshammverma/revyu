@@ -16,19 +16,20 @@ export default function OpengraphImage() {
           flexDirection: "column",
           justifyContent: "space-between",
           padding: 72,
-          background: "#f2f7f7",
-          color: "#1a1e23",
+          // The same deep navy and blue glow as the site's hero.
+          background: "radial-gradient(circle at 85% 10%, #1f3f8f 0%, #0a0f1f 55%)",
+          color: "#ffffff",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 40, fontWeight: 700 }}>
-          <div style={{ width: 20, height: 20, borderRadius: 10, background: "#2f6df0" }} />
+          <div style={{ width: 20, height: 20, borderRadius: 10, background: "#8fb4ff" }} />
           Revyu
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           <div style={{ fontSize: 76, lineHeight: 1.08, fontWeight: 700, maxWidth: 980 }}>
             A printed QR that helps customers write their own Google reviews.
           </div>
-          <div style={{ fontSize: 34, color: "#515a63" }}>
+          <div style={{ fontSize: 34, color: "#c5d3ee" }}>
             Google link at every rating. Flat monthly price. 15-day free trial.
           </div>
         </div>

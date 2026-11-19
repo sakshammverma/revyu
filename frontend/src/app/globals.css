@@ -15,6 +15,11 @@
   --line-dark: #2b3239;
   --band-textured: #e2e6e6;
 
+  /* Dark marketing surfaces (hero, final CTA, footer, promo bar) and the light blue used for links on them. */
+  --night: #0a0f1f;
+  --night-2: #121a33;
+  --accent-soft: #8fb4ff;
+
   --accent: #2f6df0;
   --accent-hover: #2558cc;
   --accent-50: #e7f5fd;
@@ -26,6 +31,10 @@
   --success-50: #f0f7ed;
   --success-strong: #2f6b1a; /* success text on light backgrounds (AA) */
   --alert-50: #fdf0f3;
+
+  /* Charts: the second series beside --accent (validated as a colour-blind-safe pair), and rating stars. */
+  --chart-2: #eb6834;
+  --star: #f5a524;
 
   /* Typography matching Voiceflow's Tiempos Headline & UCity Pro (Wide, balanced editorial serif) */
   --font-display-serif: var(--font-lora), var(--font-newsreader), "Tiempos Headline", "Lora", "Newsreader", Georgia, "Times New Roman", serif;
@@ -91,6 +100,9 @@
   --color-line: var(--line);
   --color-line-dark: var(--line-dark);
   --color-band-textured: var(--band-textured);
+  --color-night: var(--night);
+  --color-night-2: var(--night-2);
+  --color-accent-soft: var(--accent-soft);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
   --color-accent-50: var(--accent-50);
@@ -101,6 +113,8 @@
   --color-success-50: var(--success-50);
   --color-success-strong: var(--success-strong);
   --color-alert-50: var(--alert-50);
+  --color-chart-2: var(--chart-2);
+  --color-star: var(--star);
 
   /* Legacy mappings */
   --color-paper: var(--bg);
@@ -303,6 +317,14 @@ body {
 }
 .flow-step { animation: flowStepIn 0.18s ease-out; }
 
+/* The final thank-you tick: one soft pop (off under reduced motion, like every animation here). */
+@keyframes flowPop {
+  0% { opacity: 0; transform: scale(0.6); }
+  60% { opacity: 1; transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+.flow-pop { animation: flowPop 0.42s cubic-bezier(0.2, 0.7, 0.3, 1) 0.08s both; }
+
 @keyframes heroWordIn {
   from {
     opacity: 0.01;
@@ -325,33 +347,6 @@ body {
   }
 }
 
-@keyframes dialRotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes marqueeScroll {
-  from {
-    transform: translateX(0%);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
-@keyframes marqueeScrollReverse {
-  from {
-    transform: translateX(-50%);
-  }
-  to {
-    transform: translateX(0%);
-  }
-}
-
 @keyframes promoGlow {
   0%, 100% {
     opacity: 0.6;
@@ -363,41 +358,6 @@ body {
   }
 }
 
-/* Video-like loop animations for audio waveform */
-@keyframes waveBar {
-  0%, 100% {
-    height: 4px;
-  }
-  50% {
-    height: 24px;
-  }
-}
-
-/* Video-like pulse for animated connector line */
-@keyframes drawPath {
-  0% {
-    stroke-dashoffset: 100;
-  }
-  50% {
-    stroke-dashoffset: 0;
-  }
-  100% {
-    stroke-dashoffset: -100;
-  }
-}
-
-/* Chat bubble stagger entry */
-@keyframes chatBubbleIn {
-  0% {
-    opacity: 0;
-    transform: translateY(12px) scale(0.96);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
 .animate-hero-word {
   animation: heroWordIn 500ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
 }
@@ -406,63 +366,9 @@ body {
   animation: heroPopIn 260ms cubic-bezier(0.2, 0.7, 0.3, 1) both;
 }
 
-.animate-dial {
-  animation: dialRotate 20s linear infinite;
-}
-
-.animate-marquee {
-  animation: marqueeScroll 90s linear infinite;
-}
-
-.animate-marquee:hover {
-  animation-play-state: paused;
-}
-
-.animate-marquee-reverse {
-  animation: marqueeScrollReverse 90s linear infinite;
-}
-
-.animate-marquee-reverse:hover {
-  animation-play-state: paused;
-}
-
 .animate-promo-glow {
   animation: promoGlow 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
-
-@keyframes progressFill {
-  0% {
-    width: 0%;
-  }
-  100% {
-    width: 100%;
-  }
-}
-
-@keyframes tapPulse {
-  0% {
-    transform: scale(0.8);
-    opacity: 0.8;
-  }
-  50% {
-    transform: scale(1.15);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 0.9;
-  }
-}
-
-@keyframes tabFill {
-  0% {
-    width: 0%;
-  }
-  100% {
-    width: 100%;
-  }
-}
-
 
 /* Interaction affordances (components/marketing/interact) */
 @keyframes affordBreathe {
@@ -569,3 +475,310 @@ h2[tabindex="-1"]:focus {
   .ui-skeleton, .animate-pulse, .animate-spin { animation: none !important; }
   * { scroll-behavior: auto !important; }
 }
+
+/* ── Homepage: journey flowchart ─────────────────────────────────────────── */
+/* A connector with a pulse travelling along it: vertical on phones, horizontal on desktop. */
+.jm-conn {
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+  width: 2px;
+  height: 22px;
+  margin: 3px auto;
+  border-radius: 999px;
+  background: var(--color-line-strong);
+  overflow: hidden;
+}
+.jm-conn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent, var(--accent), transparent);
+  transform: translateY(-100%);
+  animation: jmPulseY 2.6s linear infinite;
+  animation-delay: var(--d, 0s);
+}
+@media (min-width: 1024px) {
+  .jm-conn { width: 26px; height: 2px; margin: 0 3px; }
+  .jm-conn::after {
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    transform: translateX(-100%);
+    animation-name: jmPulseX;
+  }
+}
+@keyframes jmPulseX { 0% { transform: translateX(-100%); } 45%, 100% { transform: translateX(100%); } }
+@keyframes jmPulseY { 0% { transform: translateY(-100%); } 45%, 100% { transform: translateY(100%); } }
+
+.jm-fork path { fill: none; stroke-width: 2; vector-effect: non-scaling-stroke; }
+.jm-fork-base { stroke: var(--color-line-strong); }
+.jm-fork-pulse {
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-dasharray: 16 100;
+  stroke-dashoffset: 16;
+  animation: jmDash 2.6s linear 0.8s infinite;
+}
+@keyframes jmDash { 0% { stroke-dashoffset: 16; } 45%, 100% { stroke-dashoffset: -100; } }
+
+/* Nodes arrive in order the first time the map scrolls into view. */
+.jm-node {
+  transition: opacity 0.5s ease, transform 0.5s var(--ease-enter);
+  transition-delay: calc(var(--i, 0) * 110ms);
+}
+.jm-map[data-on="false"] .jm-node { opacity: 0; transform: translateY(10px); }
+
+/* ── Homepage: 3D counter standee ────────────────────────────────────────── */
+.standee-stage {
+  position: relative;
+  width: 250px;
+  height: 320px;
+  perspective: 900px;
+  --rx: 7deg;
+  --ry: -18deg;
+  --gx: 28%;
+}
+.standee-float {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 34px;
+  transform-style: preserve-3d;
+  animation: standeeFloat 6s ease-in-out infinite;
+}
+.standee {
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform 0.4s var(--ease-enter);
+}
+.standee-sheet {
+  position: relative;
+  width: 196px;
+  padding: 18px 16px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: #ffffff;
+  border-radius: 14px;
+  overflow: hidden;
+  transform: translateZ(7px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7), 0 30px 44px -22px rgba(0, 0, 0, 0.6);
+}
+.standee-glare {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent calc(var(--gx) - 22%),
+    rgba(47, 109, 240, 0.13) var(--gx),
+    transparent calc(var(--gx) + 22%)
+  );
+}
+/* The thickness of the sheet: the same shape a few pixels behind. */
+.standee-edge {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #c9d6f2, #9fb2d9);
+}
+.standee-base {
+  position: absolute;
+  left: 50%;
+  bottom: -12px;
+  width: 156px;
+  height: 24px;
+  margin-left: -78px;
+  border-radius: 5px;
+  background: linear-gradient(180deg, #39424c, #171b20);
+  transform: translateZ(26px);
+}
+.standee-base-top {
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  width: 156px;
+  height: 52px;
+  margin-left: -78px;
+  border-radius: 5px;
+  background: #4a5560;
+  transform: rotateX(90deg);
+}
+.standee-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  width: 190px;
+  height: 20px;
+  margin-left: -95px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(16, 24, 40, 0.38), transparent);
+  filter: blur(5px);
+  animation: standeeShadow 6s ease-in-out infinite;
+}
+@keyframes standeeFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+@keyframes standeeShadow { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(0.88); opacity: 0.7; } }
+
+/* ── Homepage: who gets asked ────────────────────────────────────────────── */
+.al-track {
+  position: relative;
+  height: 36px;
+  border-radius: 999px;
+  background: var(--color-paper-subtle);
+  overflow: hidden;
+}
+.al-gate {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: 28px;
+  height: 28px;
+  margin: -14px 0 0 -14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  background: #ffffff;
+  color: var(--text-2);
+  box-shadow: var(--shadow-rest);
+}
+.al-gate-code { color: var(--ink); box-shadow: 0 0 0 2px rgba(47, 109, 240, 0.45), var(--shadow-rest); }
+/* Still positions (also what reduced motion shows): spread along the counter. */
+.al-dot {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--i) * 11% + 5%);
+  width: 10px;
+  height: 10px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: #aab4b6;
+  animation: alWalk 7.2s linear infinite;
+  animation-delay: calc(var(--i) * -0.8s);
+}
+.al-dot.al-past { background: var(--accent); }
+.al-dot.al-asked { animation-name: alWalkAsked; }
+@keyframes alWalk { from { left: -4%; } to { left: 104%; } }
+@keyframes alWalkAsked {
+  0% { left: -4%; background: #aab4b6; transform: scale(1); }
+  47% { background: #aab4b6; transform: scale(1); }
+  51% { background: var(--accent); transform: scale(1.6); }
+  57% { transform: scale(1); }
+  100% { left: 104%; background: var(--accent); transform: scale(1); }
+}
+
+/* ── Marketing redesign: dark surfaces, reveals, hero scene, flow story ──── */
+/* The site-wide --font-display-serif chain references --font-newsreader, which is never loaded, so the whole
+   declaration is invalid and headings fall back to the body font everywhere. Marketing pages set a valid chain
+   here so their headings render in Lora; the product UI is left as it is. */
+.marketing-root { --font-display-serif: var(--font-lora), Georgia, "Times New Roman", serif; }
+/* The dark sections share one deep navy so the promo bar, hero, final CTA and footer read as one material. */
+.night-surface {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--night);
+  background-image:
+    radial-gradient(60% 55% at 78% 18%, rgba(47, 109, 240, 0.34), transparent 70%),
+    radial-gradient(45% 45% at 8% 92%, rgba(47, 109, 240, 0.18), transparent 70%);
+  color: #ffffff;
+}
+/* A faint grid that fades out toward the edges: depth without an image request. */
+.night-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(75% 70% at 60% 35%, #000 20%, transparent 100%);
+  mask-image: radial-gradient(75% 70% at 60% 35%, #000 20%, transparent 100%);
+}
+/* The same faint grid for a light surface (the home hero). */
+.day-grid { position: relative; isolation: isolate; }
+.day-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(26, 30, 35, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(26, 30, 35, 0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(75% 70% at 60% 35%, #000 20%, transparent 100%);
+  mask-image: radial-gradient(75% 70% at 60% 35%, #000 20%, transparent 100%);
+}
+.glass-dark {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+.btn-ghost-dark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: var(--r-control);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  transition: background-color var(--dur-ui) ease, border-color var(--dur-ui) ease;
+}
+.btn-ghost-dark:hover { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.4); }
+
+/* Sections arrive once as they scroll into view (components/marketing/Reveal). */
+.rv {
+  transition: opacity 0.6s ease, transform 0.7s var(--ease-enter);
+  transition-delay: calc(var(--rv-i, 0) * 90ms);
+}
+.rv[data-on="false"] { opacity: 0; transform: translateY(18px); }
+
+/* Cards that lift toward the pointer. */
+.lift { transition: transform 0.25s var(--ease-enter), box-shadow 0.25s ease; }
+@media (hover: hover) {
+  .lift:hover { transform: translateY(-4px); box-shadow: var(--shadow-elevated); }
+}
+
+/* Hero scene: a phone and a counter standee in CSS 3D. --px/--py follow the pointer (-0.5 to 0.5). */
+.hs-stage { position: relative; perspective: 1500px; --px: 0; --py: 0; }
+.hs-phone {
+  transform-style: preserve-3d;
+  transform: rotateY(calc(-15deg + var(--px) * 10deg)) rotateX(calc(5deg - var(--py) * 8deg)) rotateZ(1deg);
+  transition: transform 0.5s var(--ease-enter);
+  filter: drop-shadow(0 40px 50px rgba(16, 24, 40, 0.28));
+}
+.hs-float { animation: hsFloat 7s ease-in-out infinite; }
+.hs-float-slow { animation: hsFloat 9s ease-in-out -3s infinite; }
+@keyframes hsFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+.hs-glow {
+  position: absolute;
+  inset: 12% 8% 6% 8%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(26, 30, 35, 0.09), transparent);
+  filter: blur(40px);
+  pointer-events: none;
+}
+.hs-canvas { position: absolute; inset: -8% -12%; pointer-events: none; opacity: 0; transition: opacity 1.2s ease; }
+.hs-canvas[data-ready="true"] { opacity: 1; }
+/* Scan line across the camera view on the first screen. */
+@keyframes hsScan { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(118px); } }
+.hs-scanline { animation: hsScan 2.2s ease-in-out infinite; }
+
+/* Flow story: the rail beside the steps fills as the section scrolls past (where supported). */
+.fs-rail { position: absolute; left: 15px; top: 0; bottom: 0; width: 2px; border-radius: 2px; background: var(--color-line-strong); overflow: hidden; }
+.fs-rail::after { content: ""; position: absolute; inset: 0; background: var(--accent); transform-origin: top; transform: scaleY(var(--fs-progress, 0)); transition: transform 0.4s var(--ease-enter); }
+
+/* Bar that grows when its section arrives (the gap section). */
+.grow-bar { transform-origin: left; transition: transform 0.9s var(--ease-enter); }
+.rv[data-on="false"] .grow-bar { transform: scaleX(0); }

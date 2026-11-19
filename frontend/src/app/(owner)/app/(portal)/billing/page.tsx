@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useOwner } from "@/components/portal/OwnerContext";
 import { Button, Card, EmptyState, ErrorState, StatusPill, useToast } from "@/components/ui";
@@ -14,6 +14,8 @@ export default function BillingPage() {
   const { billing, outlet, refresh } = useOwner();
   const { toast } = useToast();
   const [busyPlan, setBusyPlan] = useState<string | null>(null);
+  // Set once a checkout succeeds: "confirmed" by us, or "pending" on Razorpay's webhook.
+  const [paid, setPaid] = useState<{ plan: string; confirmed: boolean } | null>(null);
 
   if (!billing) {
     return (
@@ -39,11 +41,11 @@ export default function BillingPage() {
     }
     try {
       await confirmBilling(result);
-      toast("Payment received. You're all set.");
+      setPaid({ plan, confirmed: true });
     } catch {
       // Razorpay has the payment; its webhook activates the account even if this
       // confirm call failed, so don't tell the owner to pay again.
-      toast("Payment received. Your account will update in a minute. Don't pay again.", { tone: "info" });
+      setPaid({ plan, confirmed: false });
     } finally {
       await refresh();
       setBusyPlan(null);
@@ -61,7 +63,7 @@ export default function BillingPage() {
         <p className="text-sm text-text-2 mt-1">One flat price. No contracts, no hidden fees.</p>
       </div>
 
-      <StatusCard billing={billing} isPaid={isPaid} />
+      {paid ? <PaidCard billing={billing} plan={paid.plan} confirmed={paid.confirmed} onRefresh={refresh} /> : <StatusCard billing={billing} isPaid={isPaid} />}
 
       {billing.referral_discounts_earned > 0 && (
         <div className="rounded-xl border border-success/25 bg-success-50 p-4 text-sm">
@@ -72,7 +74,7 @@ export default function BillingPage() {
         </div>
       )}
 
-      {billing.can_pay && (
+      {billing.can_pay && !paid && (
         <Card title={isPaid ? "Switch or renew" : "Choose your plan"}>
           <div className="grid gap-3 sm:grid-cols-2">
             {monthly && (
@@ -133,6 +135,74 @@ const PAYMENT_LABEL: Record<string, string> = {
   failed: "Failed",
   refunded: "Refunded",
 };
+
+function PaidCard({
+  billing,
+  plan,
+  confirmed,
+  onRefresh,
+}: {
+  billing: BillingStatus;
+  plan: string;
+  confirmed: boolean;
+  onRefresh: () => Promise<void>;
+}) {
+  const heading = useRef<HTMLHeadingElement>(null);
+  const option = billing.plans.find((p) => p.code === plan);
+  const settled = billing.subscription_status === "active";
+
+  useEffect(() => {
+    heading.current?.focus();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
+
+  // Not confirmed by us yet: Razorpay's webhook settles it within seconds to a minute.
+  useEffect(() => {
+    if (settled) return;
+    const id = setInterval(() => void onRefresh(), 5000);
+    const stop = setTimeout(() => clearInterval(id), 120_000);
+    return () => {
+      clearInterval(id);
+      clearTimeout(stop);
+    };
+  }, [settled, onRefresh]);
+
+  return (
+    <section className="rounded-2xl border border-success/25 bg-success-50 p-5 sm:p-7" aria-live="polite">
+      <div className="flex items-start gap-3">
+        <span aria-hidden className="w-10 h-10 shrink-0 rounded-full bg-success text-white flex items-center justify-center">
+          <svg viewBox="0 0 20 20" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <path d="M5 10.5l3 3 7-7" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+        <div className="min-w-0">
+          <h2 ref={heading} tabIndex={-1} className="font-display text-2xl text-ink outline-none">
+            Payment received. Thank you!
+          </h2>
+          <p className="text-sm text-text-2 mt-1">
+            {option ? `${plan === "annual" ? "Annual" : "Monthly"} plan · ${formatMoney(option.amount_minor, option.currency_code)}${plan === "annual" ? "/year" : "/month"}. ` : ""}
+            {settled
+              ? billing.current_period_end
+                ? `Your dashboard is fully unlocked. Next renewal on ${formatDate(billing.current_period_end)}.`
+                : "Your dashboard is fully unlocked."
+              : confirmed
+                ? "Unlocking your dashboard now."
+                : "We're confirming it with Razorpay; this page updates by itself. Don't pay again."}
+          </p>
+          <p className="text-xs text-text-2 mt-2">Razorpay emails your receipt. Your QR code stays exactly the same.</p>
+        </div>
+      </div>
+      <div className="mt-5 flex flex-col sm:flex-row gap-2">
+        <Button href="/app" className="sm:min-w-[200px]">
+          Go to my dashboard
+        </Button>
+        <Button href="/app/qr" variant="secondary">
+          QR &amp; print files
+        </Button>
+      </div>
+    </section>
+  );
+}
 
 function StatusCard({ billing, isPaid }: { billing: BillingStatus; isPaid: boolean }) {
   let title: string;

@@ -56,6 +56,14 @@ export function FunnelView({ funnel }: { funnel: Funnel }) {
         <p className="text-xs text-text-2 leading-relaxed">
           Counts stop at &ldquo;Went to Google&rdquo;. What happens on Google&rsquo;s own page (signing in, pasting, submitting) can&rsquo;t be measured.
         </p>
+        {funnel.self_reported && funnel.self_reported.came_back > 0 && (
+          <p className="text-xs text-text-2 leading-relaxed mt-2 pt-2 border-t border-dashed border-line-strong">
+            <span className="font-semibold text-ink tabular-nums">{funnel.self_reported.came_back}</span> came back to this page
+            afterwards, and{" "}
+            <span className="font-semibold text-ink tabular-nums">{funnel.self_reported.said_posted}</span> of them told us
+            they had posted. This is what customers said, not a count from Google.
+          </p>
+        )}
       </div>
     </div>
   );

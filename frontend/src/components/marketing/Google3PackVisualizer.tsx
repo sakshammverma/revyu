@@ -4,7 +4,9 @@ import Link from "next/link";
 
 import { useRef, useState } from "react";
 
+import { AskLanes } from "./AskLanes";
 import { GhostHand, InteractiveTag, TryHint, useCountUp, useInView, usePlayground } from "./interact";
+import { Reveal } from "./Reveal";
 
 // Act 1 — "The gap" (documents/21-CONVERSION-DESIGN.md §3, FR-79). Loss is
 // stated once, about the owner's *current* situation, with numbers they can
@@ -22,99 +24,96 @@ export function Google3PackVisualizer() {
     set(v);
   };
 
+  const max = Math.max(yours, theirs, 1);
+
   return (
-    <section id="gap" className="mx-2 sm:mx-3 my-12 sm:my-16">
-      <div className="v2-sheet max-w-[1296px] mx-auto border border-line p-6 sm:p-12 lg:p-16">
-        {/* Section Heading */}
-        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
-          <p className="vf-section-label uppercase tracking-wider mb-2 text-text-2">
-            The gap
-          </p>
-          <h2 className="heading-h2 font-display text-ink">
-            {yours} reviews. The one nearby has {theirs}.
-          </h2>
-          <p className="mt-3 text-sm sm:text-base text-text-muted leading-relaxed">
-            Same work. Same prices. They just ask every customer — you ask the ones you happen to remember.
-          </p>
-        </div>
+    <section id="gap" aria-labelledby="gap-title" className="mx-2 mt-10 sm:mx-3 sm:mt-16">
+      <div className="v2-sheet mx-auto max-w-[1296px] border border-line p-6 sm:p-12 lg:p-16">
+        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-14">
+          {/* Left: the claim, and the owner's own numbers */}
+          <div className="lg:col-span-6">
+            <p className="vf-section-label mb-2 flex items-center gap-3 uppercase tracking-wider">
+              The gap <InteractiveTag />
+            </p>
+            <h2 id="gap-title" className="heading-h2">
+              {yours} reviews. The one nearby has {theirs}.
+            </h2>
+            <p className="mt-3 text-base leading-relaxed text-text-muted sm:text-lg">
+              Same work, same prices. They ask every customer. You ask the ones you happen to remember. A stranger choosing
+              between you reads the count first.
+            </p>
 
-        {/* 2-Column: inputs + search-result mockup */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-[#f8fafc] rounded-2xl border border-line p-6 sm:p-10">
-          {/* Left Column: owner's own numbers (5 cols) */}
-          <div className="lg:col-span-5 flex flex-col justify-between">
-            <div>
-              <InteractiveTag className="mb-2" />
-              <h3 className="font-display text-xl sm:text-2xl text-ink leading-snug mb-2">
-                Where do you stand today?
-              </h3>
-              <p className="text-xs sm:text-sm text-text-2 leading-relaxed mb-6">
-                Look yourself up on Google Maps, then the busiest competitor near you. Put both review counts in.
-              </p>
-            </div>
-
-            <div ref={fieldsRef} className="relative bg-white rounded-xl p-5 border border-line shadow-2xs mb-3 grid grid-cols-2 gap-4">
+            <div ref={fieldsRef} className="relative mt-7 grid grid-cols-2 gap-4 rounded-2xl border border-line bg-bg p-5">
               <NumberField label="Your Google reviews" value={yours} onChange={edit(setYours)} ring={!tried} />
               <NumberField label="Nearby competitor" value={theirs} onChange={edit(setTheirs)} />
-              <GhostHand
-                play={inView && !tried}
-                path={[{ x: "25%", y: "68%" }]}
-                onStep={() => !tried && setYours(62)}
-              />
+              <GhostHand play={inView && !tried} path={[{ x: "25%", y: "68%" }]} onStep={() => !tried && setYours(62)} />
             </div>
-            <div className="mb-6 flex">
+            <div className="mt-3 flex">
               <TryHint label="Type your own review count" done={tried} />
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              <div className="p-3.5 rounded-xl bg-white border border-line shadow-2xs">
-                <p className="text-[10px] text-text-muted font-medium">The gap today</p>
-                <p className="text-lg font-bold text-ink mt-0.5">{gap} reviews</p>
-                <p className="text-[10px] text-text-muted mt-0.5">What a searcher sees first</p>
-              </div>
-              <div className="p-3.5 rounded-xl bg-white border border-line shadow-2xs">
-                <p className="text-[10px] text-text-muted font-medium">Why it happens</p>
-                <p className="text-lg font-bold text-accent-hover mt-0.5">Asking</p>
-                <p className="text-[10px] text-text-muted mt-0.5">Not quality — consistency</p>
-              </div>
-            </div>
+            {/* The two counts as bars: the picture a searcher carries away */}
+            <Reveal className="mt-6 flex flex-col gap-3">
+              <Bar label="Your shop" value={yours} pct={(yours / max) * 100} you />
+              <Bar label="The one nearby" value={theirs} pct={(theirs / max) * 100} />
+              <p className="text-sm text-text-2">
+                <span className="font-semibold text-ink">{gap} reviews apart.</span> Not quality. Consistency of asking.
+              </p>
+            </Reveal>
 
-            <p className="text-[11px] text-text-muted mb-4">
-              Nobody can promise you a number. What you can decide is whether every customer gets asked, or
-              only the ones you happen to remember.
-            </p>
-
-            <div className="flex flex-wrap items-center gap-3 self-start">
-              <Link href="/signup" className="btn-primary text-xs py-2.5 px-5">
-                <span>Stop being the quiet one →</span>
+            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
+              <Link href="/gap-report" className="btn-primary min-h-[48px] px-6 text-[15px]">
+                <span>Check your real numbers, free</span>
+                <span aria-hidden>→</span>
               </Link>
-              <Link href="/gap-report" className="text-xs font-semibold text-accent-hover underline underline-offset-2">
-                Check your real numbers
-              </Link>
+              <span className="text-sm text-text-muted">Live Google data · no signup</span>
             </div>
           </div>
 
-          {/* Right Column: search-result mockup (7 cols) */}
-          {/* An illustration of a search result, not content: hidden from assistive tech. */}
-          <div aria-hidden data-illustration className="lg:col-span-7 bg-white rounded-xl border border-[#dadce0] p-4 sm:p-6 shadow-v2-rest">
-            <div className="flex items-center gap-3 pb-3 border-b border-[#dadce0] text-xs">
-              <span className="text-base text-[#4285f4]">🔍</span>
-              <span className="font-medium text-[#202124]">shop near me</span>
-              <span className="ml-auto text-[10px] text-[#5f6368]">Illustration</span>
-            </div>
+          {/* Right: search-result mockup. An illustration, not content: hidden from assistive tech. */}
+          <div className="lg:col-span-6">
+            <div aria-hidden data-illustration className="rounded-2xl border border-[#dadce0] bg-white p-4 shadow-v2-elevated sm:p-6">
+              <div className="flex items-center gap-3 rounded-full border border-[#dadce0] px-4 py-2.5 text-sm">
+                <svg viewBox="0 0 24 24" className="h-4 w-4 text-[#4285f4]" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="M20 20l-3.500-3.500" />
+                </svg>
+                <span className="font-medium text-[#202124]">shop near me</span>
+                <span className="ml-auto text-[11px] text-[#5f6368]">Illustration</span>
+              </div>
 
-            <div className="mt-4 space-y-3">
-              <Listing name="The shop nearby" rating="4.6" count={theirs} note="Asks every customer" muted={false} />
-              <Listing name="Your shop" rating="4.3" count={yours} note="Same products, same prices" highlight />
-              <Listing name="Another shop" rating="4.1" count={Math.round(yours * 0.6)} note="" muted />
+              <div className="mt-4 space-y-3">
+                <Listing name="The shop nearby" rating="4.6" count={theirs} note="Asks every customer" muted={false} />
+                <Listing name="Your shop" rating="4.3" count={yours} note="Same products, same prices" highlight />
+                <Listing name="Another shop" rating="4.1" count={Math.round(yours * 0.6)} note="" muted />
+              </div>
             </div>
-
-            <p className="mt-4 text-[11px] text-[#5f6368]">
-              A stranger choosing between two shops reads the count before they read anything you do well.
+            <p className="mt-3 text-xs text-text-muted">
+              Nobody can promise you a number. What you can decide is whether every customer gets asked.
             </p>
           </div>
         </div>
+
+        <AskLanes />
       </div>
     </section>
+  );
+}
+
+function Bar({ label, value, pct, you = false }: { label: string; value: number; pct: number; you?: boolean }) {
+  return (
+    <div>
+      <div className="mb-1 flex items-baseline justify-between text-sm">
+        <span className="font-semibold text-ink">{label}</span>
+        <span className="font-semibold tabular-nums text-ink">{value}</span>
+      </div>
+      <div className="h-3 overflow-hidden rounded-full bg-paper-subtle">
+        <div
+          className={`grow-bar h-full rounded-full transition-[width] duration-500 ${you ? "bg-accent" : "bg-ink-dark"}`}
+          style={{ width: `${Math.max(pct, 2)}%` }}
+        />
+      </div>
+    </div>
   );
 }
 

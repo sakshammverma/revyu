@@ -10,6 +10,7 @@ vi.mock("@/server/db", async (importOriginal) => {
 import { PATCH as patchFeedback } from "@/app/api/app/feedback/[feedbackId]/route";
 import { GET as getFeedback } from "@/app/api/app/outlets/[outletId]/feedback/route";
 import { GET as getFunnel } from "@/app/api/app/outlets/[outletId]/funnel/route";
+import { GET as getHome } from "@/app/api/app/outlets/[outletId]/home/route";
 import { GET as getOverview } from "@/app/api/app/outlets/[outletId]/overview/route";
 import { GET as getRating } from "@/app/api/app/outlets/[outletId]/rating/route";
 import { GET as getTags } from "@/app/api/app/outlets/[outletId]/tags/route";
@@ -24,7 +25,7 @@ import {
   makeSession,
   routeCtx,
 } from "@/server/testing/helpers";
-import { pgTextToIso, pyRound } from "./dashboard";
+import { getTrend, pgTextToIso, pyRound } from "./dashboard";
 
 const { events, placeSnapshots, privateFeedback, sessions, tags } = schema;
 
@@ -305,6 +306,114 @@ describe("feedback inbox and resolve", () => {
       [row] = await tx.select().from(privateFeedback).where(eq(privateFeedback.id, older.id));
       expect(row.resolved).toBe(false);
       expect(row.resolvedAt).toBeNull();
+    }));
+});
+
+describe("trend and home (the Overview page)", () => {
+  const DAY = 86_400_000;
+
+  it("buckets by the outlet's own calendar day, not UTC", () =>
+    inTx(async (tx) => {
+      const { outlet } = await owner(tx, { state: "active", timezone: "Asia/Kolkata" });
+      // 20:00 UTC on the 17th is already 01:30 on the 18th in India.
+      const now = new Date("2026-11-17T20:00:00Z");
+      await ev(tx, outlet.id, "scan", null, { occurredAt: new Date("2026-11-17T19:00:00Z") }); // 00:30 on the 18th
+      await ev(tx, outlet.id, "scan", null, { occurredAt: new Date("2026-11-17T18:00:00Z") }); // 23:30 on the 17th
+      await ev(tx, outlet.id, "scan", null, { occurredAt: new Date("2026-11-11T18:00:00Z") }); // the 11th: before a 7-day window
+      const s = await makeSession(tx, outlet);
+      await tx.update(sessions).set({ completed: true, completedAt: new Date("2026-11-17T19:30:00Z") }).where(eq(sessions.id, s.id));
+
+      const trend = await getTrend(tx, outlet, "7d", now);
+      expect(trend.days.map((d) => d.date)).toEqual([
+        "2026-11-12", "2026-11-13", "2026-11-14", "2026-11-15", "2026-11-16", "2026-11-17", "2026-11-18",
+      ]);
+      expect(trend.days.at(-1)).toEqual({ date: "2026-11-18", scans: 1, completed: 1 });
+      expect(trend.days.at(-2)).toEqual({ date: "2026-11-17", scans: 1, completed: 0 });
+      expect(trend.totals).toEqual({ scans: 2, completed: 1, conversion_rate: 0.5 });
+      expect(trend.since.toISOString()).toBe("2026-11-11T18:30:00.000Z");
+      // A brand-new outlet has no full earlier period to compare with.
+      expect(trend.previous).toBeNull();
+    }));
+
+  it("home: one response with the trend, a matching funnel, rating and open feedback", () =>
+    inTx(async (tx) => {
+      const now = Date.now();
+      const { outlet, session } = await owner(tx, {
+        state: "active",
+        activatedAt: new Date(now - 100 * DAY),
+        baselineRating: "4.2",
+        baselineReviewCount: 40,
+      });
+      await ev(tx, outlet.id, "scan", null);
+      await ev(tx, outlet.id, "scan", null);
+      await ev(tx, outlet.id, "scan", null, { occurredAt: new Date(now - 3 * DAY) });
+      for (let i = 0; i < 4; i++) await ev(tx, outlet.id, "scan", null, { occurredAt: new Date(now - 40 * DAY) });
+      const s = await makeSession(tx, outlet);
+      await tx.update(sessions).set({ completed: true, completedAt: new Date() }).where(eq(sessions.id, s.id));
+      for (let i = 0; i < 5; i++) {
+        await tx.insert(privateFeedback).values({
+          id: crypto.randomUUID(),
+          outletId: outlet.id,
+          sessionId: s.id,
+          rating: 3,
+          message: `m${i}`,
+          contact: null,
+          resolved: i === 4, // the newest one is already handled
+          createdAt: new Date(now - (10 - i) * 60_000),
+        });
+      }
+
+      const ctx = routeCtx({ outletId: outlet.id });
+      const get = async (range: string) =>
+        (await getHome(makeRequest(`/api/app/outlets/${outlet.id}/home?range=${range}`, { session }), ctx)).json();
+
+      const month = await get("30d");
+      expect(month.range).toBe("30d");
+      expect(month.trend.days).toHaveLength(30);
+      expect(month.trend.days.at(-1)).toMatchObject({ scans: 2, completed: 1 });
+      expect(month.trend.totals).toEqual({ scans: 3, completed: 1, conversion_rate: 0.3333 });
+      expect(month.trend.previous).toEqual({ scans: 4, completed: 0, conversion_rate: 0 });
+      expect(month.trend.since).toBeUndefined();
+      expect(month.funnel.steps[0]).toMatchObject({ step: "scan", count: 3 });
+      expect(month.rating).toMatchObject({ baseline_rating: 4.2, current_review_count: 40 });
+      expect(month.open_feedback.map((f: { message: string }) => f.message)).toEqual(["m3", "m2", "m1"]);
+      expect(month.overview).toMatchObject({ scans: 7, unresolved_count: 4 });
+
+      const week = await get("7d");
+      expect(week.trend.days).toHaveLength(7);
+      expect(week.trend.previous).toEqual({ scans: 0, completed: 0, conversion_rate: 0 });
+      // Anything that is not "7d" is the 30-day view.
+      expect((await get("all")).range).toBe("30d");
+    }));
+
+  it.each(["locked", "suspended"])("home while %s: counts only, no detail", (state) =>
+    inTx(async (tx) => {
+      const { outlet, session } = await owner(tx, { state });
+      await ev(tx, outlet.id, "scan", null);
+      const res = await getHome(
+        makeRequest(`/api/app/outlets/${outlet.id}/home`, { session }),
+        routeCtx({ outletId: outlet.id }),
+      );
+      expect(res.status).toBe(200);
+      expect(await res.json()).toMatchObject({
+        overview: { scans: 1, dashboard_locked: true },
+        trend: null,
+        funnel: null,
+        rating: null,
+        open_feedback: null,
+      });
+    }),
+  );
+
+  it("home is owner-only", () =>
+    inTx(async (tx) => {
+      const a = await owner(tx);
+      const b = await owner(tx);
+      const res = await getHome(
+        makeRequest(`/api/app/outlets/${a.outlet.id}/home`, { session: b.session }),
+        routeCtx({ outletId: a.outlet.id }),
+      );
+      expect(res.status).toBe(403);
     }));
 });
 

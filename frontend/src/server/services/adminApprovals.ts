@@ -16,6 +16,7 @@ import { getEnv } from "@/server/env";
 import { HttpError } from "@/server/http";
 import { notify } from "@/server/notifications";
 import { latestSubscription, releaseSignupPayment } from "./billing";
+import { issueWelcomeLink } from "./ownerAuth";
 import { buildFlowConfig } from "./flow";
 import { buildReviewUrl, getPlaceSnapshot, PlacesUnavailableError } from "./places";
 import { pyIso } from "./pyDate";
@@ -156,6 +157,8 @@ export async function approveOutlet(db: DbLike, outletId: string, body: z.infer<
   const [account] = await db.select().from(accounts).where(eq(accounts.id, claimed.accountId)).limit(1);
   if (account) {
     const env = getEnv();
+    const base = env.frontendBaseUrl.replace(/\/+$/, "");
+    const token = await issueWelcomeLink(db, account, now);
     await notify(db, {
       accountId: account.id,
       outletId: claimed.id,
@@ -164,7 +167,9 @@ export async function approveOutlet(db: DbLike, outletId: string, body: z.infer<
       data: {
         business_name: claimed.businessName,
         short_url: `${env.publicFlowBaseUrl.replace(/\/+$/, "")}/r/${slug}`,
-        dashboard_url: `${env.frontendBaseUrl.replace(/\/+$/, "")}/app/login`,
+        // One tap into the dashboard; the welcome checklist picks it up from there.
+        dashboard_url: `${base}/app/auth/magic?token=${token}&next=${encodeURIComponent("/app?welcome=1")}`,
+        login_url: `${base}/app/login`,
       },
     });
   }

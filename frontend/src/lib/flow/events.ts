@@ -18,7 +18,10 @@ export type EventType =
   | "copy_tapped"
   | "handoff"
   | "private_feedback_opened"
-  | "private_feedback_submitted";
+  | "private_feedback_submitted"
+  // After the handoff: the customer came back to this page, and said they posted.
+  | "review_return"
+  | "post_confirmed";
 
 interface QueuedEvent {
   type: EventType;

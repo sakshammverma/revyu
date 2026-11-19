@@ -14,6 +14,8 @@ const PAGES = [
   { name: "signup", path: "/signup" },
   { name: "gap report", path: "/gap-report" },
   { name: "customer flow", path: "/r/demo-shop/review" },
+  { name: "demo flow", path: "/demo" },
+  { name: "demo Google stand-in", path: "/demo/google" },
 ];
 
 for (const p of PAGES) {

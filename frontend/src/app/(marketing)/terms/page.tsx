@@ -15,8 +15,6 @@ export default function TermsPage() {
     <LegalPage title="Terms of Service">
       <p>
         These terms govern use of Revyu by business owners (&ldquo;you&rdquo;).
-        This page is not final legal copy and should be reviewed by counsel
-        before relying on it.
       </p>
 
       <h2>The service</h2>

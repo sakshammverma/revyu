@@ -15,8 +15,7 @@ export default function PrivacyPage() {
     <LegalPage title="Privacy Policy" subtitle="How we handle your data">
       <p>
         Revyu collects the minimum data needed to run the product. This page
-        describes what we hold today; it is not final legal copy and should
-        be reviewed by counsel before relying on it.
+        describes what we hold and why.
       </p>
 
       <h2>What we collect about business owners</h2>

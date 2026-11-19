@@ -47,7 +47,7 @@ export function ROICalculatorSection() {
   if (!pricing.loading && !pricing.ready) return null;
 
   return (
-    <div id="calculator" className="mx-2 sm:mx-3 my-16 sm:my-24">
+    <div id="calculator" className="mx-2 sm:mx-3 my-12 sm:my-16">
       <section className="v2-sheet max-w-[1296px] mx-auto border border-line p-6 sm:p-12 lg:p-16">
         {/* Header */}
         <div className="max-w-3xl mb-12">
@@ -143,7 +143,7 @@ export function ROICalculatorSection() {
               value={pricing.ready ? `${customersPerYearMonthly}` : "…"}
               note="Over twelve months"
             />
-            <Stat label="Annual plan, per day" value={show(Math.round(annualMinor / 365))} note="Less than a daily cup of tea or coffee" tone="blue" />
+            <Stat label="Annual plan, per day" value={show(Math.round(annualMinor / 365))} note="The annual price, spread over 365 days" tone="blue" />
             <Stat label="Free before you pay" value="15 days" note="First charge comes after the trial" />
           </div>
         </div>

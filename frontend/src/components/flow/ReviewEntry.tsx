@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { cookies, headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { CustomerFlow } from "@/components/flow/CustomerFlow";
 import { Icon } from "@/components/hub/Icons";
+import { LANG_COOKIE, resolveFlowLanguage } from "@/lib/flow/strings";
 import { loadFlowConfig, recordScan } from "@/server/pageData";
 
 // The review flow itself, byte-for-byte as before (SRS-20.4). The optional
@@ -22,8 +24,17 @@ export async function ReviewEntry({
   // Scan event runs after the response, never blocks render. Previews record nothing.
   if (fireScan && !config.preview) recordScan(config.outlet.id);
 
+  // Decided here, on the server, so the page never flashes from one language to another.
+  const [cookieStore, headerList] = await Promise.all([cookies(), headers()]);
+  const { lang, offered } = resolveFlowLanguage({
+    saved: cookieStore.get(LANG_COOKIE)?.value,
+    outletLocale: config.locale,
+    acceptLanguage: headerList.get("accept-language"),
+  });
+
   return (
     // lang matters for screen-reader pronunciation and for the browser's font fallback (e.g. Devanagari).
+    // The flow sets its own lang on what it renders, since the customer can switch.
     <div lang={config.locale || "en"}>
       {backToHub && (
         <Link
@@ -34,7 +45,7 @@ export async function ReviewEntry({
           <span className="truncate max-w-[16rem]">{config.outlet.business_name}</span>
         </Link>
       )}
-      <CustomerFlow slug={slug} config={config} />
+      <CustomerFlow slug={slug} config={config} initialLang={lang} languages={offered} />
     </div>
   );
 }

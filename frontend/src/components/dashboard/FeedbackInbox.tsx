@@ -7,7 +7,7 @@ import { resolveFeedback, type FeedbackItem } from "@/lib/dashboard/api";
 
 type Filter = "open" | "resolved" | "all";
 
-function ageLabel(iso: string, now: number): string {
+export function ageLabel(iso: string, now: number): string {
   const hours = (now - new Date(iso).getTime()) / 3_600_000;
   if (hours < 1) return "Just now";
   if (hours < 24) return `${Math.floor(hours)}h ago`;
@@ -16,7 +16,7 @@ function ageLabel(iso: string, now: number): string {
 }
 
 /** Tel/WhatsApp quick-actions when the customer left something diallable. */
-function contactActions(contact: string) {
+export function contactActions(contact: string) {
   const digits = contact.replace(/[^\d+]/g, "");
   const isPhone = digits.replace(/\D/g, "").length >= 8 && !contact.includes("@");
   if (isPhone) {

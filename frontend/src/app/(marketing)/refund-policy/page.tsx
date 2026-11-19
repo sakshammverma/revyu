@@ -13,11 +13,6 @@ export const metadata: Metadata = pageMetadata({
 export default function RefundPolicyPage() {
   return (
     <LegalPage title="Refund Policy" subtitle="When you pay, when you don’t, and how refunds work">
-      <p>
-        This page is not final legal copy and should be reviewed by counsel
-        before relying on it.
-      </p>
-
       <h2>Signup rejected or unverifiable</h2>
       <p>
         You set up autopay at signup, but nothing is charged until your

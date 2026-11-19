@@ -27,7 +27,7 @@ export function PromoBar() {
   if (dismissed) return null;
 
   return (
-    <div className="relative z-50 h-12 bg-ink-dark text-white flex items-center justify-between px-4 sm:px-8 overflow-hidden border-b border-[#2b3239]">
+    <div className="relative z-50 h-12 bg-night text-white flex items-center justify-between px-4 sm:px-8 overflow-hidden border-b border-white/10">
       {/* Background Animated Glow Art */}
       <div
         className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-60 animate-promo-glow"
@@ -41,7 +41,7 @@ export function PromoBar() {
         <span className="font-semibold text-white tracking-tight"><Price plan="monthly" suffix="/month, flat" fallback="One flat monthly price" /></span>
         <span className="text-text-on-dark hidden lg:inline">·</span>
         <span className="text-text-on-dark hidden lg:inline">
-          Ask every customer before the shop next door does · 15 days free
+          One printed code that asks every customer · 15 days free
         </span>
         <span className="text-[#2b3239] hidden lg:inline">|</span>
         <Link

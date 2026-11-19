@@ -37,6 +37,8 @@ export interface Env {
   /** Supabase project URL + service-role key, used for Storage uploads. Server-only. */
   supabaseUrl: string;
   supabaseServiceRoleKey: string;
+  /** When set, this email gets a fixed OTP "000000" without a real email send. */
+  demoAccountEmail: string;
 }
 
 let cached: Env | undefined;
@@ -82,6 +84,7 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
     razorpayPlanIdAnnual: source.RAZORPAY_PLAN_ID_ANNUAL ?? "",
     supabaseUrl: (source.SUPABASE_URL ?? "").replace(/\/+$/, ""),
     supabaseServiceRoleKey: source.SUPABASE_SERVICE_ROLE_KEY ?? "",
+    demoAccountEmail: source.DEMO_ACCOUNT_EMAIL ?? "",
   };
 
   const problems: string[] = [];

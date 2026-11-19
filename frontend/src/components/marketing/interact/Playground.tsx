@@ -3,11 +3,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 export const DEMOS = [
-  { id: "rate", label: "Rate a visit", anchor: "build" },
-  { id: "draft", label: "Build a review draft", anchor: "mechanism" },
-  { id: "kit", label: "Browse the print kit", anchor: "kit" },
-  { id: "specialty", label: "Pick your business type", anchor: "specialties" },
   { id: "rank", label: "Check your Google gap", anchor: "gap" },
+  { id: "rate", label: "Rate a visit and build a draft", anchor: "how" },
+  { id: "kit", label: "Browse the print kit", anchor: "kit" },
   { id: "roi", label: "Slide your average bill", anchor: "calculator" },
 ] as const;
 export type DemoId = (typeof DEMOS)[number]["id"];

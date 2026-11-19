@@ -26,6 +26,9 @@ export const VALID_EVENT_TYPES: ReadonlySet<string> = new Set([
   "handoff",
   "private_feedback_opened",
   "private_feedback_submitted",
+  // Self-reported, after the handoff: came back from Google / said they posted.
+  "review_return",
+  "post_confirmed",
   "hub_viewed",
   "module_selected",
   "link_clicked",

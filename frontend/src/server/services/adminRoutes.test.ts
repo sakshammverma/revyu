@@ -46,7 +46,7 @@ import { notify } from "@/server/notifications";
 import { bandFor, buildLink } from "@/server/services/adminOps";
 import { inRolledBackTx, makeAccount, makeOutlet, makeRequest, routeCtx } from "@/server/testing/helpers";
 
-const { events, notifications, outlets, payments, referralRewards, subscriptions, tags } = schema;
+const { events, notifications, otpCodes, outlets, payments, referralRewards, subscriptions, tags } = schema;
 
 const inTx = (fn: (tx: DbLike) => Promise<void>) =>
   inRolledBackTx(async (tx) => {
@@ -204,6 +204,9 @@ describe("approval queue", () => {
       const sent = (await notesFor(tx, outlet.id)).filter((n) => n.template === "outlet_activated");
       expect(sent).toHaveLength(1);
       expect(sent[0].status).toBe("skipped_no_provider");
+      // The email's link logs the owner straight in.
+      const [link] = await tx.select().from(otpCodes).where(eq(otpCodes.accountId, row.accountId));
+      expect(link?.consumed).toBe(false);
 
       // Second approval is a 404 and sends nothing more (idempotent).
       expect((await call({ place_verified: true, placement_confirmed: true })).status).toBe(404);

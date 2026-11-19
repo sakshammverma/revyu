@@ -6,6 +6,7 @@
 
 export const TEMPLATES = [
   "otp_login",
+  "signup_received",
   "outlet_activated",
   "first_scan",
   "trial_threshold",
@@ -38,13 +39,28 @@ export function render(template: string, data: TemplateData): [subject: string, 
         `Your code is ${s(data.code)}. It expires in 10 minutes.\n\n` +
           `Or tap this link to log in directly: ${s(data.magic_link)}`,
       ];
+    case "signup_received":
+      return [
+        "We've got your Revyu signup",
+        `Thanks for signing up ${s(data.business_name)}. ${s(data.paid_line)}\n\n` +
+          `What happens next:\n` +
+          `1. We check your business against the Google listing you picked, ` +
+          `usually within a few hours.\n` +
+          `2. You get an email the moment your QR code is ready, with a link ` +
+          `straight into your dashboard.\n` +
+          `3. Print the QR, put it where customers pay, and reviews start coming in.\n\n` +
+          `Check your status any time: ${s(data.status_url)}\n\n` +
+          `Questions? Just reply to this email.`,
+      ];
     case "outlet_activated":
       return [
         "Your Revyu QR is ready",
         `${s(data.business_name)} is verified and live.\n\n` +
+          `Open your dashboard (one tap, no code needed): ${s(data.dashboard_url)}\n` +
+          `This link works once, for 3 days. After that, log in at ` +
+          `${d(data.login_url, s(data.dashboard_url))} with this email address.\n\n` +
           `Your QR code and print files (receipt footer, handout card, counter ` +
-          `standee, counter sticker) are in your dashboard: ${s(data.dashboard_url)}\n` +
-          `Log in with this email address — we'll send you a one-time code.\n\n` +
+          `standee, counter sticker) are waiting there.\n\n` +
           `Your review link: ${s(data.short_url)}\n\n` +
           `Print the receipt footer or hand out the cards. Keep the wording as it ` +
           `is — "scan to share your experience" — and never offer anything in ` +

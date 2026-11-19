@@ -6,7 +6,9 @@ import { and, eq, inArray, or } from "drizzle-orm";
 import { z } from "zod";
 
 import { schema, type DbLike } from "@/server/db";
+import { getEnv } from "@/server/env";
 import { HttpError } from "@/server/http";
+import { notifyOnce } from "@/server/notifications";
 import { listVerticals, verticalTags } from "@/server/verticals";
 import { latestSubscription, markCheckoutComplete, recordPayment } from "./billing";
 import { getProvider, getProviderByName, PaymentProviderUnavailableError } from "./payments";
@@ -322,12 +324,40 @@ export async function createSignup(db: DbLike, body: SignupBody, opts: { visitor
 
 type OutletRow = typeof outlets.$inferSelect;
 
+const paidLineFor = (oneTime: boolean) =>
+  oneTime ? "Payment received." : `Payment method authorised — nothing is charged until your ${TRIAL_DAYS}-day trial ends.`;
+
+/**
+ * "We've got your signup", with a link back to the status page. Sent once,
+ * from whichever of the checkout confirm or the webhook lands first. Never
+ * fails the caller: the payment is already recorded.
+ */
+export async function notifySignupReceived(db: DbLike, outlet: OutletRow | null) {
+  if (!outlet || outlet.state !== "pending_approval") return;
+  try {
+    const [account] = await db.select().from(accounts).where(eq(accounts.id, outlet.accountId)).limit(1);
+    if (!account) return;
+    const subscription = await latestSubscription(db, outlet.accountId);
+    await notifyOnce(db, {
+      accountId: account.id,
+      outletId: outlet.id,
+      toEmail: account.ownerEmail,
+      template: "signup_received",
+      data: {
+        business_name: outlet.businessName,
+        paid_line: paidLineFor(Boolean(subscription?.razorpayOrderId)),
+        status_url: `${getEnv().frontendBaseUrl.replace(/\/+$/, "")}/signup/status/${outlet.id}`,
+      },
+    });
+  } catch (err) {
+    console.error("signup_received notification failed", err);
+  }
+}
+
 export async function signupStatus(db: DbLike, outlet: OutletRow) {
   const subscription = await latestSubscription(db, outlet.accountId);
   const oneTime = Boolean(subscription?.razorpayOrderId);
-  const paidLine = oneTime
-    ? "Payment received."
-    : `Payment method authorised — nothing is charged until your ${TRIAL_DAYS}-day trial ends.`;
+  const paidLine = paidLineFor(oneTime);
   const messages: Record<string, string> = {
     pending_payment: "Waiting for payment. If you closed the payment window, start again from the signup page.",
     pending_approval: `${paidLine} We're verifying your business details — usually within a few hours.`,
@@ -397,5 +427,7 @@ export async function confirmSignup(db: DbLike, signupId: string, body: ConfirmB
     });
     await markCheckoutComplete(tx, subscription);
   });
-  return signupStatus(db, await getSignupOutlet(db, signupId));
+  const updated = await getSignupOutlet(db, signupId);
+  await notifySignupReceived(db, updated);
+  return signupStatus(db, updated);
 }

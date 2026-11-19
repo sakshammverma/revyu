@@ -85,6 +85,8 @@ export interface FunnelStep {
 export interface Funnel {
   steps: FunnelStep[];
   note: string;
+  /** What customers told us after Google (sessions). Absent on older API responses. */
+  self_reported?: { came_back: number; said_posted: number };
 }
 
 export interface TagFrequency {
@@ -108,6 +110,43 @@ export interface FeedbackItem {
   created_at: string;
 }
 
+export interface TrendDay {
+  /** Calendar day in the outlet's own timezone, "2026-11-17". */
+  date: string;
+  scans: number;
+  completed: number;
+}
+
+export interface PeriodTotals {
+  scans: number;
+  completed: number;
+  conversion_rate: number;
+}
+
+export type TrendRange = "7d" | "30d";
+
+export interface Trend {
+  range: TrendRange;
+  timezone: string;
+  days: TrendDay[];
+  totals: PeriodTotals;
+  /** The same number of days just before; null until the outlet has been live that long. */
+  previous: PeriodTotals | null;
+}
+
+/** Everything the Overview page shows. The detailed parts are null while the dashboard is locked. */
+export interface Home {
+  overview: Overview;
+  range: TrendRange;
+  trend: Trend | null;
+  funnel: Funnel | null;
+  rating: RatingInfo | null;
+  /** Newest unresolved private messages (a few; the inbox has the rest). */
+  open_feedback: FeedbackItem[] | null;
+}
+
+export const getHome = (outletId: string, range: TrendRange = "30d") =>
+  get<Home>(`/api/app/outlets/${outletId}/home?range=${range}`);
 export const getMyOutlet = (opts?: { redirectOn401?: boolean }) =>
   get<MyOutlet>("/api/app/outlets/mine", opts);
 export const getOverview = (outletId: string) => get<Overview>(`/api/app/outlets/${outletId}/overview`);

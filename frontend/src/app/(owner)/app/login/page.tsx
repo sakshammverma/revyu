@@ -11,6 +11,8 @@ import { safeNextPath } from "@/lib/ownerSession";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const RESEND_SECONDS = 30;
+const DEMO_EMAIL = process.env.NEXT_PUBLIC_DEMO_EMAIL ?? "";
+const DEMO_OTP = "000000";
 
 // SRS-10.1: single email field -> code entry. No password.
 export default function LoginPage() {
@@ -34,6 +36,7 @@ function LoginForm() {
   const [busy, setBusy] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [resent, setResent] = useState(false);
+  const [isDemo, setIsDemo] = useState(false);
 
   // Already signed in? Skip straight to the dashboard.
   useEffect(() => {
@@ -96,6 +99,25 @@ function LoginForm() {
     }
   }
 
+  async function startDemo() {
+    if (busy || !DEMO_EMAIL) return;
+    setIsDemo(true);
+    setEmail(DEMO_EMAIL);
+    setEmailError(null);
+    setBusy(true);
+    try {
+      await requestOtp(DEMO_EMAIL);
+      setStep("code");
+      setCode("");
+      setCodeError(null);
+      setCooldown(RESEND_SECONDS);
+    } catch {
+      setEmailError("Couldn't start the demo. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <main className="min-h-screen flex items-center justify-center px-4 py-10 bg-bg">
       <div className="v2-sheet border border-line max-w-sm w-full p-6 sm:p-8">
@@ -135,6 +157,14 @@ function LoginForm() {
                 Start your free trial
               </Link>
             </p>
+            {DEMO_EMAIL && (
+              <div className="border-t border-line pt-4 mt-1 flex flex-col gap-2 items-center">
+                <p className="text-xs text-text-2">Want to explore first?</p>
+                <Button type="button" variant="secondary" full loading={busy} onClick={startDemo}>
+                  Try demo account
+                </Button>
+              </div>
+            )}
           </form>
         ) : (
           <form
@@ -145,17 +175,23 @@ function LoginForm() {
             }}
           >
             <div>
-              <h1 className="font-display text-2xl text-ink">Check your email</h1>
-              <p className="text-sm text-text-2 mt-1 leading-relaxed">
-                If this email has an account, we sent a 6-digit code and a login link to <strong className="text-ink">{email}</strong>.{" "}
-                <button
-                  type="button"
-                  className="text-accent font-semibold underline underline-offset-2 cursor-pointer"
-                  onClick={() => setStep("email")}
-                >
-                  Change email
-                </button>
-              </p>
+              <h1 className="font-display text-2xl text-ink">{isDemo ? "Enter the demo code" : "Check your email"}</h1>
+              {isDemo ? (
+                <p className="text-sm text-text-2 mt-1 leading-relaxed">
+                  Use code <strong className="text-ink font-mono tracking-widest">{DEMO_OTP}</strong> to log into the demo dashboard.
+                </p>
+              ) : (
+                <p className="text-sm text-text-2 mt-1 leading-relaxed">
+                  If this email has an account, we sent a 6-digit code and a login link to <strong className="text-ink">{email}</strong>.{" "}
+                  <button
+                    type="button"
+                    className="text-accent font-semibold underline underline-offset-2 cursor-pointer"
+                    onClick={() => setStep("email")}
+                  >
+                    Change email
+                  </button>
+                </p>
+              )}
             </div>
             <Field
               label="6-digit code"
@@ -176,24 +212,36 @@ function LoginForm() {
               Log in
             </Button>
             <div className="text-sm text-text-2 text-center">
-              {cooldown > 0 ? (
-                <span>Resend available in {cooldown}s</span>
-              ) : (
+              {isDemo ? (
                 <button
                   type="button"
                   className="text-accent font-semibold cursor-pointer underline underline-offset-2"
-                  disabled={busy}
-                  onClick={() => sendCode(true)}
+                  onClick={() => { setStep("email"); setIsDemo(false); setEmail(""); }}
                 >
-                  {busy ? "Sending…" : "Resend code"}
+                  Back to login
                 </button>
+              ) : (
+                <>
+                  {cooldown > 0 ? (
+                    <span>Resend available in {cooldown}s</span>
+                  ) : (
+                    <button
+                      type="button"
+                      className="text-accent font-semibold cursor-pointer underline underline-offset-2"
+                      disabled={busy}
+                      onClick={() => sendCode(true)}
+                    >
+                      {busy ? "Sending…" : "Resend code"}
+                    </button>
+                  )}
+                  {resent && cooldown > 0 && (
+                    <p role="status" className="mt-1 text-xs text-success">
+                      A new code is on its way.
+                    </p>
+                  )}
+                  <p className="mt-2 text-xs">Not there after a minute? Check your spam folder.</p>
+                </>
               )}
-              {resent && cooldown > 0 && (
-                <p role="status" className="mt-1 text-xs text-success">
-                  A new code is on its way.
-                </p>
-              )}
-              <p className="mt-2 text-xs">Not there after a minute? Check your spam folder.</p>
             </div>
           </form>
         )}

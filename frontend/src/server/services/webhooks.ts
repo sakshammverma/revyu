@@ -10,6 +10,7 @@ import { schema, type DbLike } from "@/server/db";
 import { getEnv } from "@/server/env";
 import { notify } from "@/server/notifications";
 import { DAY_MS, markCheckoutComplete, periodDays, recordPayment, type Outlet, type Subscription } from "./billing";
+import { notifySignupReceived } from "./signup";
 
 const { accounts, outlets, payments, subscriptions } = schema;
 
@@ -85,7 +86,7 @@ async function onSubscriptionAuthenticated(db: DbLike, entity: unknown) {
   // Mandate authorised at signup: same transition as the signed checkout
   // confirm, whichever arrives first.
   const sub = await subscriptionFromEntity(db, entity);
-  if (sub) await markCheckoutComplete(db, sub);
+  if (sub) await notifySignupReceived(db, await markCheckoutComplete(db, sub));
 }
 
 async function onSubscriptionActivated(db: DbLike, entity: unknown) {
@@ -215,6 +216,7 @@ async function onOrderPaid(db: DbLike, entity: unknown) {
   if (!sub) return;
   await recordPaymentIdempotent(db, sub, paymentEntity, "captured");
   const outlet = await markCheckoutComplete(db, sub); // signup: -> pending_approval
+  await notifySignupReceived(db, outlet);
   await activateIfLive(db, outlet); // renewal / reactivation after suspension
 }
 

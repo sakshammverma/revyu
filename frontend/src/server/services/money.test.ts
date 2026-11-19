@@ -186,6 +186,13 @@ describe("signup (SRS-18)", () => {
       const again = await confirmSignup(id, { razorpay_payment_id: "mock", razorpay_signature: "garbage" });
       expect((await again.json()).state).toBe("pending_approval"); // already confirmed: no second payment row
       expect((await tx.select().from(payments).where(eq(payments.subscriptionId, sub.id))).length).toBe(1);
+
+      // "We've got your signup" goes out once, even though confirm ran twice.
+      const received = await tx
+        .select()
+        .from(notifications)
+        .where(and(eq(notifications.outletId, id), eq(notifications.template, "signup_received")));
+      expect(received).toHaveLength(1);
     }));
 
   it("validates input and rejects duplicates, reusing an abandoned checkout on retry", () =>

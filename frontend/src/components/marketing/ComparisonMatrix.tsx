@@ -1,96 +1,135 @@
-import Link from "next/link";
+import type { ReactNode } from "react";
 
-// Three ways a shop handles it, framed by what each one costs the owner.
+import { Reveal } from "./Reveal";
+
+// Five-point star centred on 0,0 with an outer radius of 4.
+const STAR = "M0 -4L1 -1.38L3.8 -1.24L1.62 .53L2.35 3.24L0 1.7L-2.35 3.24L-1.62 .53L-3.8 -1.24L-1 -1.38Z";
+
+// Three ways a shop asks for reviews, framed by what each one costs the owner.
 // No named competitors and no invented figures.
-const ROWS = [
+const WAYS: { title: string; tag: string; best?: boolean; icon: ReactNode; rows: [string, string][] }[] = [
   {
-    feature: "When the customer is asked",
-    revyu: "At the counter, while they are still smiling",
-    message: "Days later, when the feeling has gone",
-    memory: "Only when you happen to remember",
-    highlight: true,
+    title: "Asking by memory",
+    tag: "What most shops do",
+    // A shopper with a thought bubble holding a faded, dashed star: the review
+    // that was meant to be asked for and never was.
+    icon: (
+      <>
+        <circle cx="17" cy="24" r="5.5" className="fill-ink/70" />
+        <path d="M6 42c.8-6.5 5-10 11-10s10.2 3.5 11 10z" className="fill-ink/70" />
+        <circle cx="24.5" cy="20" r="1.4" className="fill-white stroke-line-strong" strokeWidth={1.2} />
+        <circle cx="27" cy="16.5" r="2" className="fill-white stroke-line-strong" strokeWidth={1.2} />
+        <rect x="25" y="1" width="22" height="17" rx="8.5" className="fill-white stroke-line-strong" strokeWidth={1.2} />
+        <path d={STAR} transform="translate(36 9.8) scale(1.5)" className="fill-star/30 stroke-star" strokeWidth={0.9} strokeDasharray="1.4 1" strokeLinejoin="round" />
+      </>
+    ),
+    rows: [
+      ["When", "Only when you happen to remember"],
+      ["Who", "The few who come to mind"],
+      ["Your effort", "Your attention, every single day"],
+      ["What you see", "Nothing"],
+    ],
   },
   {
-    feature: "Who gets asked",
-    revyu: "Everyone who sees the code, the quiet regulars too",
-    message: "Only people whose number you hold",
-    memory: "The few who come to mind",
+    title: "A message days later",
+    tag: "SMS or WhatsApp follow-ups",
+    // A phone with an unanswered message and a clock: the ask arrives late.
+    icon: (
+      <>
+        <rect x="9" y="4" width="21" height="38" rx="4" className="fill-white stroke-ink" strokeWidth={2} />
+        <path d="M17 8.5h5" className="stroke-ink/40" strokeWidth={1.6} strokeLinecap="round" />
+        <rect x="13" y="13" width="12" height="6" rx="2" className="fill-line-strong" />
+        <rect x="17" y="22" width="9" height="5" rx="2" className="fill-accent/60" />
+        <circle cx="33" cy="34" r="9.5" className="fill-warning stroke-paper-subtle" strokeWidth={2.5} />
+        <path d="M33 29.5V34l3 2" className="fill-none stroke-white" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+      </>
+    ),
+    rows: [
+      ["When", "Days later, when the feeling has gone"],
+      ["Who", "Only people whose number you hold"],
+      ["Your effort", "A list, a message, a follow-up. Every time"],
+      ["What you see", "Messages sent"],
+    ],
   },
   {
-    feature: "What it asks of you",
-    revyu: "Print it once",
-    message: "A list, a message, a follow-up. Every time",
-    memory: "Your attention, every single day",
-    highlight: true,
-  },
-  {
-    feature: "Where your customer starts",
-    revyu: "A draft built from their own taps",
-    message: "A blank box",
-    memory: "A blank box",
-  },
-  {
-    feature: "What you see",
-    revyu: "Scans, completions, what people praise",
-    message: "Messages sent",
-    memory: "Nothing",
+    title: "A code on your counter",
+    tag: "Revyu",
+    best: true,
+    // A counter standee: stars, a QR code and a caption line, on a base.
+    icon: (
+      <>
+        <rect x="9" y="40" width="30" height="3.5" rx="1.75" className="fill-white/45" />
+        <rect x="13" y="4" width="22" height="36" rx="3" className="fill-white" />
+        {[18.5, 24, 29.5].map((x) => (
+          <path key={x} d={STAR} transform={`translate(${x} 9.5) scale(0.5)`} className="fill-star" />
+        ))}
+        {[
+          [17, 14],
+          [26, 14],
+          [17, 23],
+        ].map(([x, y]) => (
+          <g key={`${x}-${y}`}>
+            <rect x={x} y={y} width="5" height="5" rx="0.8" className="fill-ink" />
+            <rect x={x + 1} y={y + 1} width="3" height="3" rx="0.4" className="fill-white" />
+            <rect x={x + 1.75} y={y + 1.75} width="1.5" height="1.5" className="fill-ink" />
+          </g>
+        ))}
+        <path d="M26 23h2v2h-2zM29 26h2v2h-2zM26 26.5h2v1.5h-2zM28.5 23h1.5v1.5h-1.5z" className="fill-ink" />
+        <rect x="18" y="33" width="12" height="1.6" rx="0.8" className="fill-line-strong" />
+      </>
+    ),
+    rows: [
+      ["When", "At the counter, while they are still smiling"],
+      ["Who", "Everyone who sees the code, the quiet regulars too"],
+      ["Your effort", "Print it once"],
+      ["What you see", "Scans, completions, what people praise"],
+    ],
   },
 ];
 
 export function ComparisonMatrix() {
   return (
-    <section className="mx-2 sm:mx-3 my-12 sm:my-16">
-      <div className="v2-sheet max-w-[1296px] mx-auto border border-line p-6 sm:p-12 lg:p-16">
-        <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
-          <p className="vf-section-label uppercase tracking-wider mb-2 text-text-2">
-            Three ways shops do it
-          </p>
-          <h2 className="heading-h2 font-display text-ink">
-            Only one of them works on the days you forget.
-          </h2>
-          <p className="mt-3 text-sm sm:text-base text-text-2 leading-relaxed">
-            Happy customers don&rsquo;t fail to review because they&rsquo;re unhappy. They fail because nobody asked them at the right moment.
-          </p>
-        </div>
+    <section aria-labelledby="ways-title" className="mx-auto max-w-[1296px] px-4 pt-4 sm:px-8">
+      <div className="max-w-3xl">
+        <p className="vf-section-label mb-2 uppercase tracking-wider">Three ways shops ask</p>
+        <h2 id="ways-title" className="heading-h2">
+          Only one of them works on the days you forget.
+        </h2>
+        <p className="mt-3 text-base leading-relaxed text-text-muted sm:text-lg">
+          Happy customers rarely skip a review because they are unhappy. They skip it because nobody asked at the right moment.
+        </p>
+      </div>
 
-        <div role="region" aria-label="Comparison table" tabIndex={0} className="overflow-x-auto rounded-2xl border border-line bg-white shadow-v2-rest">
-          <table className="w-full min-w-[640px] text-left border-collapse text-xs sm:text-sm">
-            <thead>
-              <tr className="border-b border-line bg-[#f8fafc]">
-                <th scope="col" className="p-4 sm:p-5 font-semibold text-ink w-1/4"><span className="sr-only">Feature</span></th>
-                <th scope="col" className="p-4 sm:p-5 font-bold text-ink bg-accent-50/60 border-x border-accent/20 w-1/4">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-accent" />
-                    <span>A code on your counter</span>
+      <div className="mt-10 grid gap-4 sm:gap-5 lg:grid-cols-3">
+        {WAYS.map((way, i) => (
+          <Reveal key={way.title} order={i}>
+            <div
+              className={`flex h-full flex-col rounded-2xl p-6 sm:p-7 ${
+                way.best ? "night-surface shadow-v2-elevated" : "border border-line bg-white shadow-v2-rest"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <span className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${way.best ? "bg-accent" : "bg-paper-subtle"}`}>
+                  <svg aria-hidden viewBox="0 0 48 48" className="h-11 w-11">
+                    {way.icon}
+                  </svg>
+                </span>
+                <div>
+                  <h3 className={`font-display text-xl leading-tight ${way.best ? "text-white" : "text-ink"}`}>{way.title}</h3>
+                  <p className={`text-xs font-semibold ${way.best ? "text-accent-soft" : "text-text-muted"}`}>{way.tag}</p>
+                </div>
+              </div>
+              <dl className={`mt-5 flex flex-col divide-y text-sm ${way.best ? "divide-white/10" : "divide-line"}`}>
+                {way.rows.map(([k, v]) => (
+                  <div key={k} className="grid grid-cols-[92px_1fr] gap-3 py-3">
+                    <dt className={`text-xs font-semibold uppercase tracking-wide ${way.best ? "text-white/70" : "text-text-muted"}`}>{k}</dt>
+                    <dd className={way.best ? "font-semibold text-white" : "text-text-2"}>{v}</dd>
                   </div>
-                </th>
-                <th scope="col" className="p-4 sm:p-5 font-semibold text-text-2 w-1/4">A message days later</th>
-                <th scope="col" className="p-4 sm:p-5 font-semibold text-text-2 w-1/4">Asking by memory</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {ROWS.map((row) => (
-                <tr key={row.feature} className={row.highlight ? "bg-[#f8fafc]/50" : ""}>
-                  <th scope="row" className="p-4 sm:p-5 font-semibold text-ink">{row.feature}</th>
-                  <td className="p-4 sm:p-5 font-bold text-accent-hover bg-accent-50/40 border-x border-accent/20">
-                    {row.revyu}
-                  </td>
-                  <td className="p-4 sm:p-5 text-text-2">{row.message}</td>
-                  <td className="p-4 sm:p-5 text-text-2">{row.memory}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-xl bg-[#f8fafc] border border-line">
-          <p className="text-sm text-ink max-w-xl">
-            Every customer you don&rsquo;t ask is a customer the shop next door can still win on the first thing a stranger reads.
-          </p>
-          <Link href="/gap-report" className="text-sm font-semibold text-accent-hover hover:underline shrink-0">
-            See who&rsquo;s ahead of you →
-          </Link>
-        </div>
+                ))}
+              </dl>
+            </div>
+          </Reveal>
+        ))}
       </div>
     </section>
   );

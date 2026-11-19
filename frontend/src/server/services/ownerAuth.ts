@@ -9,7 +9,7 @@
  */
 import { randomBytes, randomInt, timingSafeEqual } from "node:crypto";
 
-import { and, desc, eq, gte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, ne, sql } from "drizzle-orm";
 
 import { hashToken } from "@/server/auth/owner";
 import { schema, type DbLike } from "@/server/db";
@@ -70,6 +70,59 @@ export async function requestOtp(
   return { code, magicToken };
 }
 
+/** Fixed OTP "000000" for the demo account — no email is sent. */
+export const DEMO_OTP_CODE = "000000";
+
+export async function requestDemoOtp(
+  db: DbLike,
+  account: Pick<Account, "id">,
+  now: Date = new Date(),
+): Promise<void> {
+  // Clear old unconsumed demo codes so the fixed code is always fresh.
+  await db
+    .update(otpCodes)
+    .set({ consumed: true })
+    .where(and(eq(otpCodes.accountId, account.id), eq(otpCodes.consumed, false)));
+
+  const magicToken = randomBytes(32).toString("base64url");
+  await db.insert(otpCodes).values({
+    id: crypto.randomUUID(),
+    accountId: account.id,
+    code: DEMO_OTP_CODE,
+    magicToken: hashToken(magicToken),
+    attempts: 0,
+    consumed: false,
+    expiresAt: new Date(now.getTime() + OTP_EXPIRY_MS),
+  });
+}
+
+export const WELCOME_LINK_EXPIRY_MS = 72 * 60 * 60 * 1000;
+// Not digits, so a typed 6-digit code can never match a welcome-link row.
+const NO_CODE = "nocode";
+
+/**
+ * A single-use magic link for the "you're live" email, so the owner lands in
+ * the dashboard in one tap. It lives longer than a login code because the
+ * email can sit unread for a day; it carries no usable code.
+ */
+export async function issueWelcomeLink(
+  db: DbLike,
+  account: Pick<Account, "id">,
+  now: Date = new Date(),
+): Promise<string> {
+  const magicToken = randomBytes(32).toString("base64url");
+  await db.insert(otpCodes).values({
+    id: crypto.randomUUID(),
+    accountId: account.id,
+    code: NO_CODE,
+    magicToken: hashToken(magicToken),
+    attempts: 0,
+    consumed: false,
+    expiresAt: new Date(now.getTime() + WELCOME_LINK_EXPIRY_MS),
+  });
+  return magicToken;
+}
+
 export interface IssuedSession {
   rawToken: string;
   expiresAt: Date;
@@ -113,7 +166,8 @@ export async function verifyOtp(
   const [otp] = await db
     .select()
     .from(otpCodes)
-    .where(and(eq(otpCodes.accountId, account.id), eq(otpCodes.consumed, false)))
+    // A welcome link issued after the code was sent must not shadow the code.
+    .where(and(eq(otpCodes.accountId, account.id), eq(otpCodes.consumed, false), ne(otpCodes.code, NO_CODE)))
     .orderBy(desc(otpCodes.createdAt))
     .limit(1);
   if (!otp) return { ok: false, reason: "invalid" };

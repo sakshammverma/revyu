@@ -4,12 +4,13 @@ interface Props {
   tags: TagConfig[];
   selected: Set<string>;
   onToggle: (tagId: string) => void;
+  groupLabel?: string;
 }
 
 // FR-4: zero or more tags selectable. FR-5: outlet-configured set.
-export function TagChips({ tags, selected, onToggle }: Props) {
+export function TagChips({ tags, selected, onToggle, groupLabel = "Select what stood out" }: Props) {
   return (
-    <div className="flex flex-wrap gap-2" role="group" aria-label="Select what stood out">
+    <div className="flex flex-wrap gap-2" role="group" aria-label={groupLabel}>
       {tags.map((tag) => {
         const active = selected.has(tag.id);
         return (

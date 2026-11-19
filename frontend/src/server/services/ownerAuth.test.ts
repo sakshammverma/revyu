@@ -17,6 +17,7 @@ import { inRolledBackTx, makeAccount, makeRequest } from "@/server/testing/helpe
 import {
   findAccountByEmail,
   issueSession,
+  issueWelcomeLink,
   normalizeEmail,
   OTP_MAX_ATTEMPTS,
   OTP_REQUEST_MAX_PER_WINDOW,
@@ -143,6 +144,28 @@ describe("magic link", () => {
         ok: false,
         reason: "invalid",
       });
+    }));
+});
+
+describe("welcome link", () => {
+  it("logs in once, for three days, and carries no usable code", () =>
+    inRolledBackTx(async (db) => {
+      const account = await makeAccount(db);
+      const token = await issueWelcomeLink(db, account);
+      const [row] = await db.select().from(otpCodes).where(eq(otpCodes.accountId, account.id));
+      expect(row.magicToken).toBe(hashToken(token));
+      expect(row.code).not.toMatch(/^\d{6}$/);
+      expect(await verifyMagicLink(db, token, new Date(Date.now() + 73 * 60 * 60 * 1000))).toEqual({ ok: false, reason: "invalid" });
+      expect((await verifyMagicLink(db, token, new Date(Date.now() + 71 * 60 * 60 * 1000))).ok).toBe(true);
+      expect(await verifyMagicLink(db, token)).toEqual({ ok: false, reason: "invalid" });
+    }));
+
+  it("does not shadow a login code sent just before it", () =>
+    inRolledBackTx(async (db) => {
+      const account = await makeAccount(db);
+      const { code } = (await requestOtp(db, account))!;
+      await issueWelcomeLink(db, account, new Date(Date.now() + 1000));
+      expect((await verifyOtp(db, account, code)).ok).toBe(true);
     }));
 });
 

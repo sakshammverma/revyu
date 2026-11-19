@@ -20,7 +20,7 @@ const FAQS = [
   },
   {
     q: "Where do I put the code?",
-    a: "Anywhere printed. We email your QR and four print-ready files: a receipt footer, a handout card, an A5 counter standee and a counter sticker. Print them locally, or, in India, have a ready kit delivered to your shop for \u20B9199.",
+    a: "Anywhere printed. We email your QR and four print-ready files: a receipt footer, a handout card, an A5 counter standee and a counter sticker. Print them at any local printer. In India you can also have a ready printed kit delivered to your shop.",
   },
   {
     q: "What does it cost?",
@@ -38,7 +38,7 @@ const FAQS = [
 
 export function FAQSection() {
   return (
-    <div id="faq" className="mx-2 sm:mx-3 my-16 sm:my-24">
+    <div id="faq" className="mx-2 sm:mx-3 my-12 sm:my-16">
       <section className="v2-sheet max-w-[1296px] mx-auto border border-line p-6 sm:p-12 lg:p-16">
         {/* Header */}
         <div className="max-w-3xl mb-12">

@@ -1,80 +1,42 @@
-"use client";
+import Link from "next/link";
 
-import { useState } from "react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { EmailCapture } from "./EmailCapture";
+import { Reveal } from "./Reveal";
+
+const POINTS = ["15-day free trial", "QR and print files by email", "Cancel anytime"];
 
 export function FinalCTA() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-
   return (
-    <div className="mx-2 sm:mx-3 my-16 sm:my-24">
-      <section className="v2-sheet max-w-[1296px] mx-auto border border-line p-8 sm:p-14 lg:p-20 relative overflow-hidden text-center bg-white shadow-v2-elevated rounded-2xl">
-        {/* Subtle contour lines watermark in background */}
-        <div className="absolute inset-0 opacity-15 pointer-events-none flex items-center justify-center">
-          <Image
-            src="/assets/contour-lines.svg"
-            alt=""
-            width={1200}
-            height={600}
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        {/* Content Container */}
-        <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center">
-          <div className="w-12 h-12 rounded-2xl bg-accent/10 text-accent-hover flex items-center justify-center text-xl font-display mb-6 shadow-2xs">
-            ✽
-          </div>
-
-          <h2 className="heading-h2 font-display text-3xl sm:text-5xl lg:text-[54px] text-ink leading-tight tracking-tight">
-            The shop next door asks everyone. Will you?
+    <div className="mx-2 mt-12 sm:mx-3 sm:mt-16">
+      <section
+        aria-labelledby="final-cta-title"
+        className="night-surface night-grid mx-auto max-w-[1296px] overflow-hidden rounded-2xl px-6 py-14 text-center sm:px-14 sm:py-20"
+      >
+        <Reveal className="mx-auto flex max-w-3xl flex-col items-center">
+          <h2 id="final-cta-title" className="heading-h1 text-white!">
+            The shop next door asks everyone. <span className="text-accent-soft">Will you?</span>
           </h2>
-
-          <p className="mt-4 text-base sm:text-lg text-text-2 leading-relaxed max-w-xl mx-auto">
-            Every week you wait, their count moves and yours stays where it is. Start free, print your code, and let it ask for you.
+          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg">
+            Start free, print your code, and let it ask for you. Your numbers are in your dashboard before you pay anything.
           </p>
 
-          {/* Email Capture Pill */}
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              router.push(email.trim() ? `/signup?email=${encodeURIComponent(email.trim())}` : "/signup");
-            }}
-            className="mt-8 sm:mt-10 w-full max-w-md bg-white border border-line p-1.5 rounded-full shadow-v2-elevated flex items-center gap-2 hover:border-[#cbd5e1] focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/25 transition-colors"
-          >
-            <input
-              type="email"
-              name="email"
-              autoComplete="email"
-              aria-label="Your business email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Your business email"
-              className="flex-1 min-w-0 bg-transparent px-4 py-2.5 text-xs sm:text-sm text-ink placeholder-text-muted outline-hidden"
-            />
-            <button
-              type="submit"
-              className="btn-primary text-xs sm:text-sm py-2 sm:py-2.5 px-5 sm:px-6 cursor-pointer"
-            >
-              <span>Start free trial</span>
-            </button>
-          </form>
+          <EmailCapture tone="dark" className="mt-8" />
 
-          {/* Reassurance Badges */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-5 text-xs text-text-muted">
-            <span className="flex items-center gap-1.5">
-              <span className="text-success-strong font-bold">✓</span> 15-day free trial
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="text-success-strong font-bold">✓</span> QR + print files by email
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="text-success-strong font-bold">✓</span> Cancel anytime
-            </span>
-          </div>
-        </div>
+          <ul className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-white/80">
+            {POINTS.map((p) => (
+              <li key={p} className="flex items-center gap-1.5">
+                <svg aria-hidden viewBox="0 0 24 24" className="h-4 w-4 text-accent-soft" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 13l4 4L19 7" />
+                </svg>
+                {p}
+              </li>
+            ))}
+          </ul>
+
+          <Link href="/demo" className="mt-6 inline-flex min-h-[44px] items-center text-sm font-semibold text-white underline decoration-white/35 underline-offset-4 hover:decoration-white">
+            Not sure yet? Try it as a customer first →
+          </Link>
+        </Reveal>
       </section>
     </div>
   );

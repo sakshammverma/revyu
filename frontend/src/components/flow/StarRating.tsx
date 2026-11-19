@@ -5,6 +5,9 @@ import { useEffect, useRef, useState } from "react";
 interface Props {
   value: number | null;
   onChange: (rating: number) => void;
+  /** Accessible names, in the customer's language. */
+  groupLabel?: string;
+  starLabel?: (star: number) => string;
 }
 
 // How long the tapped stars stay filled before the next screen. The same for every
@@ -14,7 +17,12 @@ const PICK_MS = 160;
 
 // FR-3, FR-17: 1-5 stars, >=44px touch targets, usable one-handed with clean tactile feedback.
 // Plain buttons in a group: picking a star moves on immediately, so it is an action, not a radio.
-export function StarRating({ value, onChange }: Props) {
+export function StarRating({
+  value,
+  onChange,
+  groupLabel = "Rate your visit",
+  starLabel = (star) => `Rate ${star} out of 5 stars`,
+}: Props) {
   const [hovered, setHovered] = useState<number | null>(null);
   const [picked, setPicked] = useState<number | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -38,14 +46,14 @@ export function StarRating({ value, onChange }: Props) {
   const activeRating = picked ?? hovered ?? value ?? 0;
 
   return (
-    <div className="flex justify-between items-center gap-1 py-1" role="group" aria-label="Rate your visit">
+    <div className="flex justify-between items-center gap-1 py-1" role="group" aria-label={groupLabel}>
       {[1, 2, 3, 4, 5].map((star) => {
         const filled = star <= activeRating;
         return (
           <button
             key={star}
             type="button"
-            aria-label={`Rate ${star} out of 5 stars`}
+            aria-label={starLabel(star)}
             onClick={() => pick(star)}
             // Mouse only: on touch screens a hover state would stick after the tap.
             onPointerEnter={(e) => e.pointerType === "mouse" && setHovered(star)}
