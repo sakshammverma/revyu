@@ -115,7 +115,7 @@ function OutletRow({ outlet, onDone }: { outlet: OutletListItem; onDone: () => v
   return (
     <div className="v2-sheet border border-line px-4 py-3.5 sm:px-5 flex items-center justify-between gap-4">
       <div className="min-w-0">
-        <Link href={`/admin/outlets/${outlet.outlet_id}/detail`} className="text-base font-semibold text-ink truncate hover:text-accent hover:underline block">{outlet.business_name}</Link>
+        <Link href={`/admin/customers/${outlet.outlet_id}`} className="text-base font-semibold text-ink truncate hover:text-accent hover:underline block">{outlet.business_name}</Link>
         <p className="text-xs font-mono text-text-2 mt-0.5">
           {outlet.vertical} · {outlet.state} · {outlet.source}
         </p>

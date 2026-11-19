@@ -34,6 +34,7 @@
 
   /* Charts: the second series beside --accent (validated as a colour-blind-safe pair), and rating stars. */
   --chart-2: #eb6834;
+  --chart-1-soft: #8fb0f5; /* lighter step of --accent for a stacked partner series (validated vs --accent) */
   --star: #f5a524;
 
   /* Typography matching Voiceflow's Tiempos Headline & UCity Pro (Wide, balanced editorial serif) */
@@ -114,6 +115,7 @@
   --color-success-strong: var(--success-strong);
   --color-alert-50: var(--alert-50);
   --color-chart-2: var(--chart-2);
+  --color-chart-1-soft: var(--chart-1-soft);
   --color-star: var(--star);
 
   /* Legacy mappings */

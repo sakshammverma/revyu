@@ -1,107 +1,15 @@
 "use client";
 
+// Admin editors for one outlet, shown under "Admin controls" on the customer profile.
+
 import { useState } from "react";
 
-import { Button, Card, EmptyState, ErrorState, Field, OutletStatePill, Skeleton, StatTile, ToastProvider, useToast } from "@/components/ui";
-import {
-  fetchOutletDetail,
-  overrideOutletState,
-  updateOutletTags,
-  type OutletDetail,
-} from "@/lib/admin/api";
-import { formatDate, formatMoney } from "@/lib/format";
-import { useAsync } from "@/lib/useAsync";
+import { Button, Card, Field, useToast } from "@/components/ui";
+import { overrideOutletState, updateOutletTags, type OutletDetail } from "@/lib/admin/api";
 
 const STATES = ["trial", "locked", "active", "past_due", "suspended", "deactivated"];
 
-export function OutletDetailView({ outletId }: { outletId: string }) {
-  return (
-    <ToastProvider>
-      <Inner outletId={outletId} />
-    </ToastProvider>
-  );
-}
-
-function Inner({ outletId }: { outletId: string }) {
-  const { data, error, reload } = useAsync(() => fetchOutletDetail(outletId), [outletId]);
-
-  if (error) return <ErrorState message="Couldn't load this outlet. Check your admin token." onRetry={reload} />;
-  if (!data) return <Skeleton className="h-64 max-w-5xl mx-auto" />;
-
-  return (
-    <div className="max-w-5xl mx-auto flex flex-col gap-4 sm:gap-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className="font-display text-2xl text-ink truncate">{data.business_name}</h2>
-          <p className="text-sm text-text-2">
-            {data.vertical} · {data.source} · /r/{data.slug}
-          </p>
-        </div>
-        <OutletStatePill state={data.state} />
-      </div>
-
-      <div className="grid grid-cols-3 gap-2 sm:gap-4">
-        <StatTile label="Scans (30d)" value={data.scans_30d} />
-        <StatTile label="Completed (30d)" value={data.completed_30d} />
-        <StatTile label="Trial credits used" value={data.trial_flow_count} />
-      </div>
-
-      <div className="grid gap-4 sm:gap-5 md:grid-cols-2">
-        <Card title="Owner">
-          <dl className="text-sm grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
-            <dt className="text-text-2">Name</dt>
-            <dd className="text-ink">{data.owner_name ?? "–"}</dd>
-            <dt className="text-text-2">Email</dt>
-            <dd className="text-ink break-all">{data.owner_email}</dd>
-            <dt className="text-text-2">Phone</dt>
-            <dd className="text-ink">{data.owner_phone}</dd>
-            <dt className="text-text-2">Activated</dt>
-            <dd className="text-ink">{data.activated_at ? formatDate(data.activated_at) : "–"}</dd>
-          </dl>
-        </Card>
-        <StateOverride detail={data} onDone={reload} />
-      </div>
-
-      <TagEditor detail={data} onSaved={reload} />
-
-      <div className="grid gap-4 sm:gap-5 md:grid-cols-2">
-        <Card title="Payments">
-          {data.payments.length === 0 ? (
-            <EmptyState title="No payments yet" />
-          ) : (
-            <ul className="divide-y divide-line text-sm">
-              {data.payments.map((p, i) => (
-                <li key={i} className="py-2 flex justify-between gap-3">
-                  <span className="text-text-2 tabular-nums">{formatDate(p.created_at)}</span>
-                  <span className="font-semibold tabular-nums">{formatMoney(p.amount_minor, p.currency_code)}</span>
-                  <span className="text-text-2">{p.status}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
-        <Card title="Messages sent">
-          {data.notifications.length === 0 ? (
-            <EmptyState title="Nothing sent yet" />
-          ) : (
-            <ul className="divide-y divide-line text-sm">
-              {data.notifications.map((n, i) => (
-                <li key={i} className="py-2 flex justify-between gap-3">
-                  <span className="text-ink truncate">{n.template}</span>
-                  <span className="text-text-2 shrink-0">
-                    {n.channel} · {n.status}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Card>
-      </div>
-    </div>
-  );
-}
-
-function StateOverride({ detail, onDone }: { detail: OutletDetail; onDone: () => void }) {
+export function StateOverride({ detail, onDone }: { detail: OutletDetail; onDone: () => void }) {
   const { toast } = useToast();
   const [state, setState] = useState(detail.state);
   const [reason, setReason] = useState("");
@@ -175,7 +83,7 @@ function StateOverride({ detail, onDone }: { detail: OutletDetail; onDone: () =>
 
 type TagRow = { id: string | null; label: string; phrases: string; active: boolean };
 
-function TagEditor({ detail, onSaved }: { detail: OutletDetail; onSaved: () => void }) {
+export function TagEditor({ detail, onSaved }: { detail: OutletDetail; onSaved: () => void }) {
   const { toast } = useToast();
   const [rows, setRows] = useState<TagRow[]>(
     detail.tags.map((t) => ({ id: t.id, label: t.label, phrases: t.phrases.join("\n"), active: t.active }))

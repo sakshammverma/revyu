@@ -387,3 +387,91 @@ export async function saveAdminCountry(body: {
   if (!res.ok) throw new Error(`save country ${res.status}`);
   return res.json();
 }
+
+/* ------------------------------------------------------ customer monitor */
+
+export type CustomerStage = "onboarding" | "trial" | "paying" | "paused" | "inactive";
+export type CustomerHealth = "at_risk" | "watch" | "healthy" | "onboarding" | "inactive";
+
+export interface CustomerRow {
+  outlet_id: string;
+  business_name: string;
+  slug: string;
+  vertical: string;
+  country_code: string;
+  state: string;
+  stage: CustomerStage;
+  owner: { name: string | null; phone: string; email: string };
+  joined_at: string;
+  activated_at: string | null;
+  owner_last_seen_at: string | null;
+  billing: {
+    plan: string | null;
+    status: string | null;
+    mrr_minor: number;
+    currency_code: string;
+    lifetime_minor: number;
+    last_paid_at: string | null;
+    renews_at: string | null;
+    grace_until: string | null;
+    cancelled: boolean;
+    will_convert: boolean;
+  };
+  trial: { days_left: number | null; credits_left: number | null } | null;
+  usage: {
+    scans_30d: number;
+    scans_prev_30d: number;
+    reviews_30d: number;
+    reviews_prev_30d: number;
+    conversion_30d: number | null;
+    last_scan_at: string | null;
+  };
+  google: {
+    rating: number | null;
+    review_count: number | null;
+    baseline_rating: number | null;
+    baseline_review_count: number | null;
+    gained: number | null;
+  };
+  health: CustomerHealth;
+  reasons: string[];
+}
+
+export interface AdminQueue {
+  approvals: number;
+  pending_sends: number;
+}
+
+export interface CustomersOverview {
+  generated_at: string;
+  summary: {
+    mrr: Record<string, number>;
+    paying: number;
+    live: number;
+    trials: number;
+    new_30d: number;
+    at_risk: number;
+    watch: number;
+    scans_30d: number;
+    reviews_30d: number;
+    reviews_prev_30d: number;
+    conversion_30d: number | null;
+    google_gained: number;
+  };
+  queue: AdminQueue;
+  customers: CustomerRow[];
+}
+
+export interface CustomerProfile extends CustomerRow {
+  series: { day: string; scans: number; reviews: number }[];
+}
+
+async function adminJson<T>(path: string): Promise<T> {
+  const res = await adminFetch(path);
+  if (!res.ok) throw new Error(`${path} failed: ${res.status}`);
+  return res.json();
+}
+
+export const fetchCustomers = () => adminJson<CustomersOverview>("/api/admin/customers");
+export const fetchCustomer = (id: string) => adminJson<CustomerProfile>(`/api/admin/customers/${id}`);
+export const fetchAdminQueue = () => adminJson<AdminQueue>("/api/admin/counts");

@@ -76,7 +76,7 @@ export function CockpitView() {
                 {data.outlets.map((o) => (
                   <tr key={o.outlet_id}>
                     <td className="px-2 py-2.5">
-                      <a href={`/admin/outlets/${o.outlet_id}/detail`} className="font-semibold text-ink hover:text-accent-hover hover:underline">
+                      <a href={`/admin/customers/${o.outlet_id}`} className="font-semibold text-ink hover:text-accent-hover hover:underline">
                         {o.business_name}
                       </a>
                       <span className="block text-xs text-text-2">
