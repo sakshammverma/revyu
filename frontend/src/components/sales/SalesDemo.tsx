@@ -7,12 +7,12 @@ import { DeckFrame } from "@/components/sales/DeckFrame";
 import { GapSlide } from "@/components/sales/GapSlide";
 import { ProspectSearch, readRecent, type ShopPick } from "@/components/sales/ProspectSearch";
 import { SalesGate } from "@/components/sales/SalesGate";
-import { StartSlide } from "@/components/sales/StartSlide";
+import { roughPerDay, StartSlide } from "@/components/sales/StartSlide";
 import { TrySlide } from "@/components/sales/TrySlide";
 import { Button } from "@/components/ui/Button";
 import { SalesApiError, getKit, getProspect } from "@/lib/marketing/salesApi";
 import type { CueVars } from "@/lib/marketing/salesScript";
-import { DECK_KEY, DECK_STEPS, RECENT_KEY, RECENT_MAX, type DeckState, type DeckStep } from "@/lib/marketing/salesTypes";
+import { DECK_KEY, DECK_STEPS, RECENT_KEY, RECENT_MAX, type DeckState, type DeckStep, type SalesRole } from "@/lib/marketing/salesTypes";
 import { usePricing } from "@/lib/pricing";
 
 type Phase = { kind: "search" } | { kind: "loading"; name: string } | { kind: "deck" };
@@ -62,7 +62,7 @@ function buildError(e: unknown): string {
 /** Within this long of expiry, the scan-to-try link is renewed before the owner scans it. */
 const TRY_RENEW_MS = 15 * 60 * 1000;
 
-function Deck({ signOut }: { signOut: () => void }) {
+function Deck({ role, signOut }: { role: SalesRole; signOut: () => void }) {
   const pricing = usePricing();
   const [phase, setPhase] = useState<Phase>({ kind: "search" });
   const [deck, setDeck] = useState<DeckState | null>(null);
@@ -150,7 +150,10 @@ function Deck({ signOut }: { signOut: () => void }) {
     setDeck(null);
     setNotice(null);
     setPhase({ kind: "search" });
-  }, []);
+    // The founder's admin secret is the full /api/admin bearer: ending the demo locks it away
+    // again. A field agent's PIN stays, so the next shop is one search away.
+    if (role === "admin") signOut();
+  }, [role, signOut]);
 
   const setStep = useCallback((step: DeckStep) => setDeck((d) => (d ? { ...d, step } : d)), []);
 
@@ -181,8 +184,7 @@ function Deck({ signOut }: { signOut: () => void }) {
       rival: rival?.name,
       n: rival?.review_count ?? undefined,
       price: pricing.ready ? pricing.monthly : null,
-      perDay:
-        pricing.ready && pricing.monthlyMinor !== null ? pricing.money(Math.round(pricing.monthlyMinor / 30)) : null,
+      perDay: roughPerDay(pricing),
     };
   }, [deck, pricing]);
 
@@ -226,5 +228,5 @@ function Deck({ signOut }: { signOut: () => void }) {
 
 /** /marketing: the in-shop sales demo. PIN gate, then find the shop, then the 4-step deck. */
 export function SalesDemo() {
-  return <SalesGate>{(_role, signOut) => <Deck signOut={signOut} />}</SalesGate>;
+  return <SalesGate>{(role, signOut) => <Deck role={role} signOut={signOut} />}</SalesGate>;
 }

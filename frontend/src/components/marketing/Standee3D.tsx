@@ -63,8 +63,11 @@ export function Standee3D({
       onPointerMove={flat ? undefined : onMove}
       onPointerLeave={flat ? undefined : onLeave}
       className="standee-stage"
+      // Flat: the stage grows with the sheet (the bigger code no longer fits the fixed 320px
+      // box, and an absolutely placed sheet would spill up over the text above it).
+      style={flat ? { height: "auto" } : undefined}
     >
-      <div className="standee-float" style={flat ? { animation: "none" } : undefined}>
+      <div className="standee-float" style={flat ? { animation: "none", position: "relative" } : undefined}>
         <div className="standee" style={flat ? { transform: "none" } : undefined}>
           {/* Acrylic sheet */}
           <div className="standee-sheet">

@@ -188,12 +188,16 @@ test.describe("sales deck", () => {
     }
   });
 
-  test("End demo clears the deck from this device", async ({ page }) => {
+  test("End demo clears the deck, and locks the founder's admin secret away again", async ({ page }) => {
     await openDeck(page);
     await page.getByRole("button", { name: "Demo menu" }).click();
     await page.getByRole("button", { name: "End demo" }).click();
-    await expect(page.getByRole("heading", { name: "Find the shop" })).toBeVisible();
+    // Unlocked with the admin secret (the full /api/admin bearer): ending the demo signs out.
+    await expect(page.getByRole("heading", { name: "Sales demo" })).toBeVisible();
+    await expect(page.getByLabel("Sales PIN")).toBeVisible();
     expect(await page.evaluate(() => sessionStorage.getItem("revyu:sales:deck"))).toBeNull();
+    expect(await page.evaluate(() => sessionStorage.getItem("revyu:sales-pin"))).toBeNull();
+    expect(await page.evaluate(() => localStorage.getItem("revyu:sales-pin"))).toBeNull();
   });
 });
 

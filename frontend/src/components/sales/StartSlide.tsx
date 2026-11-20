@@ -42,6 +42,16 @@ function minorPerMajor(currency: string): number {
   }
 }
 
+/**
+ * The monthly price per day in whole units, rounded up ("about ₹17 a day", not "₹16.63"):
+ * a rough figure should look rough. Null until prices load. Shared with the presenter cues.
+ */
+export function roughPerDay(pricing: ReturnType<typeof usePricing>): string | null {
+  if (!pricing.ready || pricing.monthlyMinor === null) return null;
+  const unit = minorPerMajor(pricing.currency ?? "USD");
+  return pricing.money(Math.ceil(pricing.monthlyMinor / 30 / unit) * unit);
+}
+
 function Qr({ qr, label }: { qr: QrShape; label: string }) {
   const quiet = 4;
   return (
@@ -66,12 +76,7 @@ function Qr({ qr, label }: { qr: QrShape; label: string }) {
 export function StartSlide({ kit, name, onEnd }: { kit: SalesKit; name: string; onEnd: () => void }) {
   const pricing = usePricing();
   const [plan, setPlan] = useState<Plan>("monthly");
-  // Whole units, rounded up ("about ₹17 a day", not "₹16.63"): a rough figure should look rough.
-  const unit = minorPerMajor(pricing.currency ?? "USD");
-  const perDay =
-    pricing.ready && pricing.monthlyMinor !== null
-      ? pricing.money(Math.ceil(pricing.monthlyMinor / 30 / unit) * unit)
-      : null;
+  const perDay = roughPerDay(pricing);
   const link = kit.signup[plan];
 
   return (
