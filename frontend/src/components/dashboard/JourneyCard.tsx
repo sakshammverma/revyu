@@ -36,7 +36,16 @@ function ribbon(shares: number[]): string {
   return `${d}H0Z`;
 }
 
-export function JourneyCard({ funnel, days }: { funnel: Funnel; days: number }) {
+export function JourneyCard({
+  funnel,
+  days,
+  linkHref = "/app/insights",
+}: {
+  funnel: Funnel;
+  days: number;
+  /** "All steps" target; null hides it (the sales demo's preview has nowhere to go). */
+  linkHref?: string | null;
+}) {
   const count = (step: string) => funnel.steps.find((s) => s.step === step)?.count ?? 0;
   const stages = STAGES.map((s) => ({ ...s, count: count(s.step) }));
   const scans = stages[0].count;
@@ -50,12 +59,14 @@ export function JourneyCard({ funnel, days }: { funnel: Funnel; days: number }) 
           <h2 className="font-display text-xl text-ink">From scan to Google</h2>
           <p className="text-sm text-text-2 mt-0.5">How far customers got, last {days} days</p>
         </div>
-        <Link
-          href="/app/insights"
-          className="shrink-0 inline-flex items-center min-h-[44px] -my-2.5 text-sm font-semibold text-accent-hover hover:underline underline-offset-2"
-        >
-          All steps<span aria-hidden>&nbsp;→</span>
-        </Link>
+        {linkHref && (
+          <Link
+            href={linkHref}
+            className="shrink-0 inline-flex items-center min-h-[44px] -my-2.5 text-sm font-semibold text-accent-hover hover:underline underline-offset-2"
+          >
+            All steps<span aria-hidden>&nbsp;→</span>
+          </Link>
+        )}
       </div>
 
       <ol className="mt-5 grid grid-cols-4">

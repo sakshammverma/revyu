@@ -43,8 +43,30 @@ function headline(me: Business, top: Business | null, gap: number, rank: number,
   );
 }
 
+/** Listing details read in the same Details call as the report (no extra Google cost). */
+export interface ShopDetails {
+  /** Google's primary place type, e.g. "clothing_store". */
+  primary_type: string | null;
+  types: string[];
+  /** Google's own label for the primary type, e.g. "Clothing store". */
+  type_label: string | null;
+  /** Short address, e.g. "Indiranagar, Bengaluru". */
+  address: string | null;
+  /** ISO 3166-1 alpha-2, uppercase; null when Google gave none. */
+  country_code: string | null;
+}
+
 export async function buildReport(placeId: string): Promise<GapReport> {
-  const [me, competitors] = await fetchBusinesses(placeId);
+  return (await buildReportDetailed(placeId)).report;
+}
+
+/** The report plus the listing's own details (the sales demo's header and category). */
+export async function buildReportDetailed(placeId: string): Promise<{ report: GapReport; shop: ShopDetails }> {
+  const [me, competitors, shop] = await fetchBusinesses(placeId);
+  return { report: gapReportFrom(me, competitors), shop };
+}
+
+function gapReportFrom(me: Business, competitors: Business[]): GapReport {
   // Stable sort by count, descending (ties keep Places' order, like Python's sort).
   const withCounts = competitors
     .filter((c) => c.review_count !== null)
@@ -73,6 +95,21 @@ interface PlaceJson {
   userRatingCount?: number;
   location?: { latitude: number; longitude: number };
   primaryType?: string;
+  types?: string[];
+  primaryTypeDisplayName?: { text?: string };
+  shortFormattedAddress?: string;
+  addressComponents?: { shortText?: string; types?: string[] }[];
+}
+
+function toShop(p: PlaceJson): ShopDetails {
+  const code = p.addressComponents?.find((c) => c.types?.includes("country"))?.shortText;
+  return {
+    primary_type: p.primaryType ?? null,
+    types: Array.isArray(p.types) ? p.types.filter((t) => typeof t === "string") : [],
+    type_label: p.primaryTypeDisplayName?.text || null,
+    address: p.shortFormattedAddress || null,
+    country_code: code && /^[A-Za-z]{2}$/.test(code) ? code.toUpperCase() : null,
+  };
 }
 
 const toBusiness = (p: PlaceJson, fallbackId: string): Business => ({
@@ -82,7 +119,7 @@ const toBusiness = (p: PlaceJson, fallbackId: string): Business => ({
   review_count: p.userRatingCount ?? null,
 });
 
-async function fetchBusinesses(placeId: string): Promise<[Business, Business[]]> {
+async function fetchBusinesses(placeId: string): Promise<[Business, Business[], ShopDetails]> {
   const env = getEnv();
   if (!env.googlePlacesApiKey) {
     if (env.isLocal) return fake(placeId);
@@ -93,14 +130,18 @@ async function fetchBusinesses(placeId: string): Promise<[Business, Business[]]>
     const det = await fetch(DETAILS_URL + encodeURIComponent(placeId), {
       headers: {
         "X-Goog-Api-Key": key,
-        "X-Goog-FieldMask": "id,displayName,rating,userRatingCount,location,primaryType",
+        // types..addressComponents are Essentials/Pro fields; rating already makes this an
+        // Enterprise call, so they add no cost.
+        "X-Goog-FieldMask":
+          "id,displayName,rating,userRatingCount,location,primaryType,types,primaryTypeDisplayName,shortFormattedAddress,addressComponents",
       },
       signal: AbortSignal.timeout(10_000),
     });
     if (!det.ok) throw new Error(`HTTP ${det.status}`);
     const d = (await det.json()) as PlaceJson;
     const me = toBusiness(d, placeId);
-    if (!d.location) return [me, []];
+    const shop = toShop(d);
+    if (!d.location) return [me, [], shop];
 
     const body: Record<string, unknown> = {
       maxResultCount: 20,
@@ -121,14 +162,14 @@ async function fetchBusinesses(placeId: string): Promise<[Business, Business[]]>
     });
     if (!near.ok) throw new Error(`HTTP ${near.status}`);
     const places = ((await near.json()) as { places?: PlaceJson[] }).places ?? [];
-    return [me, places.filter((p) => p.id !== me.place_id).map((p) => toBusiness(p, ""))];
+    return [me, places.filter((p) => p.id !== me.place_id).map((p) => toBusiness(p, "")), shop];
   } catch (err) {
     throw new PlacesUnavailableError(`Places lookup failed: ${err instanceof Error ? err.message : err}`);
   }
 }
 
 /** Deterministic local/dev data so the UI is buildable without a key. */
-function fake(placeId: string): [Business, Business[]] {
+function fake(placeId: string): [Business, Business[], ShopDetails] {
   return [
     { place_id: placeId, name: "Your Business", rating: 4.3, review_count: 47 },
     [
@@ -136,7 +177,14 @@ function fake(placeId: string): [Business, Business[]] {
       { place_id: "local-c2", name: "Sharma Traders", rating: 4.5, review_count: 132 },
       { place_id: "local-c3", name: "Corner Cafe", rating: 4.4, review_count: 96 },
     ],
-  ] as [Business, Business[]];
+    {
+      primary_type: "store",
+      types: ["store", "point_of_interest", "establishment"],
+      type_label: "Store",
+      address: "Indiranagar, Bengaluru",
+      country_code: "IN",
+    },
+  ] as [Business, Business[], ShopDetails];
 }
 
 /**

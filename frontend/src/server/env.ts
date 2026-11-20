@@ -39,6 +39,8 @@ export interface Env {
   supabaseServiceRoleKey: string;
   /** When set, this email gets a fixed OTP "000000" without a real email send. */
   demoAccountEmail: string;
+  /** Shared PIN for field agents to unlock the /marketing sales demo. Empty = admin secret only. */
+  salesDemoPin: string;
 }
 
 let cached: Env | undefined;
@@ -85,6 +87,7 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
     supabaseUrl: (source.SUPABASE_URL ?? "").replace(/\/+$/, ""),
     supabaseServiceRoleKey: source.SUPABASE_SERVICE_ROLE_KEY ?? "",
     demoAccountEmail: source.DEMO_ACCOUNT_EMAIL ?? "",
+    salesDemoPin: source.SALES_DEMO_PIN ?? "",
   };
 
   const problems: string[] = [];
@@ -124,6 +127,14 @@ export function loadEnv(source: Record<string, string | undefined> = process.env
         problems.push(`${name} must be your public https:// address (not localhost) when ENVIRONMENT=${environment}`);
       }
     }
+  }
+  if (
+    !isLocal &&
+    env.salesDemoPin !== "" &&
+    (env.salesDemoPin.length < 8 || !/[0-9]/.test(env.salesDemoPin) || !/[^0-9]/.test(env.salesDemoPin))
+  ) {
+    // It guards billed Places calls; a short or all-digit PIN is guessable even with the lockout.
+    problems.push("SALES_DEMO_PIN must be at least 8 characters with letters and digits (or empty to disable it)");
   }
   if (!isLocal && !env.emailProviderApiKey && !(env.smtpHost && env.smtpUser && env.smtpPass)) {
     problems.push(

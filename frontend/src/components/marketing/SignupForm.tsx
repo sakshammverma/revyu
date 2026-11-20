@@ -78,13 +78,20 @@ export function SignupForm({
   referralCode = "",
   initialPlace,
   initialPlan = "monthly",
+  initialVertical,
+  salesRef,
 }: {
   initialPlan?: "monthly" | "annual";
   initialEmail?: string;
   referralCode?: string;
   /** Preselected Google place (the gap report's "Start free trial" link). */
   initialPlace?: { place_id: string; name: string };
+  /** Preselected business type (the sales deck's signup link passes ?type=). */
+  initialVertical?: string;
+  /** Attribution: the sales deck's signed ref (?src=), verified by the server against the place. */
+  salesRef?: string;
 }) {
+  const urlVertical = initialVertical && VERTICALS.includes(initialVertical) ? initialVertical : undefined;
   const router = useRouter();
   const pricing = usePricing();
   const [step, setStep] = useState<Step>("details");
@@ -94,7 +101,7 @@ export function SignupForm({
   const inFlight = useRef(false);
 
   const [businessName, setBusinessName] = useState(initialPlace?.name ?? "");
-  const [vertical, setVertical] = useState(VERTICALS[0]);
+  const [vertical, setVertical] = useState(urlVertical ?? VERTICALS[0]);
   const [ownerName, setOwnerName] = useState("");
   const [ownerPhone, setOwnerPhone] = useState("");
   // Email pills on the marketing pages link here as /signup?email=...
@@ -119,7 +126,7 @@ export function SignupForm({
       if (draft) {
         /* eslint-disable react-hooks/set-state-in-effect -- read a browser-only draft after hydration */
         if (!initialPlace && draft.businessName) setBusinessName(draft.businessName);
-        if (draft.vertical && VERTICALS.includes(draft.vertical)) setVertical(draft.vertical);
+        if (!urlVertical && draft.vertical && VERTICALS.includes(draft.vertical)) setVertical(draft.vertical);
         if (draft.ownerName) setOwnerName(draft.ownerName);
         if (draft.ownerPhone) setOwnerPhone(draft.ownerPhone);
         if (!initialEmail && draft.ownerEmail) setOwnerEmail(draft.ownerEmail);
@@ -171,6 +178,7 @@ export function SignupForm({
         expected_currency: pricing.currency ?? undefined,
         placement_acknowledged: placementAck,
         referral_code: referralCode || undefined,
+        sales_ref: salesRef || undefined,
       });
       // SRS-18.6: authorise payment now; the backend verifies the signature
       // and moves the signup into the approval queue (SRS-18.7).

@@ -12,7 +12,14 @@ import { StarRating } from "@/components/flow/StarRating";
  * shop owner can feel the one step Revyu doesn't control: the customer picks
  * their own stars, pastes and posts from their own account.
  */
-export function DemoGoogle({ businessName }: { businessName: string }) {
+export function DemoGoogle({
+  businessName,
+  backHref = "/demo",
+}: {
+  businessName: string;
+  /** Where to go when there is no history to go back to (the flow page this stands in for). */
+  backHref?: string;
+}) {
   const [stars, setStars] = useState<number | null>(null);
   const [text, setText] = useState("");
   const router = useRouter();
@@ -20,7 +27,7 @@ export function DemoGoogle({ businessName }: { businessName: string }) {
   function goBack() {
     // Back, not a fresh link: the flow page then knows the customer has returned.
     if (window.history.length > 1) window.history.back();
-    else router.replace("/demo");
+    else router.replace(backHref);
   }
 
   return (

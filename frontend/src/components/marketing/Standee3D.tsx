@@ -7,8 +7,28 @@ import { useRef, type PointerEvent } from "react";
  * degrees toward the pointer and a band of light moves across the acrylic; left
  * alone it floats gently. No WebGL: the whole thing is a handful of transformed
  * boxes, so it costs nothing to load and prints nothing to the GPU when idle.
+ *
+ * `flat` (the sales deck, where someone scans it off a screen): face-on, still, no glare
+ * over the modules, and the full 4-module quiet zone, so a phone camera reads it first time.
  */
-export function Standee3D({ qrPath, qrSize, label }: { qrPath: string; qrSize: number; label: string }) {
+export function Standee3D({
+  qrPath,
+  qrSize,
+  label,
+  name,
+  headline = "Loved it? Tell us.",
+  cta = "Scan with your camera",
+  flat = false,
+}: {
+  qrPath: string;
+  qrSize: number;
+  label: string;
+  /** The shop's name above the code, as on the printed standee (the sales demo). */
+  name?: string;
+  headline?: string;
+  cta?: string;
+  flat?: boolean;
+}) {
   const stage = useRef<HTMLDivElement>(null);
   const frame = useRef(0);
 
@@ -36,25 +56,31 @@ export function Standee3D({ qrPath, qrSize, label }: { qrPath: string; qrSize: n
     el.style.removeProperty("--gx");
   }
 
-  const quiet = 2;
+  const quiet = flat ? 4 : 2;
   return (
-    <div ref={stage} onPointerMove={onMove} onPointerLeave={onLeave} className="standee-stage">
-      <div className="standee-float">
-        <div className="standee">
+    <div
+      ref={stage}
+      onPointerMove={flat ? undefined : onMove}
+      onPointerLeave={flat ? undefined : onLeave}
+      className="standee-stage"
+    >
+      <div className="standee-float" style={flat ? { animation: "none" } : undefined}>
+        <div className="standee" style={flat ? { transform: "none" } : undefined}>
           {/* Acrylic sheet */}
           <div className="standee-sheet">
-            <p className="font-display text-[19px] leading-tight text-ink">Loved it? Tell us.</p>
+            {name && <p className="font-display text-[17px] leading-tight text-ink line-clamp-2 mb-1">{name}</p>}
+            <p className={name ? "text-[12px] font-semibold leading-tight text-text-2" : "font-display text-[19px] leading-tight text-ink"}>{headline}</p>
             <svg
               role="img"
               aria-label={label}
               viewBox={`${-quiet} ${-quiet} ${qrSize + quiet * 2} ${qrSize + quiet * 2}`}
-              className="mt-2.5 h-[148px] w-[148px] text-ink"
+              className={`mt-2.5 text-ink ${flat ? "h-[164px] w-[164px]" : "h-[148px] w-[148px]"}`}
               shapeRendering="crispEdges"
             >
               <path d={qrPath} fill="currentColor" />
             </svg>
-            <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-text-2">Scan with your camera</p>
-            <span aria-hidden className="standee-glare" />
+            <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.14em] text-text-2">{cta}</p>
+            {!flat && <span aria-hidden className="standee-glare" />}
           </div>
           {/* Its edge, and the block it slots into */}
           <span aria-hidden className="standee-edge" />
@@ -62,7 +88,7 @@ export function Standee3D({ qrPath, qrSize, label }: { qrPath: string; qrSize: n
           <span aria-hidden className="standee-base-top" />
         </div>
       </div>
-      <span aria-hidden className="standee-shadow" />
+      <span aria-hidden className="standee-shadow" style={flat ? { animation: "none" } : undefined} />
     </div>
   );
 }

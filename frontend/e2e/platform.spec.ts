@@ -22,7 +22,7 @@ test("every page carries the security headers", async ({ request }) => {
 
 test("robots keeps private and per-outlet pages out of search", async ({ request }) => {
   const body = await (await request.get("/robots.txt")).text();
-  for (const path of ["/app", "/admin", "/staff", "/r/", "/api/"]) expect(body).toContain(`Disallow: ${path}`);
+  for (const path of ["/app", "/admin", "/marketing", "/staff", "/r/", "/api/"]) expect(body).toContain(`Disallow: ${path}`);
   expect(body).toMatch(/Sitemap: .*\/sitemap\.xml/);
 });
 

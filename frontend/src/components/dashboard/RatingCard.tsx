@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import type { RatingInfo } from "@/lib/dashboard/api";
 import { formatDate } from "@/lib/format";
 
@@ -19,8 +21,10 @@ function Stars({ className }: { className: string }) {
  * The result the owner pays for: their Google rating and how many reviews the
  * listing has gained since they joined. Numbers come from the weekly check of
  * the public listing; null means "not checked yet" and is never shown as zero.
+ * `deltaNote` replaces the gained-reviews panel (the sales preview, where there is no
+ * "since you joined" yet and "No new reviews counted yet" would read as a result).
  */
-export function RatingCard({ data }: { data: RatingInfo }) {
+export function RatingCard({ data, deltaNote }: { data: RatingInfo; deltaNote?: ReactNode }) {
   const rating = data.current_rating ?? data.baseline_rating;
   const reviews = data.current_review_count;
   const gained =
@@ -69,7 +73,9 @@ export function RatingCard({ data }: { data: RatingInfo }) {
 
       <div className="relative mt-auto pt-5">
         <div className="rounded-xl bg-white/[0.07] border border-white/10 px-4 py-3">
-          {gained !== null && gained > 0 ? (
+          {deltaNote ? (
+            <p className="text-sm text-text-on-dark">{deltaNote}</p>
+          ) : gained !== null && gained > 0 ? (
             <>
               <p className="font-display text-3xl leading-none tabular-nums">+{gained.toLocaleString("en-IN")}</p>
               <p className="text-sm text-text-on-dark mt-1.5">new Google {gained === 1 ? "review" : "reviews"} since you joined</p>

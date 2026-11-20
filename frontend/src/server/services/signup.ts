@@ -16,6 +16,7 @@ import { buildReviewUrl, placeCountry, PlacesUnavailableError, searchPlaces } fr
 import { defaultTimezone, FALLBACK_COUNTRY, normalizeCountry, planFor } from "./pricing";
 import { pyIso } from "./pyDate";
 import { attachReferral } from "./referrals";
+import { salesRefValid } from "./salesDemo";
 import { TRIAL_DAYS } from "./trial";
 
 const { accounts, outlets, subscriptions, tags } = schema;
@@ -49,6 +50,12 @@ export const signupBody = z.object({
   expected_currency: z.string().length(3).nullish(),
   placement_acknowledged: z.boolean(),
   referral_code: z.string().max(40).nullish(),
+  /**
+   * Attribution from the in-person sales deck (/marketing): the signed `src` of its signup
+   * link. Only a ref that verifies against place_id records source "sales_demo"; anything
+   * else is ignored, so the column can't be claimed by editing a URL.
+   */
+  sales_ref: z.string().max(80).nullish(),
 });
 export type SignupBody = z.infer<typeof signupBody>;
 
@@ -168,6 +175,8 @@ export async function createSignup(db: DbLike, body: SignupBody, opts: { visitor
     // Otherwise the tag seeder silently falls back to dental tags.
     throw new HttpError(400, "VALIDATION_FAILED", "unknown vertical");
   }
+  // Sales-deck attribution only when the deck's signed ref matches this shop.
+  const source = body.sales_ref && salesRefValid(body.sales_ref, body.place_id) ? ("sales_demo" as const) : null;
 
   // SRS-18.5: duplicate detection on email, phone, and Place ID. A signup
   // abandoned at checkout (still `pending_payment`) is not a duplicate: the
@@ -248,6 +257,7 @@ export async function createSignup(db: DbLike, body: SignupBody, opts: { visitor
             countryCode: country,
             locale: price.locale,
             timezone: defaultTimezone(country),
+            ...(source ? { source } : {}),
             updatedAt: new Date(),
           })
           .where(eq(outlets.id, outletId));
@@ -285,7 +295,7 @@ export async function createSignup(db: DbLike, body: SignupBody, opts: { visitor
           googleReviewUrl: buildReviewUrl(body.place_id),
           // Invisible until checkout completes (services/billing.ts).
           state: "pending_payment",
-          source: "self_serve",
+          source: source ?? "self_serve",
           placementConfirmed: false,
           placeVerified: false,
           trialFlowCount: 0,

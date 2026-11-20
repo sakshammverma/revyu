@@ -55,6 +55,7 @@ import { POST as postWebhook } from "@/app/api/webhooks/razorpay/route";
 import { schema, type DbLike } from "@/server/db";
 import { recordPayment } from "@/server/services/billing";
 import { attachReferral, getOrCreateCode, markRefereePaid, normaliseCode, summary, voidReward } from "@/server/services/referrals";
+import { mintSalesRef } from "@/server/services/salesDemo";
 import { inRolledBackTx, issueOwnerSession, makeAccount, makeOutlet, makeRequest, routeCtx } from "@/server/testing/helpers";
 
 const { accounts, notifications, outlets, payments, plans, referralRewards, serviceCatalog, serviceRequestEvents, serviceRequests, subscriptions, tags } = schema;
@@ -235,6 +236,46 @@ describe("signup (SRS-18)", () => {
       expect([sa, ba.detail.error.code]).toEqual([409, "DUPLICATE_BUSINESS"]);
       const [stillLive] = await tx.select().from(accounts).where(eq(accounts.id, live.id));
       expect(stillLive.ownerPhone).toBe(live.ownerPhone);
+    }));
+
+  it("records where a signup came from: sales_demo only with the deck's signed ref, self_serve otherwise", () =>
+    inTx(async (tx) => {
+      await seedPlans(tx);
+      const sourceOf = async (id: string) =>
+        (await tx.select({ source: outlets.source }).from(outlets).where(eq(outlets.id, id)))[0]?.source;
+      const withRef = (over: Record<string, unknown> = {}) => {
+        const p = signupPayload(over);
+        return { ...p, sales_ref: mintSalesRef(p.place_id as string) };
+      };
+
+      const fromDeck = await signup(withRef());
+      expect(fromDeck.status).toBe(201);
+      expect(await sourceOf(((await fromDeck.json()) as { signup_id: string }).signup_id)).toBe("sales_demo");
+
+      const plain = signupPayload();
+      const selfServe = await signup(plain);
+      expect(selfServe.status).toBe(201);
+      const plainId = ((await selfServe.json()) as { signup_id: string }).signup_id;
+      expect(await sourceOf(plainId)).toBe("self_serve");
+
+      // A retry of an abandoned checkout from the sales deck picks up the attribution.
+      const retry = await signup({ ...plain, sales_ref: mintSalesRef(plain.place_id as string) });
+      expect(retry.status).toBe(201);
+      expect(((await retry.json()) as { signup_id: string }).signup_id).toBe(plainId);
+      expect(await sourceOf(plainId)).toBe("sales_demo");
+
+      // A forged, foreign or expired ref is ignored, and so is a bare source field.
+      const forged = [
+        signupPayload({ sales_ref: "sales" }),
+        signupPayload({ sales_ref: mintSalesRef("ChIJ_someone_else") }),
+        signupPayload({ sales_ref: "1000000000.AAAAAAAAAAAAAAAA" }),
+        signupPayload({ source: "sales_demo" }),
+      ];
+      for (const body of forged) {
+        const res = await signup(body);
+        expect(res.status).toBe(201);
+        expect(await sourceOf(((await res.json()) as { signup_id: string }).signup_id)).toBe("self_serve");
+      }
     }));
 
   it("status and confirm 404/422 for unknown or malformed ids", async () => {

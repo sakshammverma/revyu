@@ -20,6 +20,8 @@ export interface SignupPayload {
   expected_currency?: string;
   placement_acknowledged: boolean;
   referral_code?: string;
+  /** The in-person sales deck's signed ref (its signup link's ?src=); verified server-side. */
+  sales_ref?: string;
 }
 
 export interface ApiError {
