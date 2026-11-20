@@ -3,13 +3,15 @@
 import { useEffect, useRef } from "react";
 
 /**
- * The WebGL layer behind the hero scene: QR "pixels" and review stars drifting
- * in depth, lit in the brand blue. Purely decorative, and an upgrade only:
- * the CSS scene underneath is complete without it.
+ * The WebGL layer behind the hero scene: a fine dot-matrix surface, tilted away
+ * like a counter top, that breathes slowly. Each time the phone moves to its next
+ * step a ripple spreads out from the standee and briefly lights the dots in the
+ * brand blue: every scan sends a wave. Ink and blue only, nothing literal.
  *
- * It never loads on a phone, a low-memory or low-core device, a data-saver
- * connection or under reduced motion, and it stops drawing whenever the hero
- * is off screen or the tab is hidden.
+ * Purely decorative, and an upgrade only: the CSS scene underneath is complete
+ * without it. It never loads on a phone, a low-memory or low-core device, a
+ * data-saver connection or under reduced motion, and it stops drawing whenever
+ * the hero is off screen or the tab is hidden.
  */
 
 type Nav = Navigator & { deviceMemory?: number; connection?: { saveData?: boolean } };
@@ -29,71 +31,111 @@ function capable(): boolean {
   }
 }
 
-function mount(THREE: typeof import("three"), host: HTMLDivElement): () => void {
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 50);
-  camera.position.z = 9;
+// Ripples alive at once; a new one replaces the oldest.
+const RIPPLES = 4;
 
-  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "low-power" });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+const VERTEX = /* glsl */ `
+  uniform float uTime;
+  uniform float uPixelRatio;
+  uniform vec2 uOrigin;
+  uniform float uStarts[${RIPPLES}];
+  uniform float uAmps[${RIPPLES}];
+  varying float vGlow;
+  varying float vFade;
+
+  void main() {
+    vec3 p = position;
+    // A slow, low swell so the surface is never quite still.
+    float swell = sin(p.x * 0.42 + uTime * 0.45) * cos(p.z * 0.36 - uTime * 0.32) * 0.14;
+
+    // Rings travelling out from the standee.
+    float d = distance(p.xz, uOrigin);
+    float glow = 0.0;
+    for (int i = 0; i < ${RIPPLES}; i++) {
+      float age = uTime - uStarts[i];
+      if (age < 0.0 || age > 4.2) continue;
+      float radius = age * 3.6;
+      float band = exp(-pow((d - radius) / 0.85, 2.0));
+      glow += band * uAmps[i] * (1.0 - age / 4.2);
+    }
+    glow = clamp(glow, 0.0, 1.0);
+    p.y += swell + glow * 0.32;
+
+    vec4 mv = modelViewMatrix * vec4(p, 1.0);
+    gl_Position = projectionMatrix * mv;
+    gl_PointSize = (2.6 + glow * 2.2) * uPixelRatio * (9.0 / -mv.z);
+
+    vGlow = glow;
+    // Fade into the distance and toward the sides, so the field has no edges.
+    vFade = smoothstep(22.0, 9.0, -mv.z) * smoothstep(11.0, 5.5, abs(p.x));
+  }
+`;
+
+const FRAGMENT = /* glsl */ `
+  uniform vec3 uInk;
+  uniform vec3 uAccent;
+  varying float vGlow;
+  varying float vFade;
+
+  void main() {
+    float r = length(gl_PointCoord - 0.5);
+    float disc = smoothstep(0.5, 0.32, r);
+    vec3 color = mix(uInk, uAccent, smoothstep(0.05, 0.6, vGlow));
+    float alpha = disc * vFade * (0.3 + vGlow * 0.7);
+    if (alpha < 0.01) discard;
+    gl_FragColor = vec4(color, alpha);
+  }
+`;
+
+type Api = { pulse: (strength: number) => void; cleanup: () => void };
+
+function mount(THREE: typeof import("three"), host: HTMLDivElement): Api {
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 60);
+  const eye = new THREE.Vector3(0, 4.6, 8.5);
+  const look = new THREE.Vector3(0, -1.2, -4);
+  camera.position.copy(eye);
+  camera.lookAt(look);
+
+  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: false, powerPreference: "low-power" });
+  const pixelRatio = Math.min(window.devicePixelRatio, 2);
+  renderer.setPixelRatio(pixelRatio);
   host.appendChild(renderer.domElement);
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.9));
-  const key = new THREE.DirectionalLight(0xffffff, 2.2);
-  key.position.set(3, 5, 6);
-  scene.add(key);
-  const rim = new THREE.PointLight(0x2f6df0, 60, 30);
-  rim.position.set(-5, -2, 4);
-  scene.add(rim);
-
-  const group = new THREE.Group();
-  scene.add(group);
-
-  // Deterministic pseudo-random so the layout is the same on every visit.
-  let seed = 7;
-  const rnd = () => {
-    seed = (seed * 16807) % 2147483647;
-    return seed / 2147483647;
-  };
-
-  // QR pixels: one instanced mesh, one draw call.
-  const CUBES = 40;
-  const cubeGeo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
-  const cubeMat = new THREE.MeshStandardMaterial({ color: 0x4f86ff, roughness: 0.35, metalness: 0.2 });
-  const cubes = new THREE.InstancedMesh(cubeGeo, cubeMat, CUBES);
-  const cubeData = Array.from({ length: CUBES }, () => ({
-    x: (rnd() - 0.5) * 15,
-    y: (rnd() - 0.5) * 9,
-    z: -6 + rnd() * 5,
-    s: 0.5 + rnd() * 0.9,
-    speed: 0.15 + rnd() * 0.35,
-    phase: rnd() * Math.PI * 2,
-  }));
-  group.add(cubes);
-
-  // Review stars: a five-point shape with a soft bevel.
-  const shape = new THREE.Shape();
-  for (let i = 0; i < 10; i++) {
-    const r = i % 2 === 0 ? 0.5 : 0.21;
-    const a = (i / 10) * Math.PI * 2 + Math.PI / 2;
-    if (i === 0) shape.moveTo(Math.cos(a) * r, Math.sin(a) * r);
-    else shape.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+  // The surface: one grid of points, one draw call.
+  const COLS = 88;
+  const ROWS = 64;
+  const STEP = 0.3;
+  const positions = new Float32Array(COLS * ROWS * 3);
+  let k = 0;
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      positions[k++] = (c - (COLS - 1) / 2) * STEP;
+      positions[k++] = -1.6;
+      positions[k++] = 3 - r * STEP;
+    }
   }
-  shape.closePath();
-  const starGeo = new THREE.ExtrudeGeometry(shape, { depth: 0.12, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05, bevelSegments: 3 });
-  starGeo.center();
-  const starMat = new THREE.MeshStandardMaterial({ color: 0xffb53a, roughness: 0.45, metalness: 0.05, emissive: 0xf5a524, emissiveIntensity: 0.35 });
-  // Stars sit in a ring around the phone and standee, never in front of them.
-  const stars = Array.from({ length: 9 }, (_, i) => {
-    const mesh = new THREE.Mesh(starGeo, starMat);
-    const angle = (i / 9) * Math.PI * 2 + rnd() * 0.5;
-    const base = { x: Math.cos(angle) * (4.6 + rnd() * 1.6), y: Math.sin(angle) * (2.9 + rnd() * 0.9), z: -3.5 + rnd() * 2.5 };
-    mesh.position.set(base.x, base.y, base.z);
-    mesh.scale.setScalar(0.4 + rnd() * 0.45);
-    mesh.rotation.set(rnd() * 0.6, rnd() * Math.PI, rnd() * 0.6);
-    group.add(mesh);
-    return { mesh, base, speed: 0.2 + rnd() * 0.4, phase: rnd() * Math.PI * 2 };
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+
+  const uniforms = {
+    uTime: { value: 0 },
+    uPixelRatio: { value: pixelRatio },
+    // Under the standee, bottom left of the stage.
+    uOrigin: { value: new THREE.Vector2(-2.4, 0.6) },
+    uStarts: { value: Array.from({ length: RIPPLES }, () => -100) },
+    uAmps: { value: Array.from({ length: RIPPLES }, () => 0) },
+    uInk: { value: new THREE.Color(0x1a1e23) },
+    uAccent: { value: new THREE.Color(0x2f6df0) },
+  };
+  const material = new THREE.ShaderMaterial({
+    uniforms,
+    vertexShader: VERTEX,
+    fragmentShader: FRAGMENT,
+    transparent: true,
+    depthWrite: false,
   });
+  scene.add(new THREE.Points(geometry, material));
 
   const resize = () => {
     const w = host.clientWidth || 1;
@@ -108,7 +150,7 @@ function mount(THREE: typeof import("three"), host: HTMLDivElement): () => void 
   const ro = new ResizeObserver(resize);
   ro.observe(host);
 
-  // Pointer parallax, eased.
+  // Pointer parallax: the camera drifts a little, eased.
   const target = { x: 0, y: 0 };
   const onMove = (e: PointerEvent) => {
     target.x = e.clientX / window.innerWidth - 0.5;
@@ -116,29 +158,24 @@ function mount(THREE: typeof import("three"), host: HTMLDivElement): () => void 
   };
   window.addEventListener("pointermove", onMove, { passive: true });
 
-  const dummy = new THREE.Object3D();
   let raf = 0;
   let running = false;
   let visible = true;
   const start = performance.now();
+  const now = () => (performance.now() - start) / 1000;
+  let next = 0;
+
+  const pulse = (strength: number) => {
+    uniforms.uStarts.value[next] = now();
+    uniforms.uAmps.value[next] = strength;
+    next = (next + 1) % RIPPLES;
+  };
 
   const frame = () => {
-    const t = (performance.now() - start) / 1000;
-    for (let i = 0; i < CUBES; i++) {
-      const c = cubeData[i];
-      dummy.position.set(c.x, c.y + Math.sin(t * c.speed + c.phase) * 0.35, c.z);
-      dummy.rotation.set(t * c.speed * 0.6 + c.phase, t * c.speed * 0.4, 0);
-      dummy.scale.setScalar(c.s);
-      dummy.updateMatrix();
-      cubes.setMatrixAt(i, dummy.matrix);
-    }
-    cubes.instanceMatrix.needsUpdate = true;
-    for (const s of stars) {
-      s.mesh.position.y = s.base.y + Math.sin(t * s.speed + s.phase) * 0.4;
-      s.mesh.rotation.y += 0.004 + s.speed * 0.004;
-    }
-    group.rotation.y += (target.x * 0.35 - group.rotation.y) * 0.04;
-    group.rotation.x += (target.y * 0.2 - group.rotation.x) * 0.04;
+    uniforms.uTime.value = now();
+    camera.position.x += (eye.x + target.x * 0.9 - camera.position.x) * 0.04;
+    camera.position.y += (eye.y - target.y * 0.5 - camera.position.y) * 0.04;
+    camera.lookAt(look);
     renderer.render(scene, camera);
     raf = requestAnimationFrame(frame);
   };
@@ -159,39 +196,42 @@ function mount(THREE: typeof import("three"), host: HTMLDivElement): () => void 
   io.observe(host);
   document.addEventListener("visibilitychange", sync);
   sync();
+  pulse(1);
   host.dataset.ready = "true";
 
-  return () => {
-    running = false;
-    cancelAnimationFrame(raf);
-    io.disconnect();
-    ro.disconnect();
-    document.removeEventListener("visibilitychange", sync);
-    window.removeEventListener("pointermove", onMove);
-    cubeGeo.dispose();
-    cubeMat.dispose();
-    starGeo.dispose();
-    starMat.dispose();
-    renderer.dispose();
-    renderer.domElement.remove();
-    delete host.dataset.ready;
+  return {
+    pulse,
+    cleanup: () => {
+      running = false;
+      cancelAnimationFrame(raf);
+      io.disconnect();
+      ro.disconnect();
+      document.removeEventListener("visibilitychange", sync);
+      window.removeEventListener("pointermove", onMove);
+      geometry.dispose();
+      material.dispose();
+      renderer.dispose();
+      renderer.domElement.remove();
+      delete host.dataset.ready;
+    },
   };
 }
 
-export function HeroCanvas() {
+/** `beat` changes whenever the phone moves on a step; `strong` marks the scan step. */
+export function HeroCanvas({ beat, strong = false }: { beat: number; strong?: boolean }) {
   const host = useRef<HTMLDivElement>(null);
+  const api = useRef<Api | null>(null);
 
   useEffect(() => {
     const el = host.current;
     if (!el || !capable()) return;
-    let cleanup: (() => void) | undefined;
     let cancelled = false;
     // After first paint and when the main thread is idle: never in the way of the headline.
     const load = () => {
       import("three").then((THREE) => {
         if (cancelled) return;
         try {
-          cleanup = mount(THREE, el);
+          api.current = mount(THREE, el);
         } catch {
           // No WebGL context after all: the CSS scene stands on its own.
         }
@@ -202,9 +242,14 @@ export function HeroCanvas() {
       cancelled = true;
       if (window.cancelIdleCallback) window.cancelIdleCallback(idle);
       else window.clearTimeout(idle);
-      cleanup?.();
+      api.current?.cleanup();
+      api.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    api.current?.pulse(strong ? 1 : 0.55);
+  }, [beat, strong]);
 
   return <div ref={host} aria-hidden className="hs-canvas" />;
 }

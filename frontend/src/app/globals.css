@@ -771,7 +771,16 @@ h2[tabindex="-1"]:focus {
   filter: blur(40px);
   pointer-events: none;
 }
-.hs-canvas { position: absolute; inset: -8% -12%; pointer-events: none; opacity: 0; transition: opacity 1.2s ease; }
+.hs-canvas {
+  position: absolute;
+  inset: -8% -14%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.6s ease;
+  /* No hard edge where the canvas ends: the dot surface melts into the sheet. */
+  -webkit-mask-image: radial-gradient(70% 72% at 50% 55%, #000 45%, transparent 100%);
+  mask-image: radial-gradient(70% 72% at 50% 55%, #000 45%, transparent 100%);
+}
 .hs-canvas[data-ready="true"] { opacity: 1; }
 /* Scan line across the camera view on the first screen. */
 @keyframes hsScan { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(118px); } }
@@ -784,3 +793,21 @@ h2[tabindex="-1"]:focus {
 /* Bar that grows when its section arrives (the gap section). */
 .grow-bar { transform-origin: left; transition: transform 0.9s var(--ease-enter); }
 .rv[data-on="false"] .grow-bar { transform: scaleX(0); }
+
+/* The gap section's review wall: one dot per review, the gap as empty rings. */
+.gw-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  flex: none;
+  transition: transform 0.5s var(--ease-enter), background-color 0.3s ease, box-shadow 0.3s ease;
+  transition-delay: calc(var(--i, 0) * 4ms);
+}
+.gw-them { background: rgba(255, 255, 255, 0.82); }
+.gw-you { background: var(--accent-soft); box-shadow: 0 0 10px rgba(143, 180, 255, 0.55); }
+.gw-ring { background: transparent; box-shadow: inset 0 0 0 1.5px rgba(143, 180, 255, 0.42); }
+.rv[data-on="false"] .gw-dot { transform: scale(0); }
+@media (prefers-reduced-motion: reduce) {
+  .gw-dot { transition: none; }
+}

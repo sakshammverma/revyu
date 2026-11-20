@@ -69,7 +69,7 @@ export function HeroScene({ qr, qrSize }: { qr: string; qrSize: number }) {
       onPointerLeave={onLeave}
       className="hs-stage mx-auto flex h-[430px] w-full max-w-[560px] items-center justify-center sm:h-[540px] lg:h-[600px]"
     >
-      <HeroCanvas />
+      <HeroCanvas beat={shown} strong={shown === 0} />
       <span aria-hidden className="hs-glow" />
 
       {/* The standee: a real code that opens the demo, shown at every screen size. */}
